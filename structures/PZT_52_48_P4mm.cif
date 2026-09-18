@@ -1,0 +1,75 @@
+#------------------------------------------------------------------------------
+# PbZr0.52Ti0.48O3  (PZT 52/48), tetragonal P4mm, 325 K
+#
+# 출처 : B. Noheda, J. A. Gonzalo, L. E. Cross, R. Guo, S-E. Park,
+#        D. E. Cox, G. Shirane,
+#        "Tetragonal-to-monoclinic phase transition in a ferroelectric
+#         perovskite: the structure of PbZr(0.52)Ti(0.48)O3",
+#        Phys. Rev. B 61, 8687 (2000), Table I.
+#
+# 용도 : HAFS 유리프 압전 타일 연구 5차시 — 화학구조 제안의 기준 구조.
+#        VESTA, Mercury, CrystalMaker 등에서 바로 열린다.
+#
+# 주의 : Zr와 Ti는 같은 B자리(Wyckoff 1b)를 0.52 : 0.48로 나눠 쓰는
+#        부분 점유(partial occupancy) 상태다. 두 원자를 같은 좌표에
+#        occupancy를 나눠 적었다.
+#------------------------------------------------------------------------------
+
+data_PZT_52_48_tetragonal
+
+_chemical_name_common            'Lead zirconate titanate 52/48, tetragonal'
+_chemical_formula_sum            'Pb1 Zr0.52 Ti0.48 O3'
+
+_cell_length_a                   4.04600
+_cell_length_b                   4.04600
+_cell_length_c                   4.13940
+_cell_angle_alpha                90.0
+_cell_angle_beta                 90.0
+_cell_angle_gamma                90.0
+_cell_volume                     67.762
+_cell_formula_units_Z            1
+
+_space_group_name_H-M_alt        'P 4 m m'
+_space_group_IT_number           99
+_symmetry_cell_setting           tetragonal
+
+loop_
+_space_group_symop_operation_xyz
+   'x, y, z'
+   '-y, x, z'
+   '-x, -y, z'
+   'y, -x, z'
+   '-x, y, z'
+   'x, -y, z'
+   'y, x, z'
+   '-y, -x, z'
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_U_iso_or_equiv
+_atom_site_Wyckoff_symbol
+   Pb1   Pb   0.0000   0.0000    0.00000   1.000   0.0127   1a
+   Zr1   Zr   0.5000   0.5000    0.45090   0.520   0.0041   1b
+   Ti1   Ti   0.5000   0.5000    0.45090   0.480   0.0041   1b
+   O1    O    0.5000   0.5000   -0.10270   1.000   0.0072   1b
+   O2    O    0.5000   0.0000    0.37860   1.000   0.0197   2c
+
+#------------------------------------------------------------------------------
+# 이 구조에서 계산되는 값 (calc/verify_composition.py 로 재현 가능)
+#
+#   c / a                      = 1.0231
+#   B-O1 짧은 쪽               = 1.8478 A
+#   B-O1 긴 쪽                 = 2.2916 A
+#   B-O1 비대칭 delta          = 0.4437 A     <- 압전성의 기하학적 근원
+#   B-O2 적도 (x4)             = 2.0450 A
+#   양이온 - 적도산소면 거리   = 0.2993 A     (c축의 7.2 %)
+#
+# 이상적인 입방 구조라면 B는 z = 0.5, 적도 산소도 z = 0.5 여서 두 평면이
+# 겹친다. 실제로는 B가 0.4509, 적도 산소가 0.3786 이므로 양이온이 산소
+# 평면보다 0.2993 A 위에 있고, 이 어긋남이 자발분극 Ps 의 실체다.
+#------------------------------------------------------------------------------
