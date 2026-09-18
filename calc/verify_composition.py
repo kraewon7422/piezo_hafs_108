@@ -9,7 +9,7 @@ HAFS 유리프 압전 타일 연구 / 1학년 8반 / 5차시 화학구조 제안
   1. 전하 중성            : 합이 0이어야 한다
   2. Goldschmidt 허용인자  : 0.9 < t < 1.0 이어야 페로브스카이트가 유지된다
   3. 결합 기하            : Noheda(2000) 실측 원자좌표에서 B-O 결합길이와 양이온 변위
-  4. d33 - d.g 순위상관    : "d33이 크다고 d.g가 크지 않다"는 주장의 정량 근거
+  4. d33 - d.g 순위상관    : 11종 전체와 상용 10종(UTA 연구 조성 제외)을 나눠 계산
   5. 에너지 비            : 같은 응력/부피에서 조성별 U 비교
 
 실행:  python verify_composition.py
@@ -41,7 +41,7 @@ X_SM, X_PZ, X_PZN, X_MN = 0.04, 0.88, 0.10, 0.02
 LAT_A, LAT_C = 4.0460, 4.1394                # [Å]
 Z_B, Z_O1, Z_O2 = 0.4509, -0.1027, 0.3786    # 분율좌표
 
-# US 7,686,974 B2, FIG.13 — 상용 압전 소재 비교
+# US 7,686,974 B2, FIG.13 — 상용 압전 소재 10종 + 발명자의 UTA 연구 조성 1종
 # (이름, d.g [1e-15 m2/N], g33 [1e-3 m2/C], 지수 n)
 COMMERCIAL = [
     ("EDO EC-98",         11388, 15.60, 1.249),
@@ -174,7 +174,7 @@ def main():
 
     print()
     print(line)
-    print("4. 상용 소재 11종: d33 과 d.g 의 순위 관계")
+    print("4. 문헌 소재 11종 (상용 10 + UTA 연구 조성 1): d33 과 d.g 의 순위 관계")
     print(line)
     rows = []
     for name, dg, g33, n in COMMERCIAL:
@@ -186,14 +186,19 @@ def main():
     for name, d33, g33, dg, n in rows:
         print("  %-20s %10.0f %8.1f %9.0f %7.3f" % (name, d33, g33, dg, n))
 
-    d_list = [r[1] for r in rows]
-    g_list = [r[2] for r in rows]
-    dg_list = [r[3] for r in rows]
     print()
-    print("  Spearman rho (d33, g33)  = %+.3f   <- 거의 완벽한 역상관" % spearman(d_list, g_list))
-    print("  Spearman rho (d33, d.g)  = %+.3f   <- 약하다" % spearman(d_list, dg_list))
-    print("  Pearson    r (d33, d.g)  = %+.3f" % pearson(d_list, dg_list))
-    print("  => d33 만 보고는 d.g 를 예측할 수 없다.")
+    print("  %-26s %10s %14s" % ("", "11종 전체", "상용 10종만"))
+    sets = [rows, [r for r in rows if not r[0].startswith("UTA")]]
+    cols = [([r[1] for r in s], [r[2] for r in s], [r[3] for r in s]) for s in sets]
+    print("  %-26s %+10.3f %+14.3f   <- 어느 쪽이든 거의 완벽한 역상관"
+          % ("Spearman rho (d33, g33)", spearman(cols[0][0], cols[0][1]), spearman(cols[1][0], cols[1][1])))
+    print("  %-26s %+10.3f %+14.3f"
+          % ("Spearman rho (d33, d.g)", spearman(cols[0][0], cols[0][2]), spearman(cols[1][0], cols[1][2])))
+    print("  %-26s %+10.3f %+14.3f"
+          % ("Pearson    r (d33, d.g)", pearson(cols[0][0], cols[0][2]), pearson(cols[1][0], cols[1][2])))
+    print("  => 상용품끼리는 d33 순위가 d.g 순위를 대체로 따라간다.")
+    print("     11종의 상관을 끌어내리는 것은 UTA 한 점 (d33 9위, d.g 1위):")
+    print("     d33 을 키우지 않고 eps_r 을 낮춰서도 d.g 1위가 될 수 있다는 반례다.")
 
     print()
     print(line)
