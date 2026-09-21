@@ -5,6 +5,16 @@
 
 HAFS 유리프 압전 타일 연구 · 1학년 8반 · 측정 2026-09-11 / 소재 설계 2026-09-18
 
+> **English summary** — A high-school research repo on floor tiles that harvest energy from footsteps.
+> We measured a 27 mm PZT disc directly with an Arduino (ADC registers driven by hand, 62 kHz sampling, open circuit).
+> A hard tap peaks at **1.13 V** and rings at **3.33 kHz**; a hand press is a single **~0.1 s pulse of 1.1–1.3 V** — a
+> quasi-static input, three orders of magnitude below resonance. With no resonance gain available, the figure of merit
+> for choosing a material is the product **d·g = d²/(ε₀εr)**, not d₃₃ alone, so we designed a composition that lowers
+> εr instead of raising d₃₃: **(Pb₀.₉₆Sm₀.₀₄)[(Zr₀.₅₂Ti₀.₄₈)₀.₈₈(Zn₁/₃Nb₂/₃)₀.₁₀Mn₀.₀₂]O₃**, charge-balanced to
+> exactly 0.00 with Goldschmidt t = 0.984. Both halves are reproducible from this repo: `python analyze_v2.py` for the
+> measurement, `python calc/verify_composition.py` for the design. §2-6 lists every number we withdrew or corrected and
+> why, including our own earlier mistakes. The Korean text below is the full research record.
+
 > **읽는 법** — 본문은 수치와 근거만 적는다. **처음 보는 사람을 위해** 상자(▶)를 펼치면
 > 그 자리에 나온 개념을 고등학생 눈높이에서 설명한다. 이미 아는 내용이면 건너뛰면 된다.
 
@@ -15,7 +25,7 @@ HAFS 유리프 압전 타일 연구 · 1학년 8반 · 측정 2026-09-11 / 소�
 - **측정** — 27 mm 압전 디스크를 세게 두드리면 최대 **1.13 V**가 나오고 약 **3.3 kHz**로 울린다 → [§2-1](#2-1-이벤트-요약), [§2-2](#2-2-공진-주파수--측정계-검증)
 - **측정** — 손으로 누르면 폭 약 0.1초의 매끈한 펄스 하나(**1.1–1.3 V**)가 나온다. 공진보다 수백 배 느린 **준정적** 입력이다 → [§2-5](#2-5-재현성--손으로-누른-펄스)
 - **한계** — 아두이노가 0 V 아래를 읽지 못해 파형의 음(−) 쪽이 잘렸고, 부하저항이 없어 전력은 아직 모른다 → [§3](#3-확인된-한계--다음-측정에서-고칠-것)
-- **정정** — 다시 분석해 7개 항목을 바로잡았다 (4차시 철회 4 + 5차시 재분석 3) → [§2-6](#2-6-다시-분석해서-바로잡은-것)
+- **정정** — 다시 분석해 8개 항목을 바로잡았다 (4차시 철회 4 + 5차시 재검토 4) → [§2-6](#2-6-다시-분석해서-바로잡은-것)
 - **설계** — 준정적 입력에서 소재를 고르는 기준은 d₃₃ 하나가 아니라 **d·g**다. εr를 낮추는 방향으로 조성을 설계했다 → [§7](#7-소재-설계--5차시-화학구조-제안)
 - **제안** — **(Pb₀.₉₆Sm₀.₀₄)[(Zr₀.₅₂Ti₀.₄₈)₀.₈₈(Zn₁/₃Nb₂/₃)₀.₁₀Mn₀.₀₂]O₃**, [001] 배향 · 전하 합 0.00 · 허용인자 t = 0.984 → [§7](#7-소재-설계--5차시-화학구조-제안)
 - **다음** — C_p 실측 → P–R 곡선 → 상용 소자 3종 d·g 비교 → [§4](#4-다음-차시-계획)
@@ -42,14 +52,15 @@ flowchart LR
 | [`docs/commercial_dg_table.csv`](docs/commercial_dg_table.csv) | 문헌 소재 11종 d·g 원자료 |
 | [`calc/verify_composition.py`](calc/verify_composition.py) | 소재 설계의 모든 수치 재현 (표준 라이브러리만 사용) |
 | [`structures/`](structures) | 결정구조 파일(CIF) — 기준 PZT와 제안 조성 |
+| [`sim/pzt_simulator_v6.html`](sim/pzt_simulator_v6.html) | 소재·조성 비교 시뮬레이터 (브라우저에서 바로 실행: **[데모](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html)**). 결과 해석 주의점은 §7 참조 |
 
 ---
 
 ## 1. 측정 개요
 
 **왜 측정했나.** 학교 급식실·매점 바닥에 압전 타일을 깔면 발걸음으로 얼마나 전기를 얻을 수 있는지가 연구 질문이다.
-30 × 30 cm 타일 기준 전면 포설은 급식실 581장(52.3 m² ÷ 0.09 m²) / 매점 220장이다.
-동선이 집중되는 구역만 **10 % 포설**한다고 보면 각각 58장 / 22장이 된다.
+30 × 30 cm 타일 한 장은 0.09 m²이므로, 전면 포설은 급식실 581장(52.3 m² ÷ 0.09 m²) / 매점 220장(19.8 m² ÷ 0.09 m²)이다.
+4차시 기록의 58장 / 22장은 타일 면적을 0.9 m²로 잘못 나눈 값이었다(§2-6의 8번). 실제로 몇 %를 깔지는 동선을 보고 따로 정한다.
 그때까지의 계산은 전부 문헌값 기반 추정이었고, 이번이 **첫 실측**이다.
 
 | 항목 | 내용 |
@@ -222,7 +233,7 @@ event 14는 트리거 직후부터 약 0.3 ms 간격으로 봉우리가 되풀�
 
 ### 2-6. 다시 분석해서 바로잡은 것
 
-**1–4번**은 4차시 연구일지에서 철회한 것이고, **5–7번**은 5차시에 원자료를 다시 분석하며 찾은 것이다. 4차시 판 원문은 커밋 기록과 [`analyze_v1.py`](analyze_v1.py)에 그대로 남아 있다.
+**1–4번**은 4차시 연구일지에서 철회한 것이고, **5–8번**은 5차시에 원자료와 계산을 다시 검토하며 찾은 것이다. 4차시 판 원문은 커밋 기록과 [`analyze_v1.py`](analyze_v1.py)에 그대로 남아 있다.
 
 | # | 항목 | 4차시 판 | 지금 | 이유 |
 |--:|---|---|---|---|
@@ -233,6 +244,7 @@ event 14는 트리거 직후부터 약 0.3 ms 간격으로 봉우리가 되풀�
 | 5 | event 14 τ · Q | 0.655 ms / 6.9 | 정하지 않음 | 피팅이 약 한 주기뿐, 지수 감쇠 모양이 아님, 음 반주기 잘림 (§2-2) |
 | 6 | "문헌상 공진 3~4 kHz" | 측정값이 범위 안 | 데이터시트 4.6 ± 0.5 kHz보다 약 1 kHz 낮음 | 출처 확인 결과 (§2-2) |
 | 7 | 재현성 | 11회, CV 75.1 % | 누름 4회, CV 6.9 % | 짧은 흔들림을 타격으로 셈 + 봉우리 이중 계수 (§2-5) |
+| 8 | 타일 개수 | 급식실 58장 / 매점 22장 | 전면 포설 581장 / 220장 | 30 × 30 cm = 900 cm² = 0.09 m²인데 0.9 m²로 나눴다 (§1) |
 
 ---
 
@@ -342,7 +354,7 @@ python calc/verify_composition.py    # 소재 설계 수치 검증 (추가 설�
 | 회로 검토 | LED 점등의 전원 출처 지적 | 스케치에서 `digitalWrite(LED_PIN, HIGH)` 확인 → 발전 증거가 아님을 확정 |
 | 소재 조성 설계 | d·g 기준(Priya 2010), MPB 단사정(Noheda 1999), Sm–Mn 자기보상, TGG 조직화 | 전하 중성을 직접 계산해 `x_Sm = (4−v_Mn)·x_Mn` 일반식 유도. NASA 물성표가 OCR 오류로 내부 모순이 있음을 확인하고 단일 출처(US 7,686,974)로 표를 재구성 |
 | 주장의 정량 검증 | 순위상관 계산 아이디어 | 문헌 11종의 Spearman ρ(d33, g33) = −0.955를 직접 계산. 레버 04(산소 공공 활용)와 검증 1(공공 제거)이 상충한다는 것을 발견해 문서에 명시 |
-| 저장소 정리 · 재분석 (Claude Code) | README를 두 독자용으로 재구성, 그림 경로 복구, `analyze_v2.py` 작성, 파형·스펙트럼·연속 모드 재검토, 데이터시트·특허 원문 대조 | 정정 7건과 근거를 §2-6 표로 공개하고, 모두 `analyze_v2.py`·`verify_composition.py`로 다시 계산할 수 있게 함. 위 "결과 해석" 행의 문헌 공진값은 §2-6의 6번으로 정정 |
+| 저장소 정리 · 재분석 (Claude Code) | README를 두 독자용으로 재구성, 그림 경로 복구, `analyze_v2.py` 작성, 파형·스펙트럼·연속 모드 재검토, 데이터시트·특허 원문 대조, 시뮬레이터 계수식 확인 | 정정 내역과 근거를 §2-6 표로 공개하고, 모두 `analyze_v2.py`·`verify_composition.py`로 다시 계산할 수 있게 함. 위 "결과 해석" 행의 문헌 공진값은 §2-6의 6번으로 정정 |
 
 ---
 
@@ -420,6 +432,11 @@ Pearson    r (d33, d·g)    +0.399        +0.814
 | 03 A자리 | Pb의 4 %를 Sm³⁺로 치환 | 국소 구조 불균질성으로 d 상승. ε가 폭증하기 전까지만 | Li 2018, Yan 2016 |
 | 04 B자리 | Mn²⁺ 2 % | 결함 쌍극자로 도메인벽 고정 → εr·손실 억제, 반복 하중 내구성, Sm 전하 보상 | Yue 2025 |
 | 05 미세구조 | [001] 배향 조직화 (TGG) | 이 방향에서 d가 최대이면서 εr가 최소 | Yan 2013 |
+
+> ※ **시뮬레이터 결과를 조성 근거로 쓰지 않은 이유** — 저장소의 [시뮬레이터](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html)는 Zr:Ti = 1:1(x = 0.50)에서 전압이 가장 높게 나온다.
+> 그러나 코드(`sim/pzt_simulator_v6.html` 547–551행)에서 압전 계수가 `0.6 + 0.9·exp[−((x − 0.5)/0.08)²]`로, x = 0.50에 중심을 두고 입력돼 있다.
+> 즉 그 피크는 시뮬레이션이 찾아낸 값이 아니라 넣어 둔 가정이다(Ti 쪽과 Zr 쪽이 완전 대칭인 것도 그 흔적이다).
+> 조성 기준은 문헌 실측 MPB인 Zr:Ti = 52:48을 따른다. 시뮬레이터는 구조를 눈으로 보는 용도로만 둔다.
 
 설계 안의 상충 하나도 숨기지 않았다 — 레버 04는 산소 공공과 짝지은 결함 쌍극자를 쓰는데, 전하 중성은 공공을 없앤다.
 완전 보상 지점을 기준선으로 두고 최적 보상비는 실험 변수로 남겼다(`docs/05` §4).
