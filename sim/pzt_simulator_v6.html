@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>압전체 비교 시뮬레이터 v6</title>
+<style>
+  :root {
+    --bg-beige: #f5f0e6;
+    --grid-line: rgba(120, 100, 70, 0.06);
+    --grid-bold: rgba(120, 100, 70, 0.13);
+    --ink: #2b2620;
+    --ink-soft: rgba(43, 38, 32, 0.78);
+    --accent: #c05621;
+    --accent-deep: #8a3a14;
+    --polar-green: #1a7a4a;
+    --panel-bg: rgba(245, 240, 230, 0.93);
+    --panel-border: rgba(120, 100, 70, 0.22);
+    --scope-bg: rgba(245, 240, 230, 0.5);
+    --tab-bg: rgba(245, 240, 230, 0.86);
+    --tab-active: #c05621;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background-color: var(--bg-beige);
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to right, var(--grid-bold) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-bold) 1px, transparent 1px);
+    background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+    color: var(--ink);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    overflow: hidden;
+    height: 100vh; width: 100vw;
+  }
+  #scene-container {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+  }
+  #scene-container canvas { background: transparent !important; display: block; }
+
+  #material-tabs {
+    position: absolute; top: 18px; left: 50%;
+    transform: translateX(-50%); z-index: 11;
+    display: flex; gap: 4px;
+    padding: 4px;
+    background: var(--tab-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    backdrop-filter: blur(6px);
+  }
+  .tab {
+    padding: 8px 18px;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Georgia', serif;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    letter-spacing: 0.02em;
+    font-weight: 500;
+  }
+  .tab:hover { background: rgba(120,100,70,0.1); }
+  .tab.active {
+    background: var(--tab-active);
+    color: var(--bg-beige);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(192, 86, 33, 0.3);
+  }
+
+  #header {
+    position: absolute; top: 18px; left: 20px; z-index: 10;
+    padding: 12px 18px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    backdrop-filter: blur(6px);
+    max-width: 280px;
+  }
+  #header h1 {
+    margin: 0 0 4px 0;
+    font-size: 16px; font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  #header p {
+    margin: 0; font-size: 11px; line-height: 1.4;
+    color: var(--ink-soft);
+  }
+
+  #right-stack {
+    position: absolute; top: 18px; right: 20px; z-index: 10;
+    width: 300px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .panel {
+    padding: 13px 18px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    backdrop-filter: blur(6px);
+    font-size: 12.5px;
+  }
+  .panel h3 {
+    margin: 0 0 8px 0;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent-deep);
+    border-bottom: 1px solid var(--panel-border);
+    padding-bottom: 5px;
+  }
+  .panel h3 .lit-val {
+    float: right;
+    font-size: 10px;
+    color: var(--ink-soft);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+  .row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin: 4px 0;
+  }
+  .row.hidden { display: none; }
+  .label {
+    font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .value {
+    font-family: 'Courier New', monospace;
+    font-weight: 700; font-size: 13.5px;
+    color: var(--ink);
+  }
+  .phase-badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 2px;
+    font-size: 10.5px; font-weight: 700;
+    background: var(--accent);
+    color: var(--bg-beige);
+    letter-spacing: 0.03em;
+  }
+  /* === v6: 오실로스코프 칸 상하 확장 === */
+  #vt-canvas {
+    width: 100%; height: 150px;        /* v5=90px → v6=150px */
+    display: block;
+    background: var(--scope-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 2px;
+    margin: 6px 0 8px 0;
+  }
+  .value-power { color: var(--accent); }
+  .value-energy { color: var(--polar-green); }
+
+  #pulse-controls {
+    position: absolute; bottom: 26px; left: 50%;
+    transform: translateX(-50%); z-index: 10;
+    padding: 14px 20px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    backdrop-filter: blur(6px);
+    width: 380px;
+    display: flex; flex-direction: column; gap: 9px;
+  }
+  #pulse-controls .slider-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px;
+  }
+  #pulse-controls .slider-row label {
+    color: var(--ink);
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-width: 70px;
+    font-weight: 600;
+  }
+  #pulse-controls .slider-row input[type=range] {
+    flex: 1;
+    accent-color: var(--accent);
+  }
+  #pulse-controls .slider-row .pressure-readout {
+    font-family: 'Courier New', monospace;
+    font-weight: 700; font-size: 13px;
+    min-width: 40px; text-align: right;
+  }
+  #pulse-button {
+    padding: 13px 0;
+    background: var(--accent);
+    color: var(--bg-beige);
+    border: none; border-radius: 2px;
+    font-family: 'Georgia', serif;
+    font-size: 15px; font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(192, 86, 33, 0.32);
+    transition: transform 0.1s, box-shadow 0.2s, background 0.2s;
+  }
+  #pulse-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(192, 86, 33, 0.42);
+  }
+  #pulse-button:active:not(:disabled) { transform: translateY(1px); }
+  #pulse-button:disabled {
+    background: var(--accent-deep);
+    opacity: 0.85;
+    cursor: wait;
+  }
+  #pulse-controls .toggle-row {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px;
+    font-size: 11.5px;
+  }
+  #pulse-controls .toggle-row label {
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  #pulse-controls .toggle-row input[type=checkbox] {
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  #reset-energy {
+    background: none;
+    border: 1px solid var(--panel-border);
+    color: var(--ink);
+    padding: 3px 9px;
+    border-radius: 2px;
+    font-size: 10.5px;
+    font-family: 'Georgia', serif;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    font-weight: 500;
+  }
+  #reset-energy:hover { background: rgba(120,100,70,0.12); }
+
+  #legend {
+    position: absolute; bottom: 26px; left: 20px; z-index: 10;
+    padding: 10px 14px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    font-size: 10.8px;
+    min-width: 170px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  #legend .item {
+    display: flex; align-items: center; gap: 8px;
+    margin: 3px 0;
+  }
+  #legend .item.hidden { display: none; }
+  #legend .swatch {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    box-shadow: inset -2px -2px 3px rgba(0,0,0,0.25);
+  }
+  #legend .arrow-swatch {
+    width: 12px; height: 12px;
+    background: var(--polar-green);
+    clip-path: polygon(50% 0%, 100% 50%, 70% 50%, 70% 100%, 30% 100%, 30% 50%, 0% 50%);
+  }
+  #legend .pressure-swatch {
+    width: 12px; height: 12px;
+    background: var(--accent);
+    clip-path: polygon(50% 100%, 100% 50%, 70% 50%, 70% 0%, 30% 0%, 30% 50%, 0% 50%);
+  }
+
+  #inset-cell {
+    position: absolute; bottom: 26px; right: 20px; z-index: 10;
+    width: 210px; height: 210px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    backdrop-filter: blur(6px);
+    overflow: hidden;
+  }
+  #inset-cell .inset-label {
+    position: absolute; top: 8px; left: 10px;
+    font-size: 9.5px; text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    z-index: 2;
+    pointer-events: none;
+    font-weight: 600;
+  }
+  #inset-cell canvas { display: block; }
+
+  /* === lil-gui — 가시성 강제 적용 === */
+  .lil-gui.root {
+    position: fixed !important;
+    top: 188px !important;
+    left: 20px !important;
+    right: auto !important;
+    --background-color: rgba(245, 240, 230, 0.93) !important;
+    --text-color: #2b2620 !important;
+    --title-background-color: rgba(192, 86, 33, 0.22) !important;
+    --title-text-color: #2b2620 !important;
+    --widget-color: rgba(120, 100, 70, 0.30) !important;
+    --hover-color: rgba(120, 100, 70, 0.18) !important;
+    --focus-color: rgba(120, 100, 70, 0.25) !important;
+    --number-color: #c05621 !important;
+    --string-color: #1a7a4a !important;
+    --highlight-color: rgba(192, 86, 33, 0.55) !important;
+    --font-family: 'Georgia', serif !important;
+    --font-size: 13px !important;
+    border: 1px solid var(--panel-border) !important;
+    --width: 250px !important;
+  }
+  .lil-gui.root,
+  .lil-gui.root .title,
+  .lil-gui.root .controller,
+  .lil-gui.root .controller .name,
+  .lil-gui.root .controller .widget,
+  .lil-gui.root .children > .controller {
+    color: #2b2620 !important;
+    font-weight: 500 !important;
+  }
+  .lil-gui.root .title {
+    font-weight: 700 !important;
+    background: rgba(192, 86, 33, 0.22) !important;
+  }
+  /* === v6: function controller 버튼 가시성 — 밝은 베이지 배경 + 진한 텍스트 === */
+  .lil-gui.root .controller.function button,
+  .lil-gui.root .controller.function .widget {
+    background: rgba(255, 248, 232, 0.92) !important;
+    color: #2b2620 !important;
+    font-weight: 600 !important;
+    border: 1px solid rgba(120, 100, 70, 0.32) !important;
+    letter-spacing: 0.02em !important;
+    transition: background 0.15s, color 0.15s !important;
+  }
+  .lil-gui.root .controller.function button:hover,
+  .lil-gui.root .controller.function .widget:hover {
+    background: rgba(255, 232, 195, 1.0) !important;
+    color: var(--accent-deep) !important;
+    border-color: var(--accent) !important;
+  }
+  .lil-gui.root .controller.function button:active,
+  .lil-gui.root .controller.function .widget:active {
+    background: rgba(255, 215, 165, 1.0) !important;
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+    "lil-gui": "https://unpkg.com/lil-gui@0.19/dist/lil-gui.esm.min.js"
+  }
+}
+</script>
+</head>
+<body>
+  <div id="material-tabs">
+    <button class="tab active" data-mat="PZT">PZT</button>
+    <button class="tab" data-mat="BaTiO3">BaTiO₃</button>
+    <button class="tab" data-mat="PVDF">PVDF</button>
+    <button class="tab" data-mat="ZnO">ZnO</button>
+    <button class="tab" data-mat="Quartz">Quartz</button>
+  </div>
+
+  <div id="header">
+    <h1>압전체 비교 시뮬레이터 <span style="font-size:11px;color:var(--accent);">v6</span></h1>
+    <p id="header-desc">5종 압전체의 결정 구조와 발전 출력을 비교합니다. 격자 확장 옵션으로 타일 배열을 모사할 수 있습니다.</p>
+  </div>
+
+  <div id="right-stack">
+    <div class="panel" id="material-panel">
+      <h3 id="mp-title">재료 상태 <span class="lit-val" id="mp-lit"></span></h3>
+      <div class="row"><span class="label">화학식</span><span class="value" id="rd-formula" style="font-size:12px">—</span></div>
+      <div class="row"><span class="label">결정계</span><span class="value" id="rd-system" style="font-size:11px">—</span></div>
+      <div class="row" id="row-x"><span class="label">Zr fraction (x)</span><span class="value" id="rd-x">0.520</span></div>
+      <div class="row" id="row-phase"><span class="label">Phase</span><span><span class="phase-badge" id="rd-phase">MPB</span></span></div>
+      <div class="row" id="row-a"><span class="label">Lattice a (Å)</span><span class="value" id="rd-a">4.020</span></div>
+      <div class="row"><span class="label">Piezo coeff. (norm.)</span><span class="value" id="rd-piezo">1.50</span></div>
+      <div class="row"><span class="label">Stress σ (norm.)</span><span class="value" id="rd-stress">0.000</span></div>
+      <div class="row"><span class="label">Polarization |P|</span><span class="value" id="rd-pol">0.000</span></div>
+    </div>
+
+    <div class="panel" id="power-panel">
+      <h3>전기 출력</h3>
+      <!-- v6: 캔버스 내부 해상도도 확장 (180→300) -->
+      <canvas id="vt-canvas" width="540" height="300"></canvas>
+      <div class="row"><span class="label">V(t) 현재</span><span class="value value-power" id="rd-voltage">0.00 V</span></div>
+      <div class="row"><span class="label">P(t) 현재</span><span class="value value-power" id="rd-power">0.00 mW</span></div>
+      <div class="row"><span class="label">P_peak (마지막 펄스)</span><span class="value value-power" id="rd-ppeak">0.00 mW</span></div>
+      <div class="row"><span class="label">누적 에너지 E</span><span class="value value-energy" id="rd-energy">0.000 mJ</span></div>
+      <div class="row"><span class="label">펄스 카운트</span><span class="value" id="rd-pulsecount">0</span></div>
+    </div>
+  </div>
+
+  <div id="legend">
+    <div class="item" data-atoms="PZT,BaTiO3"><div class="swatch" style="background:#3a3530"></div><span id="leg-A">Pb (A site)</span></div>
+    <div class="item" data-atoms="PZT"><div class="swatch" style="background:#5a9ad6"></div>Zr</div>
+    <div class="item" data-atoms="PZT,BaTiO3"><div class="swatch" style="background:#2c5588"></div>Ti</div>
+    <div class="item" data-atoms="PZT,BaTiO3"><div class="swatch" style="background:#c44545"></div>O (산소)</div>
+    <div class="item" data-atoms="PVDF"><div class="swatch" style="background:#2a2a2a"></div>C (탄소)</div>
+    <div class="item" data-atoms="PVDF"><div class="swatch" style="background:#e8e8e8"></div>H (수소)</div>
+    <div class="item" data-atoms="PVDF"><div class="swatch" style="background:#90d090"></div>F (플루오린)</div>
+    <div class="item" data-atoms="ZnO"><div class="swatch" style="background:#7a9ab8"></div>Zn (아연)</div>
+    <div class="item" data-atoms="ZnO,Quartz"><div class="swatch" style="background:#c44545"></div>O (산소)</div>
+    <div class="item" data-atoms="Quartz"><div class="swatch" style="background:#c2a868"></div>Si (실리콘)</div>
+    <div class="item"><div class="pressure-swatch"></div>외부 응력 σ</div>
+    <div class="item"><div class="arrow-swatch"></div>분극 벡터 P</div>
+  </div>
+
+  <div id="pulse-controls">
+    <div class="slider-row">
+      <label>압력 크기</label>
+      <input type="range" id="pressure-slider" min="0.1" max="1" step="0.05" value="1.0">
+      <span class="pressure-readout" id="pressure-val">1.00</span>
+    </div>
+    <button id="pulse-button">▼ 압력 펄스 인가</button>
+    <div class="toggle-row">
+      <label><input type="checkbox" id="train-toggle"> 펄스 트레인 (반복 — 걸음 모사)</label>
+      <button id="reset-energy">에너지 리셋</button>
+    </div>
+  </div>
+
+  <div id="inset-cell">
+    <div class="inset-label" id="inset-label">단위셀</div>
+  </div>
+
+  <div id="scene-container"></div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import GUI from 'lil-gui';
+
+    const PULSE_DURATION   = 2.6;
+    const PULSE_PEAK_TIME  = 1.1;
+    const PULSE_WIDTH      = 0.42;
+    const MAX_DISPLACEMENT = 0.22;
+    const VOLTAGE_SCALE    = 18.0;
+    const LOAD_RESISTANCE  = 1000;
+    const TRAIN_REST_TIME  = 0.7;
+
+    // === v6: 그래프 표시 범위 (PZT MPB 최대 신호 수용) ===
+    const V_DISPLAY_MAX = 60;     // ±60V
+    const P_DISPLAY_MAX = 3700;   // 0 ~ 3700 mW
+
+    const COLOR = {
+      Pb: 0x3a3530, Ba: 0xd4b865, Zr: 0x5a9ad6, Ti: 0x2c5588,
+      O:  0xc44545, C: 0x2a2a2a, H: 0xe8e8e8, F: 0x90d090,
+      Si: 0xc2a868, Zn: 0x7a9ab8,
+    };
+
+    const MATERIALS = {
+      PZT: {
+        name: 'PZT', formula: 'Pb(Zr,Ti)O₃', system: 'Perovskite (가변)',
+        d33Lit: 'd₃₃ ≈ 400–600 pC/N (MPB)', relativeStrength: 1.00,
+        hasComposition: true,
+        polarDir: () => polarizationDirection_PZT(state.x),
+        getPiezo: () => piezoCoefficient(state.x),
+        showRows: ['row-x', 'row-phase', 'row-a'],
+      },
+      BaTiO3: {
+        name: 'BaTiO₃', formula: 'BaTiO₃', system: 'Perovskite (정방, RT)',
+        d33Lit: 'd₃₃ ≈ 190 pC/N', relativeStrength: 0.48,
+        hasComposition: false,
+        polarDir: () => new THREE.Vector3(0, -1, 0),
+        getPiezo: () => 0.95, showRows: ['row-a'],
+      },
+      PVDF: {
+        name: 'PVDF (β)', formula: '(C₂H₂F₂)ₙ', system: '폴리머 (사방 Cm2m)',
+        d33Lit: 'd₃₃ ≈ 25 pC/N', relativeStrength: 0.15,
+        hasComposition: false,
+        polarDir: () => new THREE.Vector3(0, 1, 0),
+        getPiezo: () => 0.6, showRows: [],
+      },
+      ZnO: {
+        name: 'ZnO', formula: 'ZnO', system: 'Wurtzite (P6₃mc)',
+        d33Lit: 'd₃₃ ≈ 12 pC/N', relativeStrength: 0.08,
+        hasComposition: false,
+        polarDir: () => new THREE.Vector3(0, -1, 0),
+        getPiezo: () => 0.55, showRows: [],
+      },
+      Quartz: {
+        name: 'α-Quartz', formula: 'SiO₂', system: '삼방 (P3₂21)',
+        d33Lit: 'd₃₃ ≈ 2.3 pC/N', relativeStrength: 0.03,
+        hasComposition: false,
+        polarDir: () => new THREE.Vector3(-1, 0, 0),
+        getPiezo: () => 0.45, showRows: [],
+      },
+    };
+
+    let currentMaterial = 'PZT';
+
+    const state = {
+      x: 0.52, pressureMag: 1.0,
+      pulseActive: false, pulseStartTime: 0,
+      currentStress: 0, currentVoltage: 0, currentPower: 0,
+      currentPolarization: 0,
+      cumulativeEnergy: 0, lastPeakPower: 0, pulseCount: 0,
+      trainEnabled: false,
+      gridExpand: false,
+      polarDir: new THREE.Vector3(0, -1, 0),
+    };
+
+    let crystalData = {
+      allAtomMeshes: [], allBondMeshes: [], displaceable: [],
+      updateBonds: [], maxExtent: 3.0,
+    };
+
+    const container = document.getElementById('scene-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      42, window.innerWidth / window.innerHeight, 0.1, 1000
+    );
+    camera.position.set(8.5, 6.5, 9);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    container.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.38));
+    scene.add(new THREE.HemisphereLight(0xfff3df, 0xc4a574, 0.4));
+    const keyLight = new THREE.DirectionalLight(0xfff5e0, 1.05);
+    keyLight.position.set(8, 12, 6); scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0xcfdde6, 0.5);
+    fillLight.position.set(-6, 4, -8); scene.add(fillLight);
+    const rimLight = new THREE.DirectionalLight(0xffe8c0, 0.32);
+    rimLight.position.set(0, -5, -4); scene.add(rimLight);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 5;
+    controls.maxDistance = 60;
+    controls.target.set(0, 0, 0);
+
+    const crystalGroup = new THREE.Group();
+    scene.add(crystalGroup);
+
+    function piezoCoefficient(x) {
+      const dist = Math.abs(x - 0.5);
+      const mpbBoost = Math.exp(-Math.pow(dist / 0.08, 2));
+      return 0.6 + 0.9 * mpbBoost;
+    }
+    function determinePhase(x) {
+      if (x < 0.48) return 'Tetragonal';
+      if (x > 0.52) return 'Rhombohedral';
+      return 'MPB';
+    }
+    function latticeConstantA(x) { return 3.90 + (4.13 - 3.90) * x; }
+    function polarizationDirection_PZT(x) {
+      const phase = determinePhase(x);
+      if (phase === 'Tetragonal') return new THREE.Vector3(0, -1, 0);
+      if (phase === 'Rhombohedral') return new THREE.Vector3(-1, -1, -1).normalize();
+      return new THREE.Vector3(-0.3, -1, -0.3).normalize();
+    }
+    function pulseProfile(t) {
+      if (t < 0 || t > PULSE_DURATION) return 0;
+      const arg = (t - PULSE_PEAK_TIME) / PULSE_WIDTH;
+      return Math.exp(-arg * arg);
+    }
+    function pulseProfileDerivative(t) {
+      if (t < 0 || t > PULSE_DURATION) return 0;
+      const arg = (t - PULSE_PEAK_TIME) / PULSE_WIDTH;
+      return -2 * arg / PULSE_WIDTH * Math.exp(-arg * arg);
+    }
+
+    const sphereCache = {};
+    function sphereGeom(radius, segs = 28) {
+      const key = radius.toFixed(3) + '_' + segs;
+      if (!sphereCache[key]) sphereCache[key] = new THREE.SphereGeometry(radius, segs, Math.floor(segs * 0.75));
+      return sphereCache[key];
+    }
+    function atomMat(color, opts = {}) {
+      return new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: opts.roughness ?? 0.42,
+        metalness: opts.metalness ?? 0.12,
+        envMapIntensity: 0.6,
+      });
+    }
+    function lerpMat(c1, c2, t, opts = {}) {
+      const c = new THREE.Color(c1).lerp(new THREE.Color(c2), t);
+      return atomMat(c.getHex(), opts);
+    }
+
+    const bondGeometry = new THREE.CylinderGeometry(0.035, 0.035, 1, 8, 1, true);
+    const bondMaterial = new THREE.MeshBasicMaterial({
+      color: 0x7a6855, transparent: true, opacity: 0.45,
+    });
+    function makeBond() { return new THREE.Mesh(bondGeometry, bondMaterial); }
+    function updateBondGeometry(mesh, fromVec, toVec) {
+      const dir = new THREE.Vector3().subVectors(toVec, fromVec);
+      const len = dir.length();
+      if (len < 1e-6) { mesh.visible = false; return; }
+      mesh.visible = true;
+      mesh.scale.set(1, len, 1);
+      const mid = new THREE.Vector3().addVectors(fromVec, toVec).multiplyScalar(0.5);
+      mesh.position.copy(mid);
+      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+    }
+
+    function clearCrystal() {
+      while (crystalGroup.children.length > 0) {
+        crystalGroup.remove(crystalGroup.children[0]);
+      }
+      crystalGroup.scale.set(1, 1, 1);
+      crystalData = {
+        allAtomMeshes: [], allBondMeshes: [], displaceable: [],
+        updateBonds: [], maxExtent: 3.0,
+      };
+    }
+
+    function buildCrystal_PZT() {
+      const Nx = state.gridExpand ? 6 : 3;
+      const Ny = 3;
+      const Nz = state.gridExpand ? 6 : 3;
+      const a = latticeConstantA(state.x) * 0.55;
+      const offX = -(Nx * a) / 2;
+      const offY = -(Ny * a) / 2;
+      const offZ = -(Nz * a) / 2;
+
+      const pbRadius = 0.34, oRadius = 0.28;
+      const bRadius = 0.22 + (0.24 - 0.22) * state.x;
+      const bMat = lerpMat(COLOR.Ti, COLOR.Zr, state.x, { roughness: 0.34, metalness: 0.22 });
+      const pbMat = atomMat(COLOR.Pb, { roughness: 0.5, metalness: 0.18 });
+      const oMat = atomMat(COLOR.O, { roughness: 0.38 });
+
+      const bAtoms = [], oAtoms = [];
+
+      for (let i = 0; i <= Nx; i++)
+        for (let j = 0; j <= Ny; j++)
+          for (let k = 0; k <= Nz; k++) {
+            const m = new THREE.Mesh(sphereGeom(pbRadius), pbMat);
+            m.position.set(offX + i*a, offY + j*a, offZ + k*a);
+            m.userData = { basePos: m.position.clone() };
+            crystalGroup.add(m);
+            crystalData.allAtomMeshes.push(m);
+          }
+      for (let i = 0; i < Nx; i++)
+        for (let j = 0; j < Ny; j++)
+          for (let k = 0; k < Nz; k++) {
+            const m = new THREE.Mesh(sphereGeom(bRadius), bMat);
+            m.position.set(offX + (i+0.5)*a, offY + (j+0.5)*a, offZ + (k+0.5)*a);
+            m.userData = { basePos: m.position.clone() };
+            crystalGroup.add(m);
+            crystalData.allAtomMeshes.push(m);
+            bAtoms.push(m);
+            crystalData.displaceable.push({ mesh: m, basePos: m.userData.basePos });
+          }
+      const addO = (x, y, z) => {
+        const m = new THREE.Mesh(sphereGeom(oRadius), oMat);
+        m.position.set(x, y, z);
+        m.userData = { basePos: m.position.clone() };
+        crystalGroup.add(m);
+        crystalData.allAtomMeshes.push(m);
+        oAtoms.push(m);
+      };
+      for (let i = 0; i < Nx; i++)
+        for (let j = 0; j < Ny; j++)
+          for (let k = 0; k <= Nz; k++) addO(offX+(i+0.5)*a, offY+(j+0.5)*a, offZ+k*a);
+      for (let i = 0; i < Nx; i++)
+        for (let j = 0; j <= Ny; j++)
+          for (let k = 0; k < Nz; k++) addO(offX+(i+0.5)*a, offY+j*a, offZ+(k+0.5)*a);
+      for (let i = 0; i <= Nx; i++)
+        for (let j = 0; j < Ny; j++)
+          for (let k = 0; k < Nz; k++) addO(offX+i*a, offY+(j+0.5)*a, offZ+(k+0.5)*a);
+
+      for (const b of bAtoms) {
+        const cand = oAtoms.map(o => ({ o, d: o.position.distanceTo(b.position) }));
+        cand.sort((p, q) => p.d - q.d);
+        for (let n = 0; n < 6; n++) {
+          const bond = makeBond();
+          updateBondGeometry(bond, b.position, cand[n].o.position);
+          crystalGroup.add(bond);
+          crystalData.allBondMeshes.push(bond);
+          crystalData.updateBonds.push({
+            mesh: bond,
+            getFrom: () => b.position,
+            getTo: () => cand[n].o.position,
+          });
+        }
+      }
+
+      const phase = determinePhase(state.x);
+      if (phase === 'Tetragonal') {
+        const t = (0.48 - state.x) / 0.48;
+        crystalGroup.scale.set(1, 1 + 0.07 * t, 1);
+      } else if (phase === 'Rhombohedral') {
+        const t = (state.x - 0.52) / 0.48;
+        crystalGroup.scale.set(1 + 0.025*t, 1 - 0.012*t, 1 - 0.012*t);
+      } else {
+        crystalGroup.scale.set(1.003, 1.008, 1.003);
+      }
+      crystalData.maxExtent = Math.max(Nx, Nz) * a / 2 * crystalGroup.scale.y;
+    }
+
+    function buildCrystal_BaTiO3() {
+      const Nx = state.gridExpand ? 6 : 3;
+      const Ny = 3;
+      const Nz = state.gridExpand ? 6 : 3;
+      const a = 3.99 * 0.55;
+      const cOverA = 1.01;
+      const offX = -(Nx * a) / 2;
+      const offY = -(Ny * a) / 2;
+      const offZ = -(Nz * a) / 2;
+
+      const baRadius = 0.36, oRadius = 0.28, tiRadius = 0.22;
+      const baMat = atomMat(COLOR.Ba, { roughness: 0.42, metalness: 0.15 });
+      const tiMat = atomMat(COLOR.Ti, { roughness: 0.34, metalness: 0.22 });
+      const oMat = atomMat(COLOR.O, { roughness: 0.38 });
+      const tiAtoms = [], oAtoms = [];
+
+      for (let i = 0; i <= Nx; i++)
+        for (let j = 0; j <= Ny; j++)
+          for (let k = 0; k <= Nz; k++) {
+            const m = new THREE.Mesh(sphereGeom(baRadius), baMat);
+            m.position.set(offX + i*a, offY + j*a, offZ + k*a);
+            m.userData = { basePos: m.position.clone() };
+            crystalGroup.add(m);
+            crystalData.allAtomMeshes.push(m);
+          }
+      for (let i = 0; i < Nx; i++)
+        for (let j = 0; j < Ny; j++)
+          for (let k = 0; k < Nz; k++) {
+            const m = new THREE.Mesh(sphereGeom(tiRadius), tiMat);
+            m.position.set(offX + (i+0.5)*a, offY + (j+0.5)*a, offZ + (k+0.5)*a);
+            m.userData = { basePos: m.position.clone() };
+            crystalGroup.add(m);
+            crystalData.allAtomMeshes.push(m);
+            tiAtoms.push(m);
+            crystalData.displaceable.push({ mesh: m, basePos: m.userData.basePos });
+          }
+      const addO = (x, y, z) => {
+        const m = new THREE.Mesh(sphereGeom(oRadius), oMat);
+        m.position.set(x, y, z);
+        m.userData = { basePos: m.position.clone() };
+        crystalGroup.add(m);
+        crystalData.allAtomMeshes.push(m);
+        oAtoms.push(m);
+      };
+      for (let i = 0; i < Nx; i++)
+        for (let j = 0; j < Ny; j++)
+          for (let k = 0; k <= Nz; k++) addO(offX+(i+0.5)*a, offY+(j+0.5)*a, offZ+k*a);
+      for (let i = 0; i < Nx; i++)
+        for (let j = 0; j <= Ny; j++)
+          for (let k = 0; k < Nz; k++) addO(offX+(i+0.5)*a, offY+j*a, offZ+(k+0.5)*a);
+      for (let i = 0; i <= Nx; i++)
+        for (let j = 0; j < Ny; j++)
+          for (let k = 0; k < Nz; k++) addO(offX+i*a, offY+(j+0.5)*a, offZ+(k+0.5)*a);
+
+      for (const t of tiAtoms) {
+        const cand = oAtoms.map(o => ({ o, d: o.position.distanceTo(t.position) }));
+        cand.sort((p, q) => p.d - q.d);
+        for (let n = 0; n < 6; n++) {
+          const bond = makeBond();
+          updateBondGeometry(bond, t.position, cand[n].o.position);
+          crystalGroup.add(bond);
+          crystalData.allBondMeshes.push(bond);
+          crystalData.updateBonds.push({
+            mesh: bond,
+            getFrom: () => t.position,
+            getTo: () => cand[n].o.position,
+          });
+        }
+      }
+      crystalGroup.scale.set(1, cOverA, 1);
+      crystalData.maxExtent = Math.max(Nx, Nz) * a / 2 * cOverA;
+    }
+
+    function buildCrystal_PVDF() {
+      const chainsY = state.gridExpand ? 5 : 3;
+      const chainsZ = state.gridExpand ? 5 : 3;
+      const monomers = state.gridExpand ? 6 : 4;
+      const dxCC = 0.62;
+      const zigzagZ = 0.28;
+      const spacingY = 1.7;
+      const spacingZ = 2.0;
+      const totalC = monomers * 2;
+      const chainLen = (totalC - 1) * dxCC;
+
+      const cMat = atomMat(COLOR.C, { roughness: 0.48, metalness: 0.1 });
+      const hMat = atomMat(COLOR.H, { roughness: 0.55, metalness: 0.05 });
+      const fMat = atomMat(COLOR.F, { roughness: 0.35, metalness: 0.18 });
+
+      for (let cy = 0; cy < chainsY; cy++) {
+        for (let cz = 0; cz < chainsZ; cz++) {
+          const isOffsetChain = ((cy + cz) % 2 === 1);
+          const xShift = isOffsetChain ? dxCC : 0;
+          const yOff = -((chainsY-1)/2) * spacingY + cy * spacingY;
+          const zOff = -((chainsZ-1)/2) * spacingZ + cz * spacingZ;
+          const cPositions = [];
+
+          for (let i = 0; i < totalC; i++) {
+            const cx = -chainLen/2 + i * dxCC + xShift;
+            const cyPos = yOff;
+            const czPos = zOff + (i % 2 === 0 ? zigzagZ : -zigzagZ);
+
+            const c = new THREE.Mesh(sphereGeom(0.18), cMat);
+            c.position.set(cx, cyPos, czPos);
+            c.userData = { basePos: c.position.clone() };
+            crystalGroup.add(c);
+            crystalData.allAtomMeshes.push(c);
+            cPositions.push(c);
+
+            if (i % 2 === 0) {
+              for (const dz of [0.18, -0.18]) {
+                const h = new THREE.Mesh(sphereGeom(0.11), hMat);
+                h.position.set(cx + 0.05, cyPos - 0.55, czPos + dz);
+                h.userData = { basePos: h.position.clone() };
+                crystalGroup.add(h);
+                crystalData.allAtomMeshes.push(h);
+                const bond = makeBond();
+                updateBondGeometry(bond, c.position, h.position);
+                crystalGroup.add(bond);
+                crystalData.allBondMeshes.push(bond);
+              }
+            } else {
+              for (const dz of [0.20, -0.20]) {
+                const f = new THREE.Mesh(sphereGeom(0.16), fMat);
+                f.position.set(cx, cyPos + 0.62, czPos + dz);
+                f.userData = { basePos: f.position.clone() };
+                crystalGroup.add(f);
+                crystalData.allAtomMeshes.push(f);
+                crystalData.displaceable.push({ mesh: f, basePos: f.userData.basePos });
+                const bond = makeBond();
+                updateBondGeometry(bond, c.position, f.position);
+                crystalGroup.add(bond);
+                crystalData.allBondMeshes.push(bond);
+                crystalData.updateBonds.push({
+                  mesh: bond,
+                  getFrom: () => c.position,
+                  getTo: () => f.position,
+                });
+              }
+            }
+          }
+          for (let i = 0; i < cPositions.length - 1; i++) {
+            const bond = makeBond();
+            updateBondGeometry(bond, cPositions[i].position, cPositions[i+1].position);
+            crystalGroup.add(bond);
+            crystalData.allBondMeshes.push(bond);
+          }
+        }
+      }
+      crystalData.maxExtent = Math.max(chainLen/2 + 1, chainsY * spacingY / 2, chainsZ * spacingZ / 2);
+    }
+
+    function buildCrystal_ZnO() {
+      const rings = state.gridExpand ? 2 : 1;
+      const nLayers = state.gridExpand ? 4 : 3;
+      const aHex = 1.45;
+      const cHeight = 2.3;
+      const u = 0.382;
+      const znMat = atomMat(COLOR.Zn, { roughness: 0.42, metalness: 0.3 });
+      const oMat = atomMat(COLOR.O, { roughness: 0.4 });
+      const znRadius = 0.30, oRadius = 0.26;
+
+      const hexPositions = [[0, 0]];
+      for (let r = 1; r <= rings; r++) {
+        for (let side = 0; side < 6; side++) {
+          for (let step = 0; step < r; step++) {
+            const ang1 = side * Math.PI / 3;
+            const ang2 = (side + 2) * Math.PI / 3;
+            const x = r * aHex * Math.cos(ang1) + step * aHex * Math.cos(ang2);
+            const z = r * aHex * Math.sin(ang1) + step * aHex * Math.sin(ang2);
+            hexPositions.push([x, z]);
+          }
+        }
+      }
+
+      const layerOffsetB = [aHex/2, aHex * Math.sqrt(3)/6];
+      const allZn = [];
+      const allO = [];
+
+      for (let layer = 0; layer < nLayers; layer++) {
+        const yBase = layer * cHeight - (nLayers-1)/2 * cHeight;
+        const isB = (layer % 2 === 1);
+        const xOff = isB ? layerOffsetB[0] : 0;
+        const zOff = isB ? layerOffsetB[1] : 0;
+
+        for (const p of hexPositions) {
+          const zn = new THREE.Mesh(sphereGeom(znRadius), znMat);
+          zn.position.set(p[0] + xOff, yBase, p[1] + zOff);
+          zn.userData = { basePos: zn.position.clone() };
+          crystalGroup.add(zn);
+          crystalData.allAtomMeshes.push(zn);
+          crystalData.displaceable.push({ mesh: zn, basePos: zn.userData.basePos });
+          allZn.push({ layer, mesh: zn });
+
+          const o = new THREE.Mesh(sphereGeom(oRadius), oMat);
+          o.position.set(p[0] + xOff, yBase + u * cHeight, p[1] + zOff);
+          o.userData = { basePos: o.position.clone() };
+          crystalGroup.add(o);
+          crystalData.allAtomMeshes.push(o);
+          allO.push({ layer, mesh: o });
+        }
+      }
+
+      const maxBondLen = u * cHeight * 1.05;
+      for (const zn of allZn) {
+        const cand = allO.map(o => ({ o, d: o.mesh.position.distanceTo(zn.mesh.position) }));
+        cand.sort((p, q) => p.d - q.d);
+        for (let n = 0; n < 4; n++) {
+          if (cand[n].d > maxBondLen * 1.5) break;
+          const bond = makeBond();
+          updateBondGeometry(bond, zn.mesh.position, cand[n].o.mesh.position);
+          crystalGroup.add(bond);
+          crystalData.allBondMeshes.push(bond);
+          crystalData.updateBonds.push({
+            mesh: bond,
+            getFrom: () => zn.mesh.position,
+            getTo: () => cand[n].o.mesh.position,
+          });
+        }
+      }
+      const span = Math.max(rings * aHex * 2 + 1.5, nLayers * cHeight / 2);
+      crystalData.maxExtent = span;
+    }
+
+    function buildCrystal_Quartz() {
+      const helices = state.gridExpand ? 7 : 1;
+      const tetsPerHelix = state.gridExpand ? 6 : 9;
+      const siMat = atomMat(COLOR.Si, { roughness: 0.4, metalness: 0.15 });
+      const oMat = atomMat(COLOR.O, { roughness: 0.38 });
+      const helixR = 1.35;
+      const helixPitch = 1.05;
+
+      const helixCenters = [[0, 0]];
+      if (helices > 1) {
+        const helixSpacing = 3.0;
+        for (let k = 0; k < 6; k++) {
+          const ang = k * Math.PI / 3;
+          helixCenters.push([helixSpacing * Math.cos(ang), helixSpacing * Math.sin(ang)]);
+        }
+      }
+
+      for (const center of helixCenters) {
+        const siList = [];
+
+        for (let i = 0; i < tetsPerHelix; i++) {
+          const ang = (i / 3) * (Math.PI * 2 / 3);
+          const sx = center[0] + helixR * Math.cos(ang);
+          const sz = center[1] + helixR * Math.sin(ang);
+          const sy = i * helixPitch - (tetsPerHelix - 1) * helixPitch / 2;
+
+          const si = new THREE.Mesh(sphereGeom(0.22), siMat);
+          si.position.set(sx, sy, sz);
+          si.userData = { basePos: si.position.clone() };
+          crystalGroup.add(si);
+          crystalData.allAtomMeshes.push(si);
+          crystalData.displaceable.push({ mesh: si, basePos: si.userData.basePos });
+          siList.push({ mesh: si, ang, y: sy, center });
+        }
+
+        for (let i = 0; i < siList.length - 1; i++) {
+          const si1 = siList[i].mesh.position;
+          const si2 = siList[i+1].mesh.position;
+          const midX = (si1.x + si2.x) / 2;
+          const midY = (si1.y + si2.y) / 2;
+          const midZ = (si1.z + si2.z) / 2;
+          const outDx = midX - center[0];
+          const outDz = midZ - center[1];
+          const outLen = Math.sqrt(outDx*outDx + outDz*outDz);
+          const outScale = 0.3 / Math.max(outLen, 0.1);
+          const oxx = midX + outDx * outScale;
+          const ozz = midZ + outDz * outScale;
+
+          const o = new THREE.Mesh(sphereGeom(0.18), oMat);
+          o.position.set(oxx, midY, ozz);
+          o.userData = { basePos: o.position.clone() };
+          crystalGroup.add(o);
+          crystalData.allAtomMeshes.push(o);
+
+          const b1 = makeBond();
+          updateBondGeometry(b1, si1, o.position);
+          crystalGroup.add(b1);
+          crystalData.allBondMeshes.push(b1);
+          crystalData.updateBonds.push({
+            mesh: b1, getFrom: () => si1, getTo: () => o.position,
+          });
+          const b2 = makeBond();
+          updateBondGeometry(b2, si2, o.position);
+          crystalGroup.add(b2);
+          crystalData.allBondMeshes.push(b2);
+          crystalData.updateBonds.push({
+            mesh: b2, getFrom: () => si2, getTo: () => o.position,
+          });
+        }
+
+        for (const siInfo of siList) {
+          const sp = siInfo.mesh.position;
+          const outDx = sp.x - center[0];
+          const outDz = sp.z - center[1];
+          const outLen = Math.sqrt(outDx*outDx + outDz*outDz);
+          const ox = outDx / Math.max(outLen, 0.1);
+          const oz = outDz / Math.max(outLen, 0.1);
+
+          for (const dy of [+0.5, -0.5]) {
+            const o = new THREE.Mesh(sphereGeom(0.18), oMat);
+            o.position.set(sp.x + ox * 0.7, sp.y + dy, sp.z + oz * 0.7);
+            o.userData = { basePos: o.position.clone() };
+            crystalGroup.add(o);
+            crystalData.allAtomMeshes.push(o);
+
+            const bond = makeBond();
+            updateBondGeometry(bond, sp, o.position);
+            crystalGroup.add(bond);
+            crystalData.allBondMeshes.push(bond);
+            crystalData.updateBonds.push({
+              mesh: bond, getFrom: () => sp, getTo: () => o.position,
+            });
+          }
+        }
+      }
+      const span = helices === 1 ? 4 : 5.5;
+      crystalData.maxExtent = Math.max(span, tetsPerHelix * helixPitch / 2);
+    }
+
+    let pressureArrows = [];
+    let polarizationArrow = null;
+
+    function buildPressureArrows() {
+      const arrows = [];
+      const topY = crystalData.maxExtent;
+      const span = crystalData.maxExtent * 2;
+      const grid = state.gridExpand ? 6 : 4;
+      const arrowMat = new THREE.MeshStandardMaterial({
+        color: 0xc05621, emissive: 0x4a1808, emissiveIntensity: 0.4,
+        roughness: 0.45, metalness: 0.2,
+        transparent: true, opacity: 1.0,
+      });
+      for (let i = 0; i < grid; i++) {
+        for (let j = 0; j < grid; j++) {
+          const gx = -span/2 + 0.2*span/grid + i * (span - 0.4*span/grid) / (grid - 1);
+          const gz = -span/2 + 0.2*span/grid + j * (span - 0.4*span/grid) / (grid - 1);
+          const baseY = topY + 2.0;
+          const group = new THREE.Group();
+          const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.9, 12), arrowMat);
+          shaft.position.y = 0.45;
+          group.add(shaft);
+          const head = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.32, 16), arrowMat);
+          head.position.y = -0.16;
+          head.rotation.x = Math.PI;
+          group.add(head);
+          group.position.set(gx, baseY, gz);
+          group.userData = { restY: baseY, mat: arrowMat };
+          group.visible = false;
+          scene.add(group);
+          arrows.push(group);
+        }
+      }
+      return arrows;
+    }
+    function updatePressureArrows(stress) {
+      const visible = stress > 0.015;
+      const shift = 1.6 * stress;
+      for (const arrow of pressureArrows) {
+        if (!visible) { arrow.visible = false; continue; }
+        arrow.visible = true;
+        arrow.position.y = arrow.userData.restY - shift;
+        arrow.userData.mat.opacity = Math.min(1.0, stress * 1.4);
+      }
+    }
+    function buildPolarizationArrow() {
+      const group = new THREE.Group();
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x1a7a4a, emissive: 0x0d3d24, emissiveIntensity: 0.5,
+        roughness: 0.35, metalness: 0.3,
+        transparent: true, opacity: 0.95,
+      });
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.095, 1.6, 16), mat);
+      shaft.position.y = 0.8;
+      group.add(shaft);
+      const head = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.55, 20), mat);
+      head.position.y = 1.875;
+      group.add(head);
+      group.userData = { mat };
+      group.visible = false;
+      scene.add(group);
+      return group;
+    }
+    function updatePolarizationArrow(stress) {
+      if (!polarizationArrow) return;
+      const piezo = MATERIALS[currentMaterial].getPiezo();
+      const polMag = stress * piezo;
+      state.currentPolarization = polMag;
+      if (polMag < 0.02) { polarizationArrow.visible = false; return; }
+      polarizationArrow.visible = true;
+      const dir = state.polarDir.clone().negate();
+      polarizationArrow.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0), dir.normalize()
+      );
+      polarizationArrow.scale.set(1, polMag * 1.3, 1);
+      polarizationArrow.userData.mat.opacity = Math.min(1.0, polMag * 1.5);
+    }
+
+    function applyDisplacement(stress) {
+      const piezo = MATERIALS[currentMaterial].getPiezo();
+      const delta = MAX_DISPLACEMENT * stress * piezo;
+      const dir = state.polarDir;
+      for (const d of crystalData.displaceable) {
+        d.mesh.position.set(
+          d.basePos.x + dir.x * delta,
+          d.basePos.y + dir.y * delta,
+          d.basePos.z + dir.z * delta
+        );
+      }
+      for (const b of crystalData.updateBonds) {
+        updateBondGeometry(b.mesh, b.getFrom(), b.getTo());
+      }
+    }
+
+    const insetContainer = document.getElementById('inset-cell');
+    const insetRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    insetRenderer.setSize(210, 210);
+    insetRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    insetRenderer.setClearColor(0x000000, 0);
+    insetRenderer.outputColorSpace = THREE.SRGBColorSpace;
+    insetContainer.appendChild(insetRenderer.domElement);
+
+    const insetScene = new THREE.Scene();
+    const insetCamera = new THREE.PerspectiveCamera(38, 1, 0.1, 50);
+    insetCamera.position.set(2.5, 2.0, 3.2);
+    insetCamera.lookAt(0, 0, 0);
+    insetScene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    insetScene.add(new THREE.HemisphereLight(0xfff3df, 0xc4a574, 0.4));
+    const insetKey = new THREE.DirectionalLight(0xfff5e0, 0.95);
+    insetKey.position.set(3, 4, 2.5);
+    insetScene.add(insetKey);
+    const insetFill = new THREE.DirectionalLight(0xcfdde6, 0.45);
+    insetFill.position.set(-2, 1.5, -2);
+    insetScene.add(insetFill);
+
+    const insetCrystal = new THREE.Group();
+    insetScene.add(insetCrystal);
+
+    function buildInsetCell() {
+      while (insetCrystal.children.length > 0) {
+        insetCrystal.remove(insetCrystal.children[0]);
+      }
+      if (currentMaterial === 'PZT' || currentMaterial === 'BaTiO3') {
+        const aReal = currentMaterial === 'PZT' ? latticeConstantA(state.x) : 3.99;
+        const aScene = aReal * 0.65;
+        const half = aScene / 2;
+        const A_color = currentMaterial === 'PZT' ? COLOR.Pb : COLOR.Ba;
+        const A_mat = atomMat(A_color, { roughness: 0.5, metalness: 0.18 });
+        const B_color = currentMaterial === 'PZT'
+          ? new THREE.Color(COLOR.Ti).lerp(new THREE.Color(COLOR.Zr), state.x).getHex()
+          : COLOR.Ti;
+        const B_mat = atomMat(B_color, { roughness: 0.34, metalness: 0.22 });
+        const oMat = atomMat(COLOR.O, { roughness: 0.38 });
+        const corners = [
+          [-half,-half,-half],[half,-half,-half],[-half,half,-half],[half,half,-half],
+          [-half,-half,half],[half,-half,half],[-half,half,half],[half,half,half],
+        ];
+        for (const c of corners) {
+          const m = new THREE.Mesh(sphereGeom(0.34*1.15), A_mat);
+          m.position.set(c[0],c[1],c[2]); insetCrystal.add(m);
+        }
+        const bMesh = new THREE.Mesh(sphereGeom(0.24*1.15), B_mat);
+        insetCrystal.add(bMesh);
+        const faces = [[half,0,0],[-half,0,0],[0,half,0],[0,-half,0],[0,0,half],[0,0,-half]];
+        for (const f of faces) {
+          const m = new THREE.Mesh(sphereGeom(0.28*1.15), oMat);
+          m.position.set(f[0],f[1],f[2]); insetCrystal.add(m);
+          const bond = makeBond();
+          updateBondGeometry(bond, new THREE.Vector3(0,0,0), new THREE.Vector3(f[0],f[1],f[2]));
+          insetCrystal.add(bond);
+        }
+        const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(aScene, aScene, aScene));
+        insetCrystal.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
+          color: 0x8a7560, transparent: true, opacity: 0.4,
+        })));
+      } else if (currentMaterial === 'PVDF') {
+        const cMat = atomMat(COLOR.C, { roughness: 0.48 });
+        const hMat = atomMat(COLOR.H, { roughness: 0.55 });
+        const fMat = atomMat(COLOR.F, { roughness: 0.35, metalness: 0.18 });
+        const c1 = new THREE.Mesh(sphereGeom(0.22), cMat);
+        c1.position.set(-0.5, 0, 0.25); insetCrystal.add(c1);
+        const c2 = new THREE.Mesh(sphereGeom(0.22), cMat);
+        c2.position.set(0.5, 0, -0.25); insetCrystal.add(c2);
+        const bond = makeBond();
+        updateBondGeometry(bond, c1.position, c2.position);
+        insetCrystal.add(bond);
+        for (const dz of [0.22, -0.22]) {
+          const h = new THREE.Mesh(sphereGeom(0.13), hMat);
+          h.position.set(-0.5, -0.55, 0.25 + dz);
+          insetCrystal.add(h);
+          const b = makeBond();
+          updateBondGeometry(b, c1.position, h.position);
+          insetCrystal.add(b);
+        }
+        for (const dz of [0.24, -0.24]) {
+          const f = new THREE.Mesh(sphereGeom(0.19), fMat);
+          f.position.set(0.5, 0.62, -0.25 + dz);
+          insetCrystal.add(f);
+          const b = makeBond();
+          updateBondGeometry(b, c2.position, f.position);
+          insetCrystal.add(b);
+        }
+      } else if (currentMaterial === 'ZnO') {
+        const znMat = atomMat(COLOR.Zn, { roughness: 0.42, metalness: 0.3 });
+        const oMat = atomMat(COLOR.O, { roughness: 0.4 });
+        const zn = new THREE.Mesh(sphereGeom(0.38), znMat);
+        zn.position.set(0, -0.4, 0);
+        insetCrystal.add(zn);
+        const tetO = [[0, 1.0, 0], [0.9, 0.2, 0.5], [-0.9, 0.2, 0.5], [0, 0.2, -1.0]];
+        for (const p of tetO) {
+          const o = new THREE.Mesh(sphereGeom(0.32), oMat);
+          o.position.set(p[0], p[1] - 0.4, p[2]);
+          insetCrystal.add(o);
+          const b = makeBond();
+          updateBondGeometry(b, zn.position, o.position);
+          insetCrystal.add(b);
+        }
+      } else if (currentMaterial === 'Quartz') {
+        const siMat = atomMat(COLOR.Si, { roughness: 0.4, metalness: 0.15 });
+        const oMat = atomMat(COLOR.O, { roughness: 0.38 });
+        const si = new THREE.Mesh(sphereGeom(0.30), siMat);
+        si.position.set(0, 0, 0); insetCrystal.add(si);
+        const tetVerts = [[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1]];
+        const r = 0.9;
+        for (const v of tetVerts) {
+          const o = new THREE.Mesh(sphereGeom(0.26), oMat);
+          o.position.set(v[0]*r/Math.sqrt(3), v[1]*r/Math.sqrt(3), v[2]*r/Math.sqrt(3));
+          insetCrystal.add(o);
+          const b = makeBond();
+          updateBondGeometry(b, si.position, o.position);
+          insetCrystal.add(b);
+        }
+      }
+    }
+
+    // ============================================================
+    // V(t) OSCILLOSCOPE — v6: 확장된 범위 ±60V / 0~3700 mW
+    // ============================================================
+
+    const vtCanvas = document.getElementById('vt-canvas');
+    const vtCtx = vtCanvas.getContext('2d');
+    const VT_BUFFER_SIZE = 320;
+    const vtBuffer = new Array(VT_BUFFER_SIZE).fill(0);
+    const vtPowerBuffer = new Array(VT_BUFFER_SIZE).fill(0);
+    let vtIndex = 0;
+
+    function recordSignal(voltage, power_mW) {
+      vtBuffer[vtIndex] = voltage;
+      vtPowerBuffer[vtIndex] = power_mW;
+      vtIndex = (vtIndex + 1) % VT_BUFFER_SIZE;
+    }
+    function drawOscilloscope() {
+      const w = vtCanvas.width, h = vtCanvas.height;
+      vtCtx.clearRect(0, 0, w, h);
+
+      // 격자
+      vtCtx.strokeStyle = 'rgba(120,100,70,0.12)';
+      vtCtx.lineWidth = 1;
+      for (let i = 1; i < 6; i++) {
+        const y = (h / 6) * i;
+        vtCtx.beginPath(); vtCtx.moveTo(0, y); vtCtx.lineTo(w, y); vtCtx.stroke();
+      }
+      for (let i = 1; i < 8; i++) {
+        const x = (w / 8) * i;
+        vtCtx.beginPath(); vtCtx.moveTo(x, 0); vtCtx.lineTo(x, h); vtCtx.stroke();
+      }
+      // 0V 중심선
+      vtCtx.strokeStyle = 'rgba(120,100,70,0.45)';
+      vtCtx.lineWidth = 1.4;
+      vtCtx.beginPath();
+      vtCtx.moveTo(0, h * 0.5); vtCtx.lineTo(w, h * 0.5); vtCtx.stroke();
+
+      // 축 라벨
+      vtCtx.fillStyle = 'rgba(43,38,32,0.65)';
+      vtCtx.font = 'bold 13px Georgia';
+      vtCtx.fillText('V(t)', 6, 18);
+      vtCtx.font = '11px Courier New';
+      vtCtx.fillStyle = 'rgba(43,38,32,0.55)';
+      vtCtx.fillText('+' + V_DISPLAY_MAX + 'V', 6, 32);
+      vtCtx.fillText('0', 6, h * 0.5 + 4);
+      vtCtx.fillText('-' + V_DISPLAY_MAX + 'V', 6, h - 8);
+
+      // V(t) trace
+      vtCtx.strokeStyle = '#c05621';
+      vtCtx.lineWidth = 2.4;
+      vtCtx.beginPath();
+      for (let i = 0; i < VT_BUFFER_SIZE; i++) {
+        const realIdx = (vtIndex + i) % VT_BUFFER_SIZE;
+        const v = vtBuffer[realIdx];
+        const xPos = (i / (VT_BUFFER_SIZE - 1)) * w;
+        // 범위: h*0.05 (+V_max) ~ h*0.95 (-V_max), 중심 h*0.5
+        const yPos = h * 0.5 - (v / V_DISPLAY_MAX) * (h * 0.45);
+        if (i === 0) vtCtx.moveTo(xPos, yPos);
+        else vtCtx.lineTo(xPos, yPos);
+      }
+      vtCtx.stroke();
+
+      // P(t) trace (mW, 항상 양수 → 하단 절반에)
+      vtCtx.strokeStyle = 'rgba(26,122,74,0.6)';
+      vtCtx.lineWidth = 1.8;
+      vtCtx.beginPath();
+      for (let i = 0; i < VT_BUFFER_SIZE; i++) {
+        const realIdx = (vtIndex + i) % VT_BUFFER_SIZE;
+        const p = vtPowerBuffer[realIdx];
+        const xPos = (i / (VT_BUFFER_SIZE - 1)) * w;
+        const yPos = h - (p / P_DISPLAY_MAX) * (h * 0.9);
+        if (i === 0) vtCtx.moveTo(xPos, yPos);
+        else vtCtx.lineTo(xPos, yPos);
+      }
+      vtCtx.stroke();
+    }
+
+    function updateReadout() {
+      const mat = MATERIALS[currentMaterial];
+      document.getElementById('rd-formula').textContent = mat.formula;
+      document.getElementById('rd-system').textContent = mat.system;
+      document.getElementById('mp-lit').textContent = mat.d33Lit;
+
+      for (const rowId of ['row-x', 'row-phase', 'row-a']) {
+        const row = document.getElementById(rowId);
+        if (row) row.classList.toggle('hidden', !mat.showRows.includes(rowId));
+      }
+
+      if (currentMaterial === 'PZT') {
+        document.getElementById('rd-x').textContent = state.x.toFixed(3);
+        const phaseLabels = {
+          'Tetragonal': 'Tetragonal', 'Rhombohedral': 'Rhombohedral', 'MPB': 'MPB (52:48)'
+        };
+        document.getElementById('rd-phase').textContent = phaseLabels[determinePhase(state.x)];
+        document.getElementById('rd-a').textContent = latticeConstantA(state.x).toFixed(3);
+      } else if (currentMaterial === 'BaTiO3') {
+        document.getElementById('rd-a').textContent = '3.99';
+      }
+
+      document.getElementById('rd-piezo').textContent = mat.getPiezo().toFixed(2);
+      document.getElementById('rd-stress').textContent = state.currentStress.toFixed(3);
+      document.getElementById('rd-pol').textContent = state.currentPolarization.toFixed(3);
+      document.getElementById('rd-voltage').textContent = state.currentVoltage.toFixed(2) + ' V';
+      document.getElementById('rd-power').textContent = state.currentPower.toFixed(2) + ' mW';
+      document.getElementById('rd-ppeak').textContent = state.lastPeakPower.toFixed(2) + ' mW';
+      document.getElementById('rd-energy').textContent = state.cumulativeEnergy.toFixed(3) + ' mJ';
+      document.getElementById('rd-pulsecount').textContent = state.pulseCount.toString();
+    }
+
+    function updateLegend() {
+      const items = document.querySelectorAll('#legend .item');
+      items.forEach(item => {
+        const atomsAttr = item.getAttribute('data-atoms');
+        if (atomsAttr === null) return;
+        const allowed = atomsAttr.split(',');
+        item.classList.toggle('hidden', !allowed.includes(currentMaterial));
+      });
+    }
+
+    function switchMaterial(matKey) {
+      if (state.pulseActive) return;
+      currentMaterial = matKey;
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.toggle('active', tab.getAttribute('data-mat') === matKey);
+      });
+      document.getElementById('inset-label').textContent =
+        '단위셀 — ' + MATERIALS[matKey].name;
+      if (xCtrl) {
+        if (MATERIALS[matKey].hasComposition) xCtrl.show(); else xCtrl.hide();
+        if (presetsFolder) {
+          if (MATERIALS[matKey].hasComposition) presetsFolder.show(); else presetsFolder.hide();
+        }
+      }
+      rebuildAll();
+    }
+
+    function rebuildAll() {
+      clearCrystal();
+      const builders = {
+        PZT: buildCrystal_PZT,
+        BaTiO3: buildCrystal_BaTiO3,
+        PVDF: buildCrystal_PVDF,
+        ZnO: buildCrystal_ZnO,
+        Quartz: buildCrystal_Quartz,
+      };
+      builders[currentMaterial]();
+      buildInsetCell();
+      for (const a of pressureArrows) scene.remove(a);
+      pressureArrows = buildPressureArrows();
+      if (polarizationArrow) scene.remove(polarizationArrow);
+      polarizationArrow = buildPolarizationArrow();
+      state.polarDir = MATERIALS[currentMaterial].polarDir();
+      updateLegend();
+      updateReadout();
+    }
+
+    const gui = new GUI({ title: '제어 패널' });
+    const xCtrl = gui.add(state, 'x', 0.0, 1.0, 0.01)
+                     .name('Zr fraction (x)')
+                     .onChange(() => { if (!state.pulseActive && currentMaterial === 'PZT') rebuildAll(); });
+
+    const presetsFolder = gui.addFolder('빠른 프리셋 (PZT)');
+    const setPreset = (val) => {
+      if (state.pulseActive || currentMaterial !== 'PZT') return;
+      state.x = val; xCtrl.updateDisplay(); rebuildAll();
+    };
+    presetsFolder.add({ a: () => setPreset(0.00) }, 'a').name('PbTiO₃ (x=0)');
+    presetsFolder.add({ a: () => setPreset(0.30) }, 'a').name('Ti-rich (x=0.30)');
+    presetsFolder.add({ a: () => setPreset(0.48) }, 'a').name('MPB 좌측 (x=0.48)');
+    presetsFolder.add({ a: () => setPreset(0.52) }, 'a').name('MPB 중심 (x=0.52)');
+    presetsFolder.add({ a: () => setPreset(0.75) }, 'a').name('Zr-rich (x=0.75)');
+    presetsFolder.add({ a: () => setPreset(1.00) }, 'a').name('PbZrO₃ (x=1)');
+
+    const advanced = gui.addFolder('표시 옵션');
+    const viewOpts = { wireframe: false, showBonds: true, autoRotate: false, insetRotate: true };
+    advanced.add(viewOpts, 'wireframe').name('Wireframe').onChange(v => {
+      for (const m of crystalData.allAtomMeshes) m.material.wireframe = v;
+    });
+    advanced.add(viewOpts, 'showBonds').name('결합 표시').onChange(v => {
+      for (const m of crystalData.allBondMeshes) m.visible = v;
+    });
+    advanced.add(viewOpts, 'autoRotate').name('자동 회전 (메인)').onChange(v => {
+      controls.autoRotate = v; controls.autoRotateSpeed = 0.7;
+    });
+    advanced.add(viewOpts, 'insetRotate').name('인셋 회전');
+    advanced.add(state, 'gridExpand').name('격자 확장 (Grid)').onChange(() => {
+      if (!state.pulseActive) rebuildAll();
+    });
+    advanced.close();
+
+    const pressureSlider = document.getElementById('pressure-slider');
+    const pressureValSpan = document.getElementById('pressure-val');
+    pressureSlider.addEventListener('input', (e) => {
+      state.pressureMag = parseFloat(e.target.value);
+      pressureValSpan.textContent = state.pressureMag.toFixed(2);
+    });
+
+    const pulseButton = document.getElementById('pulse-button');
+    function triggerPulse() {
+      if (state.pulseActive) return;
+      state.pulseActive = true;
+      state.pulseStartTime = performance.now() / 1000;
+      state.lastPeakPower = 0;
+      pulseButton.disabled = true;
+      pulseButton.textContent = '⚡ 압력 인가 중...';
+      xCtrl.disable();
+      document.querySelectorAll('.tab').forEach(t => t.disabled = true);
+    }
+    pulseButton.addEventListener('click', triggerPulse);
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (state.pulseActive) return;
+        switchMaterial(tab.getAttribute('data-mat'));
+      });
+    });
+
+    document.getElementById('train-toggle').addEventListener('change', (e) => {
+      state.trainEnabled = e.target.checked;
+    });
+    document.getElementById('reset-energy').addEventListener('click', () => {
+      state.cumulativeEnergy = 0;
+      state.pulseCount = 0;
+      state.lastPeakPower = 0;
+      for (let i = 0; i < VT_BUFFER_SIZE; i++) { vtBuffer[i] = 0; vtPowerBuffer[i] = 0; }
+      updateReadout();
+    });
+
+    let lastFrameTime = performance.now() / 1000;
+    let trainNextPulseTime = 0;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const now = performance.now() / 1000;
+      const dt = Math.min(now - lastFrameTime, 0.1);
+      lastFrameTime = now;
+
+      if (state.trainEnabled && !state.pulseActive && now >= trainNextPulseTime) {
+        triggerPulse();
+        trainNextPulseTime = now + PULSE_DURATION + TRAIN_REST_TIME;
+      }
+
+      if (state.pulseActive) {
+        const t = now - state.pulseStartTime;
+        const rawStress = pulseProfile(t);
+        const rawDeriv = pulseProfileDerivative(t);
+        const stress = rawStress * state.pressureMag;
+        const piezo = MATERIALS[currentMaterial].getPiezo();
+        const matStrength = MATERIALS[currentMaterial].relativeStrength;
+
+        const voltage = VOLTAGE_SCALE * matStrength * piezo * rawDeriv * state.pressureMag;
+        const power_mW = (voltage * voltage / LOAD_RESISTANCE) * 1000;
+        state.cumulativeEnergy += power_mW * dt;
+
+        state.currentStress = stress;
+        state.currentVoltage = voltage;
+        state.currentPower = power_mW;
+        if (power_mW > state.lastPeakPower) state.lastPeakPower = power_mW;
+
+        applyDisplacement(stress);
+        updatePressureArrows(stress);
+        updatePolarizationArrow(stress);
+        recordSignal(voltage, power_mW);
+        updateReadout();
+
+        if (t > PULSE_DURATION) {
+          state.pulseActive = false;
+          state.currentStress = 0;
+          state.currentVoltage = 0;
+          state.currentPower = 0;
+          state.currentPolarization = 0;
+          state.pulseCount += 1;
+          applyDisplacement(0);
+          updatePressureArrows(0);
+          updatePolarizationArrow(0);
+          pulseButton.disabled = false;
+          pulseButton.textContent = '▼ 압력 펄스 인가';
+          xCtrl.enable();
+          document.querySelectorAll('.tab').forEach(t => t.disabled = false);
+          updateReadout();
+        }
+      } else {
+        recordSignal(0, 0);
+      }
+
+      drawOscilloscope();
+
+      if (viewOpts.insetRotate) {
+        insetCrystal.rotation.y += 0.006;
+        insetCrystal.rotation.x = 0.15;
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+      insetRenderer.render(insetScene, insetCamera);
+    }
+
+    switchMaterial('PZT');
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
