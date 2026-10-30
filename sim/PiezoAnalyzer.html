@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PiezoLab Analyzer · 압전 하베스터 데이터 분석</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+:root{
+  --bg:#0a0e14; --panel:#11161f; --panel2:#161d28; --line:#1f2937;
+  --text:#e6edf3; --dim:#8b98a9; --faint:#5b6675;
+  --amber:#ffb000; --amber2:#ff7a00; --cyan:#22d3ee; --green:#34d399; --red:#f87171; --violet:#a78bfa;
+  --mono:'JetBrains Mono',ui-monospace,monospace; --body:'Bricolage Grotesque',system-ui,sans-serif;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;}
+::-webkit-scrollbar{width:9px;height:9px;}::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;}
+select,input[type=text],input[type=number]{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:7px;padding:7px 9px;font-family:var(--mono);font-size:12px;outline:none;}
+select:focus,input:focus{border-color:var(--amber);}
+input[type=range]{width:100%;accent-color:var(--amber);}
+button{font-family:var(--mono);}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;}
+.header{border-bottom:1px solid var(--line);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(10,14,20,.94);backdrop-filter:blur(8px);z-index:20;}
+.logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--amber),var(--amber2));display:grid;place-items:center;font-size:20px;}
+.tabs{display:flex;gap:8px;padding:14px 24px 0;flex-wrap:wrap;}
+.tab{display:flex;align-items:center;gap:7px;padding:9px 14px;background:transparent;border:1px solid transparent;border-radius:9px;color:var(--dim);cursor:pointer;font-size:13px;}
+.tab.active{background:var(--panel2);border-color:var(--amber);color:var(--text);font-weight:600;}
+.wrap{padding:18px 24px 90px;max-width:1200px;margin:0 auto;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;background:var(--panel2);color:var(--text);border:1px solid var(--line);}
+.btn.primary{background:var(--amber);color:#1a1300;border:none;}
+.btn.danger{background:transparent;color:var(--red);border:1px solid rgba(248,113,113,.27);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;}
+.stat .bar{position:absolute;top:0;left:0;width:3px;height:100%;}
+.stat .lbl{display:flex;align-items:center;gap:7px;color:var(--dim);font-size:11px;letter-spacing:.5px;text-transform:uppercase;font-family:var(--mono);}
+.stat .val{font-size:24px;font-weight:700;margin-top:6px;font-family:var(--mono);line-height:1.1;}
+.stat .sub{font-size:11px;color:var(--faint);margin-top:3px;font-family:var(--mono);}
+.ctitle{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-weight:700;font-size:14.5px;}
+.slbl{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-bottom:5px;font-family:var(--mono);}
+.muted{color:var(--dim);font-size:12.5px;line-height:1.55;}
+.maprow{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.maprow span{width:80px;font-size:11.5px;color:var(--dim);font-family:var(--mono);}
+.maprow select{flex:1;}
+.chip{padding:6px 9px;border-radius:7px;cursor:pointer;font-family:var(--mono);font-size:10.5px;background:var(--panel2);color:var(--dim);border:1px solid var(--line);font-weight:600;}
+.chip.on{background:var(--amber);color:#1a1300;border-color:var(--amber);}
+.chip.cyan.on{background:var(--cyan);color:#04222a;border-color:var(--cyan);}
+.pulltab{position:fixed;top:50%;transform:translateY(-50%);background:linear-gradient(135deg,var(--amber),var(--amber2));color:#1a1300;padding:16px 9px;border-radius:10px 0 0 10px;cursor:pointer;z-index:40;display:flex;flex-direction:column;align-items:center;gap:6px;writing-mode:vertical-rl;font-family:var(--mono);font-weight:700;font-size:12px;transition:right .3s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 16px rgba(0,0,0,.5);}
+.drawer{position:fixed;right:0;top:0;height:100vh;width:340px;background:var(--panel);border-left:1px solid var(--line);z-index:39;transition:transform .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:20px;box-shadow:-8px 0 24px rgba(0,0,0,.4);}
+.bulb{display:grid;place-items:center;transition:all .4s;}
+.bulb.on{animation:glow 2.4s ease-in-out infinite;}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 3px var(--amber)) drop-shadow(0 0 8px var(--amber2));}50%{filter:drop-shadow(0 0 6px var(--amber)) drop-shadow(0 0 16px var(--amber2));}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:60;background:var(--panel);padding:11px 18px;border-radius:10px;font-family:var(--mono);font-size:13px;display:flex;align-items:center;gap:9px;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+.hl{display:flex;align-items:center;gap:12px;padding:11px 13px;background:var(--bg);border:1px solid var(--line);border-radius:9px;}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px;}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);}
+.empty{text-align:center;padding:70px 20px;color:var(--faint);}
+.svgicon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.12em;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============================================================
+   PiezoLab Analyzer (standalone HTML)  —  압전 하베스터 분석
+   계산식·기능은 React판과 동일. 저장은 localStorage(+메모리 폴백)+JSON.
+   ============================================================ */
+
+/* ---------- 상수/기본값 ---------- */
+const BULB_PRESETS=[
+  {name:"LED 인디케이터",w:0.06},{name:"소형 LED (1W)",w:1.0},
+  {name:"LED 전구 (5W)",w:5.0},{name:"LED 전구 (9W)",w:9.0},{name:"백열 (40W)",w:40.0},
+];
+const TIME_UNITS={s:1,ms:0.001,us:0.000001,min:60};
+const PERIOD_SEC={window:null,day:86400,week:604800,month:2592000,year:31536000};
+const PERIODS=[["window","측정창"],["day","1일"],["week","1주"],["month","1개월"],["year","1년"]];
+const DEFAULT_EFF={rectifier:0.80,storage:0.90,converter:0.82,delivery:0.95};
+
+const uid=()=>Math.random().toString(36).slice(2,10);
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+const num=v=>{const n=parseFloat(v);return Number.isFinite(n)?n:null;};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function fmtEnergy(j){if(j==null||!Number.isFinite(j))return"—";const a=Math.abs(j);
+  if(a>=3600)return(j/3600).toFixed(3)+" Wh";if(a>=1)return j.toFixed(3)+" J";
+  if(a>=1e-3)return(j*1e3).toFixed(2)+" mJ";return(j*1e6).toFixed(1)+" µJ";}
+function fmtPower(w){if(w==null||!Number.isFinite(w))return"—";const a=Math.abs(w);
+  if(a>=1)return w.toFixed(3)+" W";if(a>=1e-3)return(w*1e3).toFixed(3)+" mW";
+  if(a>=1e-6)return(w*1e6).toFixed(2)+" µW";return(w*1e9).toFixed(1)+" nW";}
+function fmtTime(s){if(s==null)return"—";if(s>=3600)return(s/3600).toFixed(2)+" 시간";
+  if(s>=60)return(s/60).toFixed(2)+" 분";if(s>=1)return s.toFixed(2)+" 초";return(s*1000).toFixed(0)+" ms";}
+
+/* 간단 SVG 아이콘 (lucide 스타일) */
+const IC={
+  zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>',
+  bolt:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>',
+  db:'<ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14a9 3 0 0 0 18 0V5"></path><path d="M3 12a9 3 0 0 0 18 0"></path>',
+  activity:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>',
+  grid:'<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>',
+  settings:'<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>',
+  clock:'<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>',
+  bulb:'<path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path>',
+  gauge:'<path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path>',
+  cpu:'<rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"></path>',
+  upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line>',
+  sheet:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line>',
+  spark:'<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"></path>',
+  save:'<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>',
+  folder:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>',
+  trash:'<polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>',
+  compare:'<circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7M11 18H8a2 2 0 0 1-2-2V9"></path>',
+  bar:'<line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line>',
+  check:'<polyline points="20 6 9 17 4 12"></polyline>',
+  warn:'<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+  x:'<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>',
+};
+function icon(name,color,size=15){return `<svg class="svgicon" viewBox="0 0 24 24" style="width:${size}px;height:${size}px;color:${color||'currentColor'}">${IC[name]||""}</svg>`;}
+
+/* ============================================================
+   계산 엔진
+   ============================================================ */
+function powerOf(s,loadR){
+  if(s.power!=null)return s.power;
+  if(s.voltage!=null&&s.current!=null)return s.voltage*s.current;
+  if(s.voltage!=null&&loadR>0)return(s.voltage*s.voltage)/loadR;
+  return 0;
+}
+function computeAnalysis(dataset,settings){
+  const empty={ok:false,totalEnergy:0,avgPower:0,peakPower:0,duration:0,sampleCount:0,
+    activeTiles:0,perTile:[],series:[],etaTotal:0,usableEnergy:0,usableAvgPower:0};
+  if(!dataset||!dataset.samples||!dataset.samples.length)return empty;
+  const tScale=TIME_UNITS[settings.timeUnit]??1, R=settings.loadR, thr=settings.eventThreshold;
+  const norm=dataset.samples.map(s=>({
+    tileId:s.tileId??"T?", t:(num(s.t)??0)*tScale,
+    p:powerOf({voltage:num(s.voltage),current:num(s.current),power:num(s.power)},R),
+  }));
+  let tMin=Infinity,tMax=-Infinity,peakPower=0;
+  for(const s of norm){if(s.t<tMin)tMin=s.t;if(s.t>tMax)tMax=s.t;if(s.p>peakPower)peakPower=s.p;}
+  const duration=Math.max(tMax-tMin,1e-9);
+  const byTile=new Map();
+  for(const s of norm){if(!byTile.has(s.tileId))byTile.set(s.tileId,[]);byTile.get(s.tileId).push(s);}
+  const NB=140, binW=duration/NB, binEnergy=new Float64Array(NB);
+  const perTile=[]; let totalEnergy=0;
+  for(const [tileId,arrRaw] of byTile.entries()){
+    const arr=arrRaw.sort((a,b)=>a.t-b.t);
+    let energy=0,peak=0,events=0,prevAbove=false;
+    for(let i=0;i<arr.length;i++){
+      if(arr[i].p>peak)peak=arr[i].p;
+      const above=arr[i].p>=thr&&thr>0;
+      if(above&&!prevAbove)events++; prevAbove=above;
+      if(i>0){const dt=arr[i].t-arr[i-1].t;
+        if(dt>0&&dt<duration){const segE=0.5*(arr[i].p+arr[i-1].p)*dt;energy+=segE;
+          const mid=(arr[i].t+arr[i-1].t)/2; let b=clamp(Math.floor((mid-tMin)/binW),0,NB-1); binEnergy[b]+=segE;}}
+    }
+    totalEnergy+=energy;
+    const tm=(dataset.tiles||[]).find(t=>t.id===tileId)||{};
+    perTile.push({tileId,label:tm.label??tileId,x:tm.x??null,y:tm.y??null,energy,peak,events,count:arr.length});
+  }
+  perTile.sort((a,b)=>b.energy-a.energy);
+  let cum=0; const series=[];
+  for(let i=0;i<NB;i++){cum+=binEnergy[i];series.push({t:tMin+i*binW,power:binEnergy[i]/binW,cumEnergy:cum,cumEnergyMJ:cum*1000});}
+  const avgPower=totalEnergy/duration;
+  const e=settings.efficiency, etaTotal=e.rectifier*e.storage*e.converter*e.delivery;
+  return {ok:true,totalEnergy,avgPower,peakPower,duration,sampleCount:norm.length,activeTiles:byTile.size,
+    perTile,series,tMin,tMax,etaTotal,usableEnergy:totalEnergy*etaTotal,usableAvgPower:avgPower*etaTotal};
+}
+
+/* ---------- 합성 데이터 생성 ---------- */
+function generateSynthetic(cfg){
+  const {cols,rows,durationSec,stepsPerMin,vPeakMin,vPeakMax,loadR,hotspot}=cfg;
+  const tiles=[];
+  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++)tiles.push({id:`T${y*cols+x+1}`,x,y,label:`T${y*cols+x+1}`});
+  const cx=hotspot?cols*0.5:null;
+  const weights=tiles.map(t=>hotspot?Math.exp(-0.5*(Math.abs(t.x-cx)+0.4*t.y)):1);
+  const wSum=weights.reduce((a,b)=>a+b,0);
+  const totalSteps=Math.round(stepsPerMin*durationSec/60);
+  const samples=[]; const fs=1000,span=0.16,tau=0.035,freq=28;
+  for(let k=0;k<totalSteps;k++){
+    let r=Math.random()*wSum,idx=0;
+    for(let i=0;i<weights.length;i++){r-=weights[i];if(r<=0){idx=i;break;}}
+    const tile=tiles[idx], t0=Math.random()*durationSec, vPeak=vPeakMin+Math.random()*(vPeakMax-vPeakMin), n=Math.round(span*fs);
+    for(let i=0;i<=n;i++){const tt=i/fs;const v=vPeak*Math.exp(-tt/tau)*Math.sin(2*Math.PI*freq*tt);
+      samples.push({tileId:tile.id,t:+(t0+tt).toFixed(4),voltage:+v.toFixed(4)});}
+  }
+  samples.sort((a,b)=>a.t-b.t);
+  return {meta:{name:`합성 데이터 ${new Date().toLocaleTimeString("ko-KR")}`,source:"synthetic",loadR,durationSec,steps:totalSteps,createdAt:Date.now()},tiles,samples};
+}
+
+/* ---------- import 어댑터 ---------- */
+function rowsToDataset(rows,mapping,name){
+  const samples=[], tileSet=new Map();
+  for(const row of rows){
+    const tileId=mapping.tileId?String(row[mapping.tileId]??"T1"):"T1";
+    const t=mapping.t?num(row[mapping.t]):null;
+    const voltage=mapping.voltage?num(row[mapping.voltage]):null;
+    const current=mapping.current?num(row[mapping.current]):null;
+    const power=mapping.power?num(row[mapping.power]):null;
+    if(t==null&&voltage==null&&power==null)continue;
+    samples.push({tileId,t:t??0,voltage,current,power});
+    if(!tileSet.has(tileId)){
+      const x=mapping.x?num(row[mapping.x]):null, y=mapping.y?num(row[mapping.y]):null;
+      tileSet.set(tileId,{id:tileId,x,y,label:tileId});
+    }
+  }
+  const tiles=[...tileSet.values()];
+  if(tiles.every(t=>t.x==null)){const cols=Math.ceil(Math.sqrt(tiles.length));tiles.forEach((t,i)=>{t.x=i%cols;t.y=Math.floor(i/cols);});}
+  return {meta:{name,source:"import",createdAt:Date.now(),rowCount:samples.length},tiles,samples};
+}
+
+/* ---------- 저장소 (localStorage + 메모리 폴백) ---------- */
+const memStore={};
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return memStore[k]??null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);return true;}catch(e){memStore[k]=v;return false;}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){delete memStore[k];}}
+function lsKeys(prefix){try{return Object.keys(localStorage).filter(k=>k.startsWith(prefix));}catch(e){return Object.keys(memStore).filter(k=>k.startsWith(prefix));}}
+
+/* ============================================================
+   상태
+   ============================================================ */
+const state={
+  dataset:null, tab:"data", drawerOpen:false,
+  settings:{loadR:10000,timeUnit:"s",eventThreshold:0.0005,efficiency:{...DEFAULT_EFF}},
+  rawRows:null, headers:[], mapping:{}, importName:"",
+  syn:{cols:6,rows:4,durationSec:60,stepsPerMin:90,vPeakMin:8,vPeakMax:28,hotspot:true},
+  bulbW:0.06, bulbMode:"budget", budgetBulbs:3, bulbPeriod:"day",
+  compareSel:[],
+};
+let A=computeAnalysis(state.dataset,state.settings);
+let charts=[];
+let toastTimer=null;
+
+function recompute(){A=computeAnalysis(state.dataset,state.settings);}
+function bulbCalc(){
+  const pAvail=A.usableAvgPower, w=state.bulbW;
+  const nCont=w>0?Math.floor(pAvail/w):0;
+  const fracExtra=w>0?(pAvail/w)-nCont:0;
+  const ratio=A.duration>0?A.usableEnergy/A.duration:0;
+  const periodSec=PERIOD_SEC[state.bulbPeriod];
+  const periodEnergy=periodSec==null?A.usableEnergy:ratio*periodSec;
+  const bulbSeconds=w>0?periodEnergy/w:0;
+  const runtimeN=(state.budgetBulbs>0&&w>0)?periodEnergy/(state.budgetBulbs*w):0;
+  return {pAvail,nCont,fracExtra,bulbSeconds,runtimeN,periodEnergy};
+}
+
+function toast(msg,kind="ok"){
+  const el=document.getElementById("toast");
+  const col=kind==="err"?"var(--red)":kind==="warn"?"var(--amber)":"var(--green)";
+  const ic=kind==="ok"?icon("check","var(--green)",16):icon("warn",col,16);
+  el.innerHTML=`<div class="toast" style="border:1px solid ${col}">${ic}${esc(msg)}</div>`;
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{el.innerHTML="";},2600);
+}
+
+/* ============================================================
+   렌더링
+   ============================================================ */
+function render(){
+  charts.forEach(c=>{try{c.destroy();}catch(e){}}); charts=[];
+  const app=document.getElementById("app");
+  app.innerHTML=`
+    <div class="header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="logo">${icon("zap","#1a1300",22)}</div>
+        <div>
+          <div style="font-weight:700;font-size:19px;letter-spacing:-.3px">PiezoLab Analyzer</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--dim)">압전 하베스터 데이터 분석 · 유리프로</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" data-act="save" ${A.ok?"":"disabled"}>${icon("save")}저장</button>
+        <button class="btn" data-act="exportJSON" ${state.dataset?"":"disabled"}>${icon("download")}JSON</button>
+      </div>
+    </div>
+    <div class="tabs">
+      ${tabBtn("data","db","데이터")}${tabBtn("analysis","activity","분석")}${tabBtn("spatial","grid","공간")}
+      ${tabBtn("settings","settings","효율·설정")}${tabBtn("history","clock","히스토리")}
+    </div>
+    <div class="wrap" id="content"></div>
+    <div class="pulltab" data-act="toggleDrawer" style="right:${state.drawerOpen?340:0}px">${icon("bulb","#1a1300",18)}전구 시뮬</div>
+    <div class="drawer" id="drawer" style="transform:translateX(${state.drawerOpen?0:100}%)"></div>
+    <div id="toast"></div>
+  `;
+  renderContent();
+  renderDrawer();
+  wireGlobal();
+}
+function tabBtn(id,ic,label){return `<button class="tab ${state.tab===id?"active":""}" data-tab="${id}">${icon(ic,state.tab===id?"var(--amber)":"var(--dim)")}${label}</button>`;}
+
+function wireGlobal(){
+  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;render();});
+  document.querySelectorAll("[data-act]").forEach(b=>{
+    const a=b.dataset.act;
+    if(a==="save")b.onclick=saveInstance;
+    if(a==="exportJSON")b.onclick=exportJSON;
+    if(a==="toggleDrawer")b.onclick=()=>{state.drawerOpen=!state.drawerOpen;render();};
+  });
+}
+
+function renderContent(){
+  const c=document.getElementById("content");
+  if(state.tab==="data")return renderData(c);
+  if(state.tab==="analysis")return renderAnalysis(c);
+  if(state.tab==="spatial")return renderSpatial(c);
+  if(state.tab==="settings")return renderSettings(c);
+  if(state.tab==="history")return renderHistory(c);
+}
+
+/* ---------- 데이터 탭 ---------- */
+function slider(id,label,val,min,max,step,fmt){
+  return `<div style="margin-bottom:12px">
+    <div class="slbl"><span>${label}</span><span style="color:var(--amber)" id="${id}_v">${fmt?fmt(val):val}</span></div>
+    <input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}">
+  </div>`;
+}
+function renderData(c){
+  const s=state.syn;
+  c.innerHTML=`
+  <div style="display:grid;gap:16px">
+    <div class="grid2">
+      <div class="card">
+        <div class="ctitle">${icon("spark","var(--cyan)",17)}합성 데이터 생성</div>
+        <p class="muted" style="margin-top:0">하드웨어가 없는 지금, 발걸음 트랜지언트를 물리적으로 모사해 모든 기능을 시연합니다. 실제 데이터가 오면 동일한 분석 엔진이 그대로 작동합니다.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
+          ${slider("s_cols","타일 열",s.cols,2,12,1)}
+          ${slider("s_rows","타일 행",s.rows,2,10,1)}
+          ${slider("s_dur","측정 시간",s.durationSec,10,300,5,v=>v+"s")}
+          ${slider("s_spm","분당 발걸음",s.stepsPerMin,10,300,5)}
+          ${slider("s_vmin","최소 첨두전압",s.vPeakMin,1,30,1,v=>v+"V")}
+          ${slider("s_vmax","최대 첨두전압",s.vPeakMax,5,60,1,v=>v+"V")}
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--dim);margin:4px 0 12px;font-family:var(--mono);cursor:pointer">
+          <input type="checkbox" id="s_hot" ${s.hotspot?"checked":""} style="accent-color:var(--cyan)"> 통행 핫스팟(출입구/배식대) 모사
+        </label>
+        <button class="btn primary" id="genBtn" style="width:100%;justify-content:center">${icon("spark","#1a1300")}합성 데이터 생성하기</button>
+      </div>
+      <div class="card">
+        <div class="ctitle">${icon("sheet","var(--amber)",17)}실측 데이터 가져오기</div>
+        <p class="muted" style="margin-top:0">엑셀(.xlsx)·CSV를 올린 뒤, 어떤 열이 타일/시간/전압/전류/전력인지 매핑합니다. 하드웨어 출력 형식이 바뀌어도 매핑만 다시 하면 됩니다.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn primary" id="upBtn">${icon("upload","#1a1300")}엑셀/CSV 업로드</button>
+          <button class="btn" id="jsonBtn">${icon("folder")}JSON 불러오기</button>
+        </div>
+        <input type="file" id="fileIn" accept=".xlsx,.xls,.csv" style="display:none">
+        <input type="file" id="jsonIn" accept=".json" style="display:none">
+        <div id="mapArea"></div>
+      </div>
+    </div>
+    ${state.dataset?`<div class="card">
+      <div style="font-size:13px;font-family:var(--mono);color:var(--dim);margin-bottom:8px">현재 데이터셋</div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;font-family:var(--mono);font-size:13px">
+        <span><span style="color:var(--faint)">이름</span> ${esc(state.dataset.meta?.name||"")}</span>
+        <span><span style="color:var(--faint)">샘플</span> ${state.dataset.samples.length.toLocaleString()}</span>
+        <span><span style="color:var(--faint)">타일</span> ${state.dataset.tiles.length}</span>
+        <span><span style="color:var(--faint)">소스</span> ${esc(state.dataset.meta?.source||"")}</span>
+      </div></div>`:""}
+  </div>`;
+
+  // 합성 슬라이더 (드래그 중 라벨만 즉시 갱신)
+  const map=[["s_cols","cols",null],["s_rows","rows",null],["s_dur","durationSec",v=>v+"s"],
+    ["s_spm","stepsPerMin",null],["s_vmin","vPeakMin",v=>v+"V"],["s_vmax","vPeakMax",v=>v+"V"]];
+  map.forEach(([id,key,fmt])=>{const el=document.getElementById(id);el.oninput=e=>{
+    const v=parseFloat(e.target.value);state.syn[key]=v;document.getElementById(id+"_v").textContent=fmt?fmt(v):v;};});
+  document.getElementById("s_hot").onchange=e=>state.syn.hotspot=e.target.checked;
+  document.getElementById("genBtn").onclick=()=>{
+    state.dataset=generateSynthetic({...state.syn,loadR:state.settings.loadR});
+    recompute();state.tab="analysis";render();
+    toast(`합성 데이터 생성: ${state.dataset.samples.length} 샘플 / ${state.dataset.meta.steps} 발걸음`);
+  };
+  document.getElementById("upBtn").onclick=()=>document.getElementById("fileIn").click();
+  document.getElementById("jsonBtn").onclick=()=>document.getElementById("jsonIn").click();
+  document.getElementById("fileIn").onchange=onFile;
+  document.getElementById("jsonIn").onchange=importJSON;
+  if(state.rawRows)renderMapArea();
+}
+function renderMapArea(){
+  const m=state.mapping;
+  const fields=[["tileId","타일 ID *"],["t","시간 *"],["voltage","전압(V)"],["current","전류(A)"],["power","전력(W)"],["x","X 위치"],["y","Y 위치"]];
+  const opt=sel=>`<option value="">(없음)</option>`+state.headers.map(h=>`<option value="${esc(h)}" ${sel===h?"selected":""}>${esc(h)}</option>`).join("");
+  document.getElementById("mapArea").innerHTML=`
+    <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+      <div style="font-size:12.5px;font-weight:600;margin-bottom:10px;font-family:var(--mono);color:var(--cyan)">컬럼 매핑 (${state.rawRows.length}행 · ${state.headers.length}열)</div>
+      ${fields.map(([k,lbl])=>`<div class="maprow"><span>${lbl}</span><select data-map="${k}">${opt(m[k])}</select></div>`).join("")}
+      <button class="btn primary" id="applyMap" style="width:100%;justify-content:center;margin-top:8px">${icon("check","#1a1300")}매핑 적용 → 분석</button>
+    </div>`;
+  document.querySelectorAll("[data-map]").forEach(s=>s.onchange=e=>{state.mapping[s.dataset.map]=e.target.value||null;});
+  document.getElementById("applyMap").onclick=()=>{
+    const ds=rowsToDataset(state.rawRows,state.mapping,state.importName||"가져온 데이터");
+    state.dataset=ds;state.rawRows=null;recompute();state.tab="analysis";render();
+    toast(`표준 모델로 변환 완료 (${ds.samples.length} 샘플)`);
+  };
+}
+function onFile(e){
+  const f=e.target.files?.[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const wb=XLSX.read(new Uint8Array(ev.target.result),{type:"array"});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{defval:null});
+    if(!rows.length){toast("빈 파일입니다","err");return;}
+    const hdr=Object.keys(rows[0]);
+    const guess=(...keys)=>hdr.find(h=>keys.some(k=>h.toLowerCase().includes(k)));
+    state.rawRows=rows;state.headers=hdr;state.importName=f.name;
+    state.mapping={tileId:guess("tile","타일","id","sensor","node"),t:guess("time","시간","timestamp","sec"),
+      voltage:guess("volt","전압"),current:guess("curr","전류","amp"),power:guess("power","전력","watt"),
+      x:guess("x","col"),y:guess("y","row")};
+    renderMapArea();
+    toast(`${rows.length}행 로드됨 — 컬럼 매핑을 확인하세요`);
+  };
+  reader.readAsArrayBuffer(f);
+}
+function importJSON(e){
+  const f=e.target.files?.[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{try{const o=JSON.parse(ev.target.result);
+    if(o.dataset){state.dataset=o.dataset;if(o.settings)state.settings=o.settings;recompute();state.tab="analysis";render();toast("JSON 불러오기 완료");}
+    else toast("형식이 올바르지 않습니다","err");
+  }catch(err){toast("JSON 파싱 실패","err");}};
+  reader.readAsText(f);
+}
+
+/* ---------- 분석 탭 ---------- */
+function statCard(ic,lbl,val,sub,accent){
+  return `<div class="stat"><div class="bar" style="background:${accent}"></div>
+    <div class="lbl">${icon(ic,accent,13)}${lbl}</div>
+    <div class="val">${val}</div>${sub?`<div class="sub">${sub}</div>`:""}</div>`;
+}
+function emptyState(){return `<div class="empty">${icon("db","var(--line)",42)}
+  <div style="font-size:17px;color:var(--dim);margin:14px 0 6px">분석할 데이터가 없습니다</div>
+  <div style="font-family:var(--mono);font-size:12.5px;margin-bottom:18px">합성 데이터를 생성하거나 실측 파일을 가져오세요</div>
+  <button class="btn primary" data-go="data">${icon("db","#1a1300")}데이터 탭으로</button></div>`;}
+
+function renderAnalysis(c){
+  if(!A.ok){c.innerHTML=emptyState();c.querySelector("[data-go]").onclick=()=>{state.tab="data";render();};return;}
+  const perDay=(A.totalEnergy/A.duration)*86400, perDayU=perDay*A.etaTotal;
+  c.innerHTML=`
+  <div style="display:grid;gap:16px">
+    <div class="statgrid">
+      ${statCard("db","총 발전 에너지",fmtEnergy(A.totalEnergy),`${A.duration.toFixed(1)}s 측정창`,"var(--amber)")}
+      ${statCard("gauge","유효 에너지",fmtEnergy(A.usableEnergy),`η = ${(A.etaTotal*100).toFixed(1)}%`,"var(--green)")}
+      ${statCard("activity","평균 전력",fmtPower(A.avgPower),`유효 ${fmtPower(A.usableAvgPower)}`,"var(--cyan)")}
+      ${statCard("bolt","첨두 전력",fmtPower(A.peakPower),"","var(--amber2)")}
+      ${statCard("grid","활성 타일",A.activeTiles,`${A.sampleCount.toLocaleString()} 샘플`,"var(--violet)")}
+      ${statCard("clock","일일 환산(외삽)",fmtEnergy(perDay),`유효 ${fmtEnergy(perDayU)}`,"var(--amber)")}
+    </div>
+    <div class="card"><div class="ctitle">${icon("activity","var(--cyan)",16)}구간 평균 전력 (시계열)</div><div style="height:230px"><canvas id="chPower"></canvas></div></div>
+    <div class="card"><div class="ctitle">${icon("db","var(--amber)",16)}누적 에너지</div><div style="height:210px"><canvas id="chEnergy"></canvas></div></div>
+    <div class="card"><div class="ctitle">${icon("bar","var(--violet)",16)}타일별 에너지 기여 (상위 12)</div><div style="height:${Math.max(180,Math.min(A.perTile.length,12)*26)}px"><canvas id="chTile"></canvas></div></div>
+  </div>`;
+  buildCharts();
+}
+function chartBase(){
+  return {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{color:"#1f2937"},ticks:{color:"#5b6675",font:{family:"var(--mono)",size:10}}},
+            y:{grid:{color:"#1f2937"},ticks:{color:"#5b6675",font:{family:"var(--mono)",size:10}}}}};
+}
+function buildCharts(){
+  const s=A.series, labels=s.map(d=>d.t.toFixed(1));
+  const tip=(unit)=>({callbacks:{title:it=>"t = "+it[0].label+" s",
+    label:it=>unit==="e"?"누적: "+fmtEnergy(it.raw/1000):"전력: "+fmtPower(it.raw)}});
+  // 전력
+  charts.push(new Chart(document.getElementById("chPower"),{type:"line",
+    data:{labels,datasets:[{data:s.map(d=>d.power),borderColor:"#22d3ee",backgroundColor:"rgba(34,211,238,.18)",
+      fill:true,borderWidth:2,pointRadius:0,tension:.25}]},
+    options:{...chartBase(),plugins:{legend:{display:false},tooltip:tip("p")},
+      scales:{...chartBase().scales,y:{...chartBase().scales.y,ticks:{...chartBase().scales.y.ticks,callback:v=>fmtPower(v).replace(/ /,"")}}}}}));
+  // 누적 에너지
+  charts.push(new Chart(document.getElementById("chEnergy"),{type:"line",
+    data:{labels,datasets:[{data:s.map(d=>d.cumEnergyMJ),borderColor:"#ffb000",backgroundColor:"rgba(255,176,0,.18)",
+      fill:true,borderWidth:2,pointRadius:0,tension:.1}]},
+    options:{...chartBase(),plugins:{legend:{display:false},tooltip:tip("e")},
+      scales:{...chartBase().scales,y:{...chartBase().scales.y,ticks:{...chartBase().scales.y.ticks,callback:v=>fmtEnergy(v/1000).replace(/ /,"")}}}}}));
+  // 타일별
+  const top=A.perTile.slice(0,12);
+  charts.push(new Chart(document.getElementById("chTile"),{type:"bar",
+    data:{labels:top.map(t=>t.label),datasets:[{data:top.map(t=>t.energy),
+      backgroundColor:top.map((_,i)=>i===0?"#ffb000":"#a78bfa"),borderRadius:4}]},
+    options:{...chartBase(),indexAxis:"y",
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:it=>"에너지: "+fmtEnergy(it.raw),
+        afterLabel:it=>`이벤트 ${top[it.dataIndex].events} · 샘플 ${top[it.dataIndex].count}`}}},
+      scales:{x:{grid:{color:"#1f2937"},ticks:{color:"#5b6675",font:{size:10},callback:v=>fmtEnergy(v).replace(/ /,"")}},
+              y:{grid:{display:false},ticks:{color:"#8b98a9",font:{family:"var(--mono)",size:11}}}}}}));
+}
+
+/* ---------- 공간 탭 ---------- */
+function renderSpatial(c){
+  if(!A.ok){c.innerHTML=emptyState();c.querySelector("[data-go]").onclick=()=>{state.tab="data";render();};return;}
+  const cells=A.perTile.filter(t=>t.x!=null&&t.y!=null);
+  if(!cells.length){c.innerHTML=`<div class="card"><div class="ctitle">${icon("grid","var(--amber)",16)}공간 에너지 히트맵</div><div style="color:var(--faint);font-family:var(--mono);font-size:13px">위치 정보가 없는 타일입니다.</div></div>`;return;}
+  const cols=Math.max(...cells.map(c=>c.x))+1, rows=Math.max(...cells.map(c=>c.y))+1, max=A.perTile.reduce((m,t)=>Math.max(m,t.energy),0)||1;
+  const grid={}; cells.forEach(c=>grid[c.x+","+c.y]=c);
+  const color=f=>`rgb(${Math.round(255*Math.min(1,f*1.4))},${Math.round(176*f)},${Math.round(80*(1-f)+40)})`;
+  let html=`<div class="card"><div class="ctitle">${icon("grid","var(--amber)",16)}공간 에너지 히트맵</div>
+    <p class="muted" style="margin-top:0">타일 위치별 누적 에너지 분포. 색이 진할수록 발전(=통행)이 집중된 위치입니다 — 배식대·출입구 동선 분석에 직결됩니다.</p>
+    <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:6px;max-width:${cols*92}px">`;
+  for(let i=0;i<rows*cols;i++){const x=i%cols,y=Math.floor(i/cols),cc=grid[x+","+y],f=cc?cc.energy/max:0;
+    html+=`<div title="${cc?esc(cc.label)+": "+fmtEnergy(cc.energy)+" · "+cc.events+" 이벤트":"비활성"}"
+      style="aspect-ratio:1;border-radius:8px;background:${cc?color(f):"var(--panel2)"};border:1px solid var(--line);
+      display:grid;place-items:center;font-family:var(--mono);font-size:10px;font-weight:600;color:${f>0.5?"#1a1300":"var(--dim)"}">${cc?esc(cc.label):""}</div>`;}
+  html+=`</div><div style="display:flex;align-items:center;gap:10px;margin-top:16px;font-family:var(--mono);font-size:11px;color:var(--dim)">
+    <span>낮음</span><div style="flex:1;max-width:200px;height:10px;border-radius:5px;background:linear-gradient(90deg,${color(0)},${color(.5)},${color(1)})"></div>
+    <span>높음 (${fmtEnergy(max)})</span></div></div>`;
+  c.innerHTML=html;
+}
+
+/* ---------- 효율·설정 탭 ---------- */
+function renderSettings(c){
+  const e=state.settings.efficiency;
+  c.innerHTML=`<div class="grid2">
+    <div class="card">
+      <div class="ctitle">${icon("gauge","var(--green)",16)}효율 체인 (측정 출력 이후 손실)</div>
+      <p class="muted" style="margin-top:0">압전 소자가 만든 전기가 전구까지 가는 동안의 손실. 각 단을 곱해 종단 효율 η을 만듭니다.</p>
+      ${slider("e_rect","정류 (AC→DC)",e.rectifier,0.3,1,0.01,v=>(v*100).toFixed(0)+"%")}
+      ${slider("e_stor","저장 (커패시터)",e.storage,0.3,1,0.01,v=>(v*100).toFixed(0)+"%")}
+      ${slider("e_conv","DC-DC 컨버터 (LTC3588 등)",e.converter,0.3,1,0.01,v=>(v*100).toFixed(0)+"%")}
+      ${slider("e_del","전달/배선",e.delivery,0.5,1,0.01,v=>(v*100).toFixed(0)+"%")}
+      <div style="margin-top:12px;padding:12px;background:var(--panel2);border-radius:9px;text-align:center">
+        <div style="color:var(--dim);font-size:12px;font-family:var(--mono)">종단 효율 η_total</div>
+        <div id="etaVal" style="color:var(--green);font-size:30px;font-weight:700;font-family:var(--mono)">${(A.etaTotal*100).toFixed(1)}%</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">${icon("cpu","var(--cyan)",16)}측정/계산 파라미터</div>
+      <div style="margin-bottom:14px"><div style="font-size:12px;color:var(--dim);margin-bottom:5px;font-family:var(--mono)">부하 저항 R (전압만 받을 때 P=V²/R)</div>
+        <input type="number" id="p_R" value="${state.settings.loadR}" style="width:100%"></div>
+      <div style="margin-bottom:14px"><div style="font-size:12px;color:var(--dim);margin-bottom:5px;font-family:var(--mono)">시간 단위 (입력 데이터의 t 열)</div>
+        <select id="p_unit" style="width:100%">
+          <option value="s" ${state.settings.timeUnit==="s"?"selected":""}>초 (s)</option>
+          <option value="ms" ${state.settings.timeUnit==="ms"?"selected":""}>밀리초 (ms)</option>
+          <option value="us" ${state.settings.timeUnit==="us"?"selected":""}>마이크로초 (µs)</option>
+          <option value="min" ${state.settings.timeUnit==="min"?"selected":""}>분 (min)</option>
+        </select></div>
+      ${slider("p_thr","이벤트(발걸음) 판정 임계전력",state.settings.eventThreshold*1000,0,5,0.05,v=>v.toFixed(2)+" mW")}
+      <div style="margin-top:8px;padding:11px;background:var(--panel2);border-radius:9px;font-size:11.5px;color:var(--faint);font-family:var(--mono);line-height:1.6">
+        계산 우선순위: ① 전력(P) 직접 → ② P=V·I → ③ P=V²/R<br>에너지: 사다리꼴 적분 ∫P dt (타일별 후 합산)
+      </div>
+    </div>
+  </div>`;
+  // 효율 슬라이더: 드래그 중 η 즉시 갱신 (입력 DOM 재생성 안 함)
+  const eff=[["e_rect","rectifier"],["e_stor","storage"],["e_conv","converter"],["e_del","delivery"]];
+  eff.forEach(([id,key])=>{const el=document.getElementById(id);el.oninput=ev=>{
+    const v=parseFloat(ev.target.value);state.settings.efficiency[key]=v;
+    document.getElementById(id+"_v").textContent=(v*100).toFixed(0)+"%";
+    recompute();document.getElementById("etaVal").textContent=(A.etaTotal*100).toFixed(1)+"%";};});
+  document.getElementById("p_R").onchange=ev=>{state.settings.loadR=num(ev.target.value)||1;recompute();};
+  document.getElementById("p_unit").onchange=ev=>{state.settings.timeUnit=ev.target.value;recompute();};
+  const thr=document.getElementById("p_thr");thr.oninput=ev=>{const v=parseFloat(ev.target.value);
+    state.settings.eventThreshold=v/1000;document.getElementById("p_thr_v").textContent=v.toFixed(2)+" mW";recompute();};
+}
+
+/* ---------- 히스토리 탭 ---------- */
+function renderHistory(c){
+  const insts=listInstances();
+  let html=`<div style="display:grid;gap:16px"><div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <div class="ctitle" style="margin:0">${icon("clock","var(--amber)",16)}저장된 분석 인스턴스</div>
+      <button class="btn" id="saveCur" ${A.ok?"":"disabled"}>${icon("save")}현재 저장</button>
+    </div>`;
+  if(!insts.length){
+    html+=`<div style="color:var(--faint);font-family:var(--mono);font-size:13px;padding:20px 0;text-align:center">저장된 인스턴스가 없습니다. 분석 후 "현재 저장"을 누르세요.</div>`;
+  }else{
+    html+=`<div style="display:grid;gap:8px">`+insts.map(it=>{
+      const sel=state.compareSel.includes(it.key);
+      return `<div class="hl" style="${sel?"background:var(--panel2);border-color:var(--amber)":""}">
+        <input type="checkbox" data-cmp="${it.key}" ${sel?"checked":""} style="accent-color:var(--amber)">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(it.name)}</div>
+          <div style="font-size:11px;color:var(--faint);font-family:var(--mono)">${new Date(it.savedAt).toLocaleString("ko-KR")} · ${fmtEnergy(it.totalEnergy)} · 유효 ${fmtEnergy(it.usableEnergy)}</div>
+        </div>
+        <button class="btn" data-load="${it.key}">${icon("folder")}불러오기</button>
+        <button class="btn danger" data-del="${it.key}" style="padding:8px 10px">${icon("trash","var(--red)")}</button>
+      </div>`;}).join("")+`</div>`;
+  }
+  html+=`</div>`;
+  if(state.compareSel.length===2)html+=renderCompare();
+  html+=`</div>`;
+  c.innerHTML=html;
+  document.getElementById("saveCur").onclick=saveInstance;
+  c.querySelectorAll("[data-cmp]").forEach(cb=>cb.onchange=()=>{
+    const k=cb.dataset.cmp;
+    if(state.compareSel.includes(k))state.compareSel=state.compareSel.filter(x=>x!==k);
+    else state.compareSel=[...state.compareSel,k].slice(-2);
+    render();});
+  c.querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>loadInstance(b.dataset.load));
+  c.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{lsDel(b.dataset.del);state.compareSel=state.compareSel.filter(x=>x!==b.dataset.del);render();toast("삭제됨");});
+}
+function renderCompare(){
+  const data=state.compareSel.map(k=>{try{return JSON.parse(lsGet(k));}catch(e){return null;}}).filter(Boolean);
+  if(data.length<2)return"";
+  const rows=[["총 에너지",o=>fmtEnergy(o.summary.totalEnergy)],["유효 에너지",o=>fmtEnergy(o.summary.usableEnergy)],
+    ["평균 전력",o=>fmtPower(o.summary.avgPower)],["첨두 전력",o=>fmtPower(o.summary.peakPower)],
+    ["측정 시간",o=>o.summary.duration.toFixed(1)+"s"],["활성 타일",o=>o.summary.activeTiles],
+    ["종단 효율",o=>(o.summary.etaTotal*100).toFixed(1)+"%"]];
+  return `<div class="card"><div class="ctitle">${icon("compare","var(--cyan)",16)}인스턴스 비교</div>
+    <div style="overflow-x:auto"><table><thead><tr><th style="text-align:left;color:var(--dim)">지표</th>
+    ${data.map((o,i)=>`<th style="text-align:right;color:${i===0?"var(--amber)":"var(--cyan)"};max-width:160px;overflow:hidden;text-overflow:ellipsis">${esc(o.name)}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(([l,fn])=>`<tr><td style="color:var(--dim)">${l}</td>${data.map(o=>`<td style="text-align:right">${fn(o)}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`;
+}
+
+/* ---------- 히스토리 저장소 로직 ---------- */
+function listInstances(){
+  const out=[];
+  for(const k of lsKeys("pzt:inst:")){const v=lsGet(k);if(v){try{const o=JSON.parse(v);out.push({key:k,name:o.name,...o.summary});}catch(e){}}}
+  out.sort((a,b)=>(b.savedAt||0)-(a.savedAt||0));return out;
+}
+function saveInstance(){
+  if(!A.ok){toast("저장할 분석이 없습니다","err");return;}
+  const id=uid(),key="pzt:inst:"+id;
+  const payload={id,name:state.dataset.meta?.name||("분석 "+new Date().toLocaleString("ko-KR")),
+    dataset:state.dataset,settings:state.settings,
+    summary:{id,savedAt:Date.now(),totalEnergy:A.totalEnergy,usableEnergy:A.usableEnergy,avgPower:A.avgPower,
+      peakPower:A.peakPower,duration:A.duration,activeTiles:A.activeTiles,sampleCount:A.sampleCount,etaTotal:A.etaTotal}};
+  const str=JSON.stringify(payload), sizeMB=str.length/1e6;
+  const okSaved=lsSet(key,str);
+  if(!okSaved)toast(`브라우저 저장 불가 → 세션 메모리에만 저장됨. JSON으로 내보내세요`,"warn");
+  else if(sizeMB>4)toast(`저장됨 (${sizeMB.toFixed(1)}MB · 큰 데이터는 JSON 백업 권장)`,"warn");
+  else toast("인스턴스 저장 완료");
+  if(state.tab==="history")render();
+}
+function loadInstance(key){
+  const v=lsGet(key);if(!v)return;const o=JSON.parse(v);
+  if(!o.dataset){toast("원본 미저장 인스턴스입니다","warn");return;}
+  state.dataset=o.dataset;state.settings=o.settings;recompute();state.tab="analysis";render();toast("불러옴: "+o.name);
+}
+function exportJSON(){
+  if(!state.dataset)return;
+  const payload={version:1,dataset:state.dataset,settings:state.settings,exportedAt:Date.now()};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=(state.dataset.meta?.name||"piezo").replace(/\s+/g,"_")+".json";a.click();URL.revokeObjectURL(a.href);
+  toast("JSON 내보내기 완료 (무손실 아카이브)");
+}
+
+/* ---------- 전구 드로어 ---------- */
+function renderDrawer(){
+  const d=document.getElementById("drawer");if(!d)return;
+  const b=bulbCalc(), N=24, periodLabel=(PERIODS.find(p=>p[0]===state.bulbPeriod)||[])[1]||"";
+  if(!A.ok){
+    d.innerHTML=`${drawerHead()}<div style="color:var(--faint);font-family:var(--mono);font-size:12.5px;padding:30px 0;text-align:center">먼저 데이터를 분석하세요.</div>`;
+    wireDrawerHead();return;
+  }
+  let bulbGrid;
+  if(state.bulbMode==="continuous"){
+    bulbGrid=Array.from({length:N}).map((_,i)=>bulbSvg(i<b.nCont,i===b.nCont&&b.fracExtra>0.05,i===b.nCont?b.fracExtra:1)).join("");
+  }else{
+    bulbGrid=Array.from({length:N}).map((_,i)=>bulbSvg(i<state.budgetBulbs,false,1)).join("");
+  }
+  d.innerHTML=`${drawerHead()}
+    <div style="display:flex;gap:6px;background:var(--bg);padding:4px;border-radius:9px;margin-bottom:14px">
+      ${["continuous","연속 전력","budget","에너지 예산"].reduce((acc,_,i,a)=>i%2?acc:[...acc,[a[i],a[i+1]]],[]).map(([m,l])=>
+        `<button class="chip" style="flex:1;border:none;padding:8px 0;${state.bulbMode===m?"background:var(--amber);color:#1a1300":"background:transparent;color:var(--dim)"}" data-mode="${m}">${l}</button>`).join("")}
+    </div>
+    <div style="font-size:12px;color:var(--dim);margin-bottom:6px;font-family:var(--mono)">전구 종류 (소비전력)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">
+      ${BULB_PRESETS.map(p=>`<button class="chip ${state.bulbW===p.w?"on":""}" data-bw="${p.w}">${p.name}</button>`).join("")}
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:16px;margin-bottom:14px">
+      ${state.bulbMode==="budget"?`<div style="display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap">
+        ${PERIODS.map(([p,l])=>`<button class="chip cyan ${state.bulbPeriod===p?"on":""}" style="flex:1 0 auto" data-period="${p}">${l}</button>`).join("")}</div>`:""}
+      <div id="bulbGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-bottom:14px">${bulbGrid}</div>
+      ${state.bulbMode==="continuous"?`
+        <div style="text-align:center;font-family:var(--mono)">
+          <div style="font-size:32px;font-weight:700;color:var(--amber)">${b.nCont}<span style="font-size:15px;color:var(--dim)"> 개</span></div>
+          <div style="font-size:11.5px;color:var(--faint);margin-top:2px">${fmtPower(b.pAvail)} 유효전력으로 ${state.bulbW}W 전구를 <b style="color:var(--text)">동시에 연속</b> 점등</div>
+          ${b.nCont===0?`<div style="font-size:11px;color:var(--red);margin-top:6px">평균전력이 전구 1개에 못 미칩니다 (→ 에너지 예산 모드 참고)</div>`:""}
+        </div>`:`
+        ${slider("budgetN","동시 점등 개수",state.budgetBulbs,1,N,1,v=>v+"개")}
+        <div style="text-align:center;font-family:var(--mono);margin-top:6px">
+          <div id="rt" style="font-size:28px;font-weight:700;color:var(--amber)">${fmtTime(b.runtimeN)}</div>
+          <div style="font-size:11.5px;color:var(--faint);margin-top:2px"><b style="color:var(--cyan)">${periodLabel}</b> 누적 유효에너지 ${fmtEnergy(b.periodEnergy)}로<br>${state.bulbW}W 전구 ${state.budgetBulbs}개를 점등 가능한 시간</div>
+        </div>`}
+    </div>
+    <div style="display:grid;gap:7px;font-family:var(--mono);font-size:11.5px">
+      ${row("측정창 유효에너지",fmtEnergy(A.usableEnergy))}
+      ${row("유효 평균전력",fmtPower(A.usableAvgPower))}
+      ${row("종단 효율 η",(A.etaTotal*100).toFixed(1)+"%","var(--green)")}
+      <div style="border-top:1px dashed var(--line);margin:4px 0"></div>
+      ${row(periodLabel+" 누적 유효에너지",fmtEnergy(b.periodEnergy),"var(--cyan)")}
+      ${row("└ "+state.bulbW+"W 1개 점등시간",fmtTime(b.bulbSeconds))}
+    </div>
+    <div style="margin-top:12px;padding:10px;background:var(--panel2);border-radius:8px;font-size:10.5px;color:var(--faint);line-height:1.6;font-family:var(--mono)">※ 측정된 전기출력에 효율 체인(η)을 곱한 <b>유효</b> 값 기준입니다. 에너지 보존이 100% 안 되는 실제 손실을 반영합니다.</div>`;
+  wireDrawerHead();
+  d.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{state.bulbMode=b.dataset.mode;renderDrawer();});
+  d.querySelectorAll("[data-bw]").forEach(b=>b.onclick=()=>{state.bulbW=parseFloat(b.dataset.bw);renderDrawer();});
+  d.querySelectorAll("[data-period]").forEach(b=>b.onclick=()=>{state.bulbPeriod=b.dataset.period;renderDrawer();});
+  const bn=document.getElementById("budgetN");
+  if(bn)bn.oninput=e=>{state.budgetBulbs=parseInt(e.target.value);
+    document.getElementById("budgetN_v").textContent=state.budgetBulbs+"개";
+    const bb=bulbCalc();document.getElementById("rt").textContent=fmtTime(bb.runtimeN);
+    document.getElementById("bulbGrid").innerHTML=Array.from({length:N}).map((_,i)=>bulbSvg(i<state.budgetBulbs,false,1)).join("");};
+}
+function drawerHead(){return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+  <div style="display:flex;align-items:center;gap:8px"><span>${icon("bulb","var(--amber)",18)}</span><span style="font-weight:700;font-size:15px">전구 시뮬레이터</span></div>
+  <span data-close style="cursor:pointer">${icon("x","var(--dim)",18)}</span></div>`;}
+function wireDrawerHead(){const cl=document.querySelector("#drawer [data-close]");if(cl)cl.onclick=()=>{state.drawerOpen=false;render();};}
+function bulbSvg(on,partial,frac){
+  const op=on?(partial?0.5+frac*0.5:1):0.35;
+  const fill=on?(partial?"var(--amber2)":"var(--amber)"):"none";
+  const col=on?"var(--amber)":"var(--faint)";
+  return `<div class="bulb ${on?"on":""}"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:${col};fill:${fill};stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:${op}">${IC.bulb}</svg></div>`;
+}
+function row(k,v,c){return `<div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">${k}</span><span style="color:${c||"var(--text)"}">${v}</span></div>`;}
+
+/* ---------- 시작 ---------- */
+window.addEventListener("DOMContentLoaded",render);
+if(document.readyState!=="loading")render();
+</script>
+</body>
+</html>
