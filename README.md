@@ -13,7 +13,9 @@ HAFS 유리프 압전 타일 연구 · 1학년 8반 · 측정 2026-09-11 / 소�
 > εr instead of raising d₃₃: **(Pb₀.₉₆Sm₀.₀₄)[(Zr₀.₅₂Ti₀.₄₈)₀.₈₈(Zn₁/₃Nb₂/₃)₀.₁₀Mn₀.₀₂]O₃**, charge-balanced to
 > exactly 0.00 with Goldschmidt t = 0.984. Both halves are reproducible from this repo: `python analyze_v2.py` for the
 > measurement, `python calc/verify_composition.py` for the design. §2-6 lists every number we withdrew or corrected and
-> why, including our own earlier mistakes. The Korean text below is the full research record.
+> why, including our own earlier mistakes. Two browser tools live in `sim/`: a material/composition simulator and a
+> tile-data analyzer (Excel/CSV → power, energy, spatial heatmap, LED run-time) — see the repo table below for demo links.
+> The Korean text below is the full research record.
 
 > **읽는 법** — 본문은 수치와 근거만 적는다. **처음 보는 사람을 위해** 상자(▶)를 펼치면
 > 그 자리에 나온 개념을 고등학생 눈높이에서 설명한다. 이미 아는 내용이면 건너뛰면 된다.
@@ -53,6 +55,7 @@ flowchart LR
 | [`calc/verify_composition.py`](calc/verify_composition.py) | 소재 설계의 모든 수치 재현 (표준 라이브러리만 사용) |
 | [`structures/`](structures) | 결정구조 파일(CIF) — 기준 PZT와 제안 조성 |
 | [`sim/pzt_simulator_v6.html`](sim/pzt_simulator_v6.html) | 소재·조성 비교 시뮬레이터 (브라우저에서 바로 실행: **[데모](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html)**). 결과 해석 주의점은 §7 참조 |
+| [`sim/PiezoAnalyzer.html`](sim/PiezoAnalyzer.html) | 압전 타일 데이터 분석기 (브라우저에서 바로 실행: **[데모](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer.html)**). 엑셀/CSV 측정값을 열 매핑으로 불러와 전력·누적 에너지, 타일 위치별 에너지 히트맵, 효율 체인(η)을 곱한 LED·전구 점등 시간을 계산한다. 실측 데이터가 없으면 합성 데이터로 모든 기능을 시연할 수 있다 |
 
 ---
 
