@@ -5,6 +5,22 @@
 
 HAFS 유리프 압전 타일 연구 · 측정 2026-09-11 / 소재 설계 2026-09-18
 
+<p align="center">
+  <a href="https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html"><img alt="Analyzer v2 — live demo" src="https://img.shields.io/badge/%E2%96%B6%20Analyzer%20v2-live%20demo-ffb000?style=for-the-badge"></a>
+  <a href="https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html"><img alt="Simulator v6 — live demo" src="https://img.shields.io/badge/%E2%96%B6%20Simulator%20v6-live%20demo-c05621?style=for-the-badge"></a>
+  <a href="docs/00_piezo_basics.md"><img alt="Piezo basics" src="https://img.shields.io/badge/%F0%9F%93%96%20Piezo%20basics-read-555?style=for-the-badge"></a>
+</p>
+
+## ▶ 바로 실행해 보기 — 설치 없이 브라우저에서
+
+| [**압전 데이터 분석기 v2**](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) | [**압전체 비교 시뮬레이터 v6**](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html) |
+|:---:|:---:|
+| [![분석기 v2 화면 — 손으로 네 번 누른 실측 파형](figures/demo_analyzer.png)](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) | [![시뮬레이터 v6 화면 — PZT 결정구조](figures/demo_simulator.png)](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html) |
+| 아두이노 CSV를 그대로 올리면 누름마다 에너지를 계산하고, 장소별로 비교하고, **우리 학교에서 쓸 만한지 판정**한다 | PZT · BaTiO₃ · PVDF · ZnO · 수정의 결정구조를 3D로 보고, 눌렀을 때 분극과 전기 출력이 어떻게 변하는지 비교한다 (해석 주의점 [§7](#7-소재-설계--5차시-화학구조-제안)) |
+| **[▶ 분석기 열기](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html)** | **[▶ 시뮬레이터 열기](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html)** |
+
+> 압전이 처음이라면 → **[압전 기초론](docs/00_piezo_basics.md)** — 누르면 왜 전기가 나오고, 왜 조금밖에 안 나오나
+
 > **English summary** — A high-school research repo on floor tiles that harvest energy from footsteps.
 > We measured a 27 mm PZT disc directly with an Arduino (ADC registers driven by hand, 62 kHz sampling, open circuit).
 > A hard tap peaks at **1.13 V** and rings at **3.33 kHz**; a hand press is a single **~0.1 s pulse of 1.1–1.3 V** — a
@@ -13,9 +29,12 @@ HAFS 유리프 압전 타일 연구 · 측정 2026-09-11 / 소재 설계 2026-09
 > εr instead of raising d₃₃: **(Pb₀.₉₆Sm₀.₀₄)[(Zr₀.₅₂Ti₀.₄₈)₀.₈₈(Zn₁/₃Nb₂/₃)₀.₁₀Mn₀.₀₂]O₃**, charge-balanced to
 > exactly 0.00 with Goldschmidt t = 0.984. Both halves are reproducible from this repo: `python analyze_v2.py` for the
 > measurement, `python calc/verify_composition.py` for the design. §2-6 lists every number we withdrew or corrected and
-> why, including our own earlier mistakes. Two browser tools live in `sim/`: a material/composition simulator and a
-> tile-data analyzer (Excel/CSV → power, energy, spatial heatmap, LED run-time) — see the repo table below for demo links.
-> The Korean text below is the full research record.
+> why, including our own earlier mistakes. Two browser tools live in `sim/` (live demos above): a material simulator and
+> a data analyzer whose v2 reads our Arduino CSVs directly, computes ½·C_p·V² per press and gives a school-feasibility verdict.
+> §8 is a practical guide to installing sensors in a Korean high school. §9 compares our numbers with the 2006–2009
+> Tokyo/Shibuya station trials and commercial tiles: a ceramic barely moves under a foot, so a footstep does very little
+> work on it — piezo floors are weak power sources but good self-powered footstep sensors. The Korean text below is the
+> full research record; [`docs/00_piezo_basics.md`](docs/00_piezo_basics.md) is a plain-language primer.
 
 > **읽는 법** — 본문은 수치와 근거만 적는다. **처음 보는 사람을 위해** 상자(▶)를 펼치면
 > 그 자리에 나온 개념을 고등학생 눈높이에서 설명한다. 이미 아는 내용이면 건너뛰면 된다.
@@ -30,6 +49,8 @@ HAFS 유리프 압전 타일 연구 · 측정 2026-09-11 / 소재 설계 2026-09
 - **정정** — 다시 분석해 8개 항목을 바로잡았다 (4차시 철회 4 + 5차시 재검토 4) → [§2-6](#2-6-다시-분석해서-바로잡은-것)
 - **설계** — 준정적 입력에서 소재를 고르는 기준은 d₃₃ 하나가 아니라 **d·g**다. εr를 낮추는 방향으로 조성을 설계했다 → [§7](#7-소재-설계--5차시-화학구조-제안)
 - **제안** — **(Pb₀.₉₆Sm₀.₀₄)[(Zr₀.₅₂Ti₀.₄₈)₀.₈₈(Zn₁/₃Nb₂/₃)₀.₁₀Mn₀.₀₂]O₃**, [001] 배향 · 전하 합 0.00 · 허용인자 t = 0.984 → [§7](#7-소재-설계--5차시-화학구조-제안)
+- **비교** — 도쿄역·시부야 실험과 상용 타일은 한 걸음에 약 1–4 J, 우리 디스크는 약 15 nJ. 근본 원인은 세라믹이 거의 안 꺼져 **받는 일이 작다**는 것 → [§9](#9-시부야상용-사례와-비교--이-탐구의-의의)
+- **예비 판정** — 학교 전력원으로는 비현실적, **전원 없는 걸음 감지 센서**로는 현실적. 현장 측정으로 확정한다 → [§8](#8-학교-설치-가이드--한국-고등학교에서-현실적으로), [§9](#9-시부야상용-사례와-비교--이-탐구의-의의)
 - **다음** — C_p 실측 → P–R 곡선 → 상용 소자 3종 d·g 비교 → [§4](#4-다음-차시-계획)
 
 ### 연구 흐름
@@ -41,6 +62,18 @@ flowchart LR
     C --> D["5차시<br/>화학구조 제안<br/>d·g 기준 조성"]
     D --> E["다음 차시<br/>C_p · P–R · d·g 실측"]
 ```
+
+### 연구 로드맵 (전체 계획)
+
+| 단계 | 내용 | 상태 |
+|:---:|---|---|
+| 1 | PZT 압전 소자가 어떻게 작동하는지 이해 | ✅ [압전 기초론](docs/00_piezo_basics.md) |
+| 1.5 | 원리·화학구조를 보여 주는 시뮬레이터, 측정 분석기 제작 | ✅ [시뮬레이터 v6](sim/pzt_simulator_v6.html) · [분석기 v2](sim/PiezoAnalyzer_v2.html) · [`structures/`](structures) |
+| 2 | 실제 소자 + 아두이노 우노로 측정 | ✅ 4차시 — §1–§3 |
+| 3 | 학교 안(급식실·매점 앞)에 센서 설치 | ⏳ 준비 중 — [§8 설치 가이드](#8-학교-설치-가이드--한국-고등학교에서-현실적으로) |
+| 4 | 현장에서 출력 측정 | ⬜ |
+| 5 | 분석 → 학교 환경에서 현실적인가 | ⬜ 분석기 '학교 판정' 탭 준비됨 · 예비 결론 [§9](#9-시부야상용-사례와-비교--이-탐구의-의의) |
+| 6 | 더 잘 쓰는 방법 (새 화학구조, 구조·배치, 용도) | ⬜ 소재 쪽 [§7](#7-소재-설계--5차시-화학구조-제안) · 구조·용도 쪽 [§9](#9-시부야상용-사례와-비교--이-탐구의-의의) |
 
 ### 저장소 구성
 
@@ -54,8 +87,10 @@ flowchart LR
 | [`docs/commercial_dg_table.csv`](docs/commercial_dg_table.csv) | 문헌 소재 11종 d·g 원자료 |
 | [`calc/verify_composition.py`](calc/verify_composition.py) | 소재 설계의 모든 수치 재현 (표준 라이브러리만 사용) |
 | [`structures/`](structures) | 결정구조 파일(CIF) — 기준 PZT와 제안 조성 |
-| [`sim/pzt_simulator_v6.html`](sim/pzt_simulator_v6.html) | 소재·조성 비교 시뮬레이터 (브라우저에서 바로 실행: **[데모](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html)**). 결과 해석 주의점은 §7 참조 |
-| [`sim/PiezoAnalyzer.html`](sim/PiezoAnalyzer.html) | 압전 타일 데이터 분석기 (브라우저에서 바로 실행: **[데모](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer.html)**). 엑셀/CSV 측정값을 열 매핑으로 불러와 전력·누적 에너지, 타일 위치별 에너지 히트맵, 효율 체인(η)을 곱한 LED·전구 점등 시간을 계산한다. 실측 데이터가 없으면 합성 데이터로 모든 기능을 시연할 수 있다 |
+| [`sim/pzt_simulator_v6.html`](sim/pzt_simulator_v6.html) | 압전체 비교 시뮬레이터 — **[▶ 데모](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html)**. 결과 해석 주의점은 §7 참조 |
+| [`sim/PiezoAnalyzer_v2.html`](sim/PiezoAnalyzer_v2.html) | 압전 데이터 분석기 (현재판) — **[▶ 데모](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html)**. 아두이노 CSV 직접 읽기(파일 하나 = 장소 하나), 에너지 계산 3방식(개방전압 ½·C_p·V² / 부하저항 ∫P dt / 커패시터 ½·C·ΔV²), 파형·이벤트 표, 장소별 히트맵, **학교 판정** 탭. 주소 끝에 `?test=1`을 붙이면 실측 CSV로 계산을 검증한다(18개, `analyze_v2.py`와 같은 값) |
+| [`sim/PiezoAnalyzer.html`](sim/PiezoAnalyzer.html) | 분석기 v1 — 기록용. 개방전압 데이터에도 가상의 10 kΩ로 P = V²/R을 계산해 에너지를 잘못 낸다(v2에서 고침) |
+| [`docs/00_piezo_basics.md`](docs/00_piezo_basics.md) | 압전 기초론 — 원리, d·g, 소자 = 커패시터, 왜 압전 바닥은 약한가, 쓰임 |
 
 ---
 
@@ -481,6 +516,173 @@ d₃₃ 순위와 d·g 순위가 따라가는지 어긋나는지를 실측하면
 문헌상 상용품끼리는 대체로 따라가므로(ρ = +0.83) "어긋난다"를 미리 결론으로 두지 않는다.
 
 C_p 측정은 이미 다음 차시 최우선 과제이므로 추가 장비가 필요 없다.
+
+---
+
+## 8. 학교 설치 가이드 — 한국 고등학교에서 현실적으로
+
+로드맵 3·4단계. **바닥에 묻지 않는다.** 들고 다니는 발판을 만들어 점심시간에만 깔고, 끝나면 걷는다.
+공사·시설 변경이 없으니 허락받기 쉽고, 비·도난·걸려 넘어짐 걱정이 줄고, 장소를 바꿔 가며 비교할 수 있다.
+
+### 8-1. 허락받기 — 순서가 중요하다
+
+1. **지도 선생님**(유리프 담당 또는 과학 선생님)께 먼저 말씀드린다. "우리 학교에서는 누구 허락이 필요한가요?"부터 묻는다 — 학교마다 다르다.
+2. **1쪽 계획서**를 지도 선생님을 통해 올린다(아래 양식). 보통 교감 선생님·행정실이 시설과 안전을 본다.
+3. **장소 담당자**와 따로 상의한다. 급식실 입구는 **영양 선생님**(배식 줄·위생·바닥 청소 동선), 매점 앞은 **매점 운영 측**.
+4. 측정 날짜를 정하면 담임 선생님이나 학생회 공지로 알린다. 안내판만으로도 된다.
+
+<details>
+<summary><b>1쪽 계획서 양식</b> — 복사해서 빈칸만 채우기</summary>
+
+```
+제목   급식실 앞 압전 발판 발전량 측정 (유리프 압전 타일 연구)
+담당   (학생 이름) 외 (인원)명 / 지도: ○○○ 선생님
+목적   실제 통행에서 압전 소자가 전기를 얼마나 만드는지 재서,
+       학교에서 쓸 만한지(발전 또는 걸음 감지 센서) 판단한다
+장소   급식실 입구 배식 줄 (또는 매점 출입문 앞)
+시간   점심시간 ○○:○○–○○:○○, ○월 ○일–○일 (3일)
+장치   30 × 30 × 1.5 cm 발판(합판 + 고무), 압전 디스크, 아두이노,
+       노트북 또는 보조배터리 — 콘센트 사용 안 함, 전압 5 V 이하
+안전   가장자리 경사 고무 + 노란 안전 테이프, 케이블은 몰딩 안으로,
+       바닥이 젖으면 즉시 중단, 측정 중 담당 학생 상주, 끝나면 바로 철수
+개인정보  사진·영상 촬영 없음. 계수기로 사람 수만 센다
+결과   분석 결과를 지도 선생님과 학교에 공유
+```
+</details>
+
+### 8-2. 발판 만들기
+
+```
+  위판 (합판 30×30 cm)
+  ─────────●─────────   ● 고무 돌기: 디스크 가운데만 누른다
+       ┌───────┐
+  ═════╧═══════╧═════   디스크 (황동면 아래)
+      ○         ○       ○ 링(와셔·O링): 디스크 테두리만 받친다 → 가운데가 휠 공간
+  ─────────────────────  아래판 (합판) + 미끄럼 방지 매트
+  ◢                   ◣ 가장자리 경사 고무 (문턱 경사로·케이블 보호대)
+```
+
+- **디스크가 휠 공간을 꼭 만든다.** 딱딱한 판에 평평하게 놓으면 거의 안 휘어서 출력이 작다.
+  압전 바닥의 에너지는 "얼마나 꺼지나"로 정해진다 — [기초론 §8](docs/00_piezo_basics.md#8-에너지의-천장--왜-압전-바닥은-약한가).
+- 처음에는 **가운데 디스크 하나만 측정**한다. 실험실 값(§2)과 바로 비교할 수 있다. 여러 개를 병렬로 묶으면 안 눌린 디스크가 부하가 되어 전압이 낮아진다.
+- 전체 높이 1.5 cm 이하. 가장자리는 경사 고무로 턱을 없애고 노란 테이프로 표시한다.
+
+### 8-3. 회로 — 두 가지
+
+| | A안 · 첫날 (지금 장비 그대로) | B안 · 정식 (모은 에너지를 잰다) |
+|---|---|---|
+| 회로 | 디스크 → 아두이노 A0 직결, [`piezo_capture_simple.ino`](piezo_capture_simple.ino) 연속 모드 | 디스크 → **쇼트키 다이오드 브리지 정류** → **1 µF 필름·세라믹 커패시터** → A0 |
+| 기록 | 노트북 시리얼 → CSV | A0를 1초에 10번 읽어 시간·전압 CSV (스케치 수정 필요) |
+| 분석기 모드 | 개방전압 ½·C_p·V² (자동) | 커패시터 ½·C·(V₂² − V₁²) — 매핑할 때 '커패시터 전압' 선택 |
+| 장점 | 바로 할 수 있다 | (−) 반주기까지 포함한 **실제로 모은 에너지**. §3의 한계 (1)(2)를 함께 해결 |
+| 주의 | 0 V 아래가 잘린다 (§3-1) | 아래 표 참고 |
+
+B안 부품 고르는 이유:
+
+- **커패시터는 1 µF.** 누름 한 번의 전하는 약 22 nC(§2-4)라서 1 µF에서는 약 22 mV 오른다. 아두이노 한 칸(4.9 mV)보다 커서 보인다.
+  100 µF면 0.2 mV라 보이지 않는다. 전해 커패시터는 누설이 커서 쓰지 않는다.
+- **다이오드는 쇼트키.** 일반 다이오드는 하나에 0.6–0.7 V를 먹어서, 1 V 남짓한 우리 신호는 거의 다 사라진다.
+- **5.1 V 제너 다이오드**를 커패시터에 병렬로 단다. 발로 세게 밟아 5 V를 넘으면 아두이노 핀이 상한다.
+- **방전 버튼**(저항 + 버튼)으로 측정 시작 때마다 커패시터를 0 V로 비운다.
+- 아두이노 입력으로도 조금씩 새어 전압이 서서히 내려갈 수 있다. 분석기는 **오른 구간만** 센다.
+
+### 8-4. 현장 측정 순서
+
+| 주차 | 할 일 |
+|:---:|---|
+| 1 | 지도 선생님 상의, 계획서 제출 |
+| 2 | 발판 제작. 실험실에서 손·발로 시험 — **발로 밟은 첫 측정값**이 여기서 나온다 |
+| 3 | 교실 앞 복도에서 쉬는 시간 1회 시범 (설치·철수 연습) |
+| 4 | 급식실 입구, 점심 3일 |
+| 5 | 매점 앞, 3일 (같은 발판·같은 회로) |
+| 6 | 분석기 '학교 판정' 탭으로 5단계 결론 |
+
+- **두 명이 계수기를 하나씩** 든다. 한 명은 지나간 사람 수, 한 명은 **발판을 밟은 사람 수**. 15분마다 기록지에 적는다. 이 두 숫자가 분석기 학교 판정 탭의 '하루 통행 인원'과 '밟는 비율'이 된다.
+- 파일 이름은 `장소_날짜_회로.csv` (예: `급식실_1112_A.csv`). 분석기에 여러 개를 한 번에 올리면 장소별로 비교된다.
+- 날씨·바닥 상태(젖음), 발판 위치 사진(사람이 안 나오게)을 메모한다.
+- 사람들은 낯선 발판을 피해 간다. 줄 서는 자리 한가운데에 두고, 피해 간 비율도 결과로 적는다.
+
+### 8-5. 안전 · 개인정보
+
+- **콘센트를 쓰지 않는다.** 노트북 배터리나 보조배터리(5 V)만 쓴다.
+- 케이블은 통로를 가로지르지 않게 벽 쪽 몰딩 안으로. 측정 중에는 담당 학생이 항상 옆에 있다.
+- 바닥이 젖거나(급식실 청소 직후) 발판이 들뜨면 바로 중단한다.
+- PZT는 납을 포함한다. 깨진 디스크는 맨손으로 만지지 않고 따로 버린다.
+- 학생 사진·영상은 찍지 않는다. 사람 수만 센다.
+- "압전 발전 연구 중 · 밟아도 됩니다 · 담당: ○○○ 선생님" 안내판을 세운다.
+
+---
+
+## 9. 시부야·상용 사례와 비교 — 이 탐구의 의의
+
+"일본 시부야에서는 압전 바닥을 쓰고 있다던데?"에 대한 답이다.
+
+### 9-1. 실제로 어땠나
+
+| 사례 | 방식 | 한 걸음(1인)당 | 우리 대비 | 출처 |
+|---|---|---|---|---|
+| **우리 디스크** (27 mm, 손 누름 평균 1.232 V) | 압전 | ½ × 20 nF × 1.232² ≈ **15 nJ** | 1 | §2-5 |
+| PZT 캔틸레버 24개 타일 (43 cm, 연구용) | 압전 | **3.49 mJ** | 약 2 × 10⁵ | Sensors and Actuators A (2017) |
+| JR동일본 도쿄역 1차 (2006, 개찰구 6 m²) | 압전 (교세라) | 약 **0.1 J** / 1인 통과 | 약 7 × 10⁶ | 위키백과(일) |
+| JR동일본 도쿄역 2차 (2008.1, 약 90 m²) | 압전 | 약 **1 J** / 1인 통과 | 약 7 × 10⁷ | 위키백과(일) |
+| JR동일본 도쿄역 3차 (2008.12–2009.2) | 압전 | 목표 10 J, 결과 약 4 J* | 약 3 × 10⁸ | 위키백과(일) |
+| 음력발전 × 시부야구, 하치코 광장 (2008.12.5–25, 12장) | 압전 | 60 kg가 1초에 2걸음 → 2–3.5 W ⇒ 약 **1–1.75 J** | 약 10⁸ | greenz.jp, Web Japan |
+| Pavegen (영국, 상용) | **전자기 유도** | **2–4 J** (회사 발표) | 약 2 × 10⁸ | pavegen.com |
+
+\* 위키백과 표기가 "4.3 W/s"라 단위 확인이 필요하다. "1인 통과"는 개찰구를 지나는 동안의 여러 걸음을 합친 값이다.
+
+**하루 단위로 보면**
+
+- 도쿄역 1차(2006)는 하루 최대 약 10,000 W·s = **약 2.8 Wh**. 일본에서 가장 붐비는 역 개찰구에서도 **스마트폰 한 대 충전(약 15 Wh)에 못 미친다.**
+- 시부야 하치코 광장 12장은 12월 5–15일에 7,025 kW·s ≈ **1.95 kWh**를 모았다고 보도됐다. 하루 약 0.2 kWh — 9 W LED 전구 하나를 하루쯤 켜는 양이다. 전기는 파란 램프를 켜는 데 쓰였다.
+- 시부야구는 2011년까지 4,000장을 깔아 구 전력의 1 %를 대겠다는 목표를 밝혔지만, **찾은 자료에서는 상설 설치·확대가 이뤄졌다는 기록을 확인하지 못했다.**
+- 상용 타일 Pavegen은 1 m²에 수백~수만 파운드라는 보도가 있고, 회사 측도 걸음당 에너지로 건물에 전력을 대기는 어렵다고 말한다. 한 대학 학생 분석에서는 투자 회수 기간이 타일 수명보다 길게 나왔다.
+
+→ 시부야는 **"쓰고 있다"기보다 "보여 줬다"** 에 가깝다. 실험은 실제로 했고 전기도 나왔지만, 쓰임은 전시·안내 표시였다.
+
+**우리 급식실에 상용 최고 수준을 깐다면** — 분석기 기본 가정(하루 600걸음)에 걸음당 3 J이면 하루 1.8 kJ = **0.5 Wh**, 스마트폰 한 대의 약 1/30이다.
+
+### 9-2. 왜 이렇게 차이 나나 — 바닥이 얼마나 꺼지나
+
+발전 바닥이 만들 수 있는 전기는 **걷는 사람이 바닥에 해 준 일**(힘 × 꺼진 거리)을 넘지 못한다.
+
+| | 꺼지는 거리 | 체중 600 N이 해 주는 일 (어림) |
+|---|---|---|
+| 상용 타일 (전자기식) | 약 5–10 mm | 약 3 J |
+| 압전 세라믹 1 cm 기둥, 깨지기 직전까지 | 약 8 µm | 약 2.5 mJ |
+| 압전 세라믹 1 mm 판 | 약 0.1 µm | 약 0.03 mJ |
+
+세라믹은 돌처럼 단단해서 체중을 실어도 마이크로미터만 줄어든다. **받는 일 자체가 작으니** 변환을 아무리 잘해도 한 걸음에 mJ이 천장이다.
+연구용 압전 타일의 3.49 mJ이 이 천장과 맞는다. J 단위를 내는 상용 타일이 **압전이 아니라 전자기식**(바닥이 mm 단위로 꺼지며 발전기를 돌림)인 이유도 이것이다.
+자세한 계산은 [기초론 §8](docs/00_piezo_basics.md#8-에너지의-천장--왜-압전-바닥은-약한가).
+
+우리 15 nJ이 그 천장보다도 훨씬 작은 것은 **손으로** 눌렀고(에너지는 힘의 제곱에 비례), 디스크 **하나**이며, 휠 공간 없이 눌렀기 때문이다. 발로 밟은 값은 아직 없다 — 4단계에서 잰다.
+
+### 9-3. 그래도 이 탐구의 의의
+
+결론이 "전력원으로는 어렵다"가 되더라도 탐구는 의미가 있다.
+
+1. **"얼마나, 왜 부족한가"를 우리 측정으로 보였다.** 많은 학교 탐구가 "LED가 켜졌다"로 끝나지만, 우리는 그 LED가 USB 전원이었다는 것부터 잡아냈다(§3-3). 부족한 양을 자릿수로 재고, 원인을 물리(받는 일 = 힘 × 거리)로 설명하는 것은 그 자체로 결과다.
+2. **6단계의 방향이 분명해졌다.** 소재 개선(§7, d·g)은 몇 배를 바꾼다. 10⁸배의 격차를 줄이는 것은 **구조**다 — 디스크가 더 휘게(벤더·캔틸레버), 느린 발걸음을 빠른 진동으로 바꿔 공진을 쓰게(주파수 상향 변환). 소재와 구조를 같이 봐야 한다는 결론은 시부야 사례만 봐서는 나오지 않는다.
+3. **현실적인 쓰임을 찾았다 — 전원 없는 걸음 감지 센서.** 13 nJ은 발전으로는 작아도 "지금 누가 밟았다"는 신호로는 충분하다. 급식실·매점 앞 **혼잡 시간대**를 재는 센서는 학교에 실제로 쓸모가 있고, 분석기의 장소별 히트맵이 그 용도다.
+4. **누구나 다시 할 수 있다.** 측정 스케치, 원자료, 분석 코드, 분석기·시뮬레이터가 모두 이 저장소에 있다.
+
+> **예비 결론 (5단계 전)** — 압전 바닥은 학교 **전력원**으로는 비현실적이고, **걸음 감지 센서·교육용 시연**으로는 현실적이다.
+> 발로 밟은 현장 값(4단계)이 나오면 분석기 '학교 판정' 탭으로 이 결론을 확정하거나 고친다.
+
+### 9-4. 출처
+
+- 위키백과(일본어) 「発電床」 — JR동일본 도쿄역 1–3차 실험 수치 — [ja.wikipedia.org](https://ja.wikipedia.org/wiki/%E7%99%BA%E9%9B%BB%E5%BA%8A)
+- greenz.jp (2008-12-18) 「東京を発電所に！改良型の発電床の実証実験が渋谷と東京駅で！」 — 시부야 하치코 광장 실험 — [greenz.jp](https://greenz.jp/2008/12/18/hatsudenyuka_shibuya/)
+- Web Japan, "The Power Beneath Your Feet" — 음력발전 타일(약 50 cm, 압전) — [web-japan.org](https://web-japan.org/trends/09_sci-tech/sci100107.html)
+- 日経クロステック (2008-12-03) 東京駅 発電床 実証実験 — [xtech.nikkei.com](https://xtech.nikkei.com/dm/article/NEWS/20081203/162331/)
+- Pavegen, How it works / FAQ — 전자기 유도, 걸음당 2–4 J — [pavegen.com/how-it-works](https://www.pavegen.com/how-it-works), [pavegen.com/faq](https://www.pavegen.com/faq)
+- TechCrunch (2015-05-25) — Pavegen 전자기 유도 방식 — [techcrunch.com](https://techcrunch.com/2015/05/25/pavegen-kicks-off-crowdcube-campaign-to-power-up-its-kinetic-flooring-business)
+- "Fabrication and evaluation of energy harvesting floor using piezoelectric frequency up-converting mechanism", *Sensors and Actuators A* (2017) — PZT 캔틸레버 24개, 3.49 mJ/걸음 — [sciencedirect.com](https://www.sciencedirect.com/science/article/abs/pii/S0924424717320095)
+- UBC APSC 261 학생 보고서 — Pavegen 투자 회수 기간 — [sustain.ubc.ca (PDF)](https://sustain.ubc.ca/sites/sustain.ubc.ca/files/seedslibrary/APSC261_2A_NewSUBAtrium_Pavegn_Group06_Merged%20Document.pdf)
+- 상용 타일 가격 보도 — Redbrick, Reset, Construction Management (보도마다 크게 다름) — [redbrick.me](https://redbrick.me/?p=386375), [reset.org](https://en.reset.org/pavegen-generate-clean-electricity-while-taking-stroll-02272018), [constructionmanagement.co.uk](https://constructionmanagement.co.uk/pavegen-pri1ce-dro4p-energy-gen8erating-smart/)
+
+상용 타일의 수치는 대부분 회사 발표나 보도이고, 독립 검증된 걸음당 측정값은 찾지 못했다.
 
 ---
 
