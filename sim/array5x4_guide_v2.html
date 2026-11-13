@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>압전 타일 5×4 가이드 v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d2433;--sub:#5a6474;--line:#d8dee6;--brass:#a8781e;--red:#c8372d;--sig:#1e63a8;--bg:#f2f4f7}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR","Noto Sans CJK KR",system-ui,sans-serif;line-height:1.65;font-size:16px}
+header{background:#1d2433;color:#fff;padding:28px 18px 24px}
+header .wrap{max-width:900px;margin:0 auto}
+header h1{margin:0 0 8px;font-size:clamp(22px,5vw,30px);font-weight:900;letter-spacing:-.5px}
+header p{margin:0;color:#c6cdd8;font-size:15px}
+header .tag{display:inline-block;color:#e8c46e;font-weight:700;font-size:13px;margin-bottom:8px;letter-spacing:.5px}
+main{max-width:900px;margin:0 auto;padding:16px 12px 60px}
+section{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px 16px;margin:14px 0}
+h2{font-size:20px;margin:0 0 10px;font-weight:900;border-left:5px solid var(--brass);padding-left:10px}
+h3{font-size:16px;margin:18px 0 6px;font-weight:700}
+p{margin:6px 0 10px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:8px;background:#fff}
+.scroll svg{display:block;width:100%;min-width:700px;height:auto}
+.hint{font-size:13px;color:var(--sub);margin:4px 2px 10px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+.tbl{overflow-x:auto}
+th,td{border-bottom:1px solid var(--line);padding:8px 8px;text-align:left;vertical-align:top}
+th{background:#eef1f5;font-weight:700;white-space:nowrap}
+td.pin{font-weight:900;color:var(--sig);white-space:nowrap}
+.red{color:var(--red);font-weight:700}.blue{color:var(--sig);font-weight:700}.brass{color:var(--brass);font-weight:700}
+.warn{background:#fdf1ef;border-left:4px solid var(--red);padding:10px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.note{background:#eef4fb;border-left:4px solid var(--sig);padding:10px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmp div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:15px}
+.cmp b{display:block;margin-bottom:4px}
+@media (max-width:620px){.cmp{grid-template-columns:1fr}}
+ol li,ul li{margin:4px 0}
+pre{background:#161b24;color:#e6e9ef;padding:14px;border-radius:8px;overflow-x:auto;font-size:13px;line-height:1.5;margin:0}
+.codebox{position:relative;margin:8px 0 14px}
+.copy{position:absolute;top:8px;right:8px;background:#e8c46e;color:#1d2433;border:0;border-radius:5px;padding:6px 12px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+.small{font-size:13.5px;color:var(--sub)}
+code{word-break:break-all}
+section{min-width:0;overflow-wrap:anywhere}
+.codebox{max-width:100%}
+.fix{background:#fff7e0;border-left:4px solid #c89a1e;padding:10px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<div class="tag">유리프 압전 소자 · 하드웨어 3갈래</div>
+<h1>압전 타일 5×4 배선과 아두이노 연결</h1>
+<p>디스크 20개 배치·배선 → 측정 박스(정류·보호·분압) → 아두이노 우노 핀 → 밟힘 보호 구조 → 급식실 앞 설치·측정 코드</p>
+</div></header>
+<main>
+<section class="fix" style="border:1px solid #e0c060">
+<h2>정정·주의 (저장소 검토)</h2>
+<ul>
+<li><b>R<sub>opt</sub> = 1/(2πfC) 근거와 "디스크 1개 R<sub>opt</sub> ≈ 5.3 MΩ(이전 차시)"는 철회된 값이다.</b> 사인파 식을 펄스 입력에 쓴 것이다. 최적 부하는 실측으로 정한다.</li>
+<li><b>"예상 평균 발전량 약 0.19 mW"</b>는 3월의 근거 없는 추정이다(걸음당 5 mJ를 가정). 중간보고서의 전면 포설 추정은 약 1.7 mW이고, 둘 다 측정값이 아니다.</li>
+<li><b>브리지 손실:</b> DB107 하나에 약 0.7~1 V(작은 전류에서 다이오드 2개)가 떨어진다. 손으로 누르면(1.1~1.3 V) 거의 0으로 읽힐 수 있다. 회로 고장이 아니므로 발로 밟아 보정한다.</li>
+<li><b>A0 값 ≠ 개방전압:</b> 1.1 MΩ × 디스크 약 20 nF = 시정수 약 22 ms로, 누름(약 0.1 s)보다 짧다. 읽은 피크는 누르는 속도에 따라 개방전압의 약 0.2~0.8배다.</li>
+<li><b>분해능:</b> 1/11 분압이므로 ADC 1칸 = 행 전압 약 <b>53.7 mV</b>, 최대 약 55 V.</li>
+<li><b>보호 부품:</b> BAT85가 없으면 5.1 V 제너보다 1N4148 2개(A핀→5V, GND→A핀)가 낫다. 제너는 1 V에서도 최대 10 µA 새고, 무릎이 완만해 위쪽 값이 눌린다.</li>
+<li><b>E모드:</b> 24 V 제너(1N4749A)는 18 V에서 최대 5 µA 새서 분압기보다 많이 소모할 수 있다. 한 걸음에 47 µF가 약 +13 mV(30 V, 20 nF 기준)만 오르므로 24 V까지 수천 걸음이 필요하다.</li>
+<li>9 V 전지 시험값 0.82 V는 ROW+ 단자에 직접 넣었을 때 값이다. 브리지를 거치면 약 0.72 V가 정상이다.</li>
+<li>이 설계와 코드(<code>arduino/v3_array5x4/</code>)는 아직 실제 부품으로 시험하지 않았다.</li>
+</ul>
+</section>
+
+<section>
+<h2>사진과 같은 점, 바꾸는 점</h2>
+<div class="cmp">
+<div><b class="brass">그대로 두는 것</b>판 위에 디스크 5열 × 4행 배치, 디스크마다 선 2가닥(은색 가운데 1 · 황동 테두리 1), 전기테이프로 고정, 선 묶음을 한쪽 끝으로 모아 빼기.</div>
+<div><b class="red">바꾸는 것</b>① 디스크마다 브리지 정류기(BR) 1개를 붙인 뒤 행별로 병렬 연결. ② 디스크를 직접 밟지 않게 상판·범퍼·스토퍼 구조로 감싸기. ③ 아두이노는 타일 밖 박스에 넣고 보호 회로를 거쳐 연결.</div>
+</div>
+<p class="small" style="margin-top:10px">정류기를 붙이는 이유: 디스크끼리 바로 묶으면 밟힌 디스크에서 나온 전하가 안 밟힌 디스크(각각 커패시터, 약 15 nF로 가정)로 흘러가 전압이 나뉘어 줄어듭니다. 또 순간마다 디스크의 휘는 방향이 달라 +와 −가 서로 상쇄됩니다. 디스크마다 정류하면 디스크 쪽으로 전류가 거꾸로 흐를 수 없고 극성도 신경 쓸 필요가 없습니다. 지난번 A0 직결 측정에서 생긴 음의 반주기 잘림(샘플의 29%가 0)도 전파 정류로 함께 해결됩니다.</p>
+</section>
+
+<section>
+<h2>1. 타일 안 배선: 5×4 배열</h2>
+<div class="scroll"><svg viewBox="0 0 780 500" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans KR, Noto Sans CJK KR, sans-serif"><rect x="40" y="28" width="620" height="420" rx="10" fill="#fbf7ee" stroke="#a8781e" stroke-width="2" stroke-dasharray="8 6"/><text x="52" y="22" font-size="13" text-anchor="start" fill="#a8781e" font-weight="700" >타일 내부 (예: 500 × 400 mm, 디스크 간격 약 100 mm)</text><line x1="28" y1="60" x2="28" y2="420" stroke="#555" stroke-width="2" stroke-linecap="round"/><polygon points="20,410 36,410 28,428" fill="#555"/><text x="12" y="240" font-size="13" text-anchor="middle" fill="#555" font-weight="700" transform="rotate(-90 12 240)">걷는 방향</text><text x="48" y="75" font-size="14" text-anchor="start" fill="#1d2433" font-weight="700" >1행</text><line x1="75" y1="108" x2="655" y2="108" stroke="#c8372d" stroke-width="3" stroke-linecap="round"/><line x1="75" y1="118" x2="640" y2="118" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><line x1="128" y1="60" x2="146" y2="62" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="128" y1="80" x2="146" y2="78" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="110" cy="70" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="110" cy="70" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="146" y="55" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="161" y="75" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="153" y1="85" x2="153" y2="108" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="153" cy="108" r="4" fill="#c8372d"/><line x1="169" y1="85" x2="169" y2="118" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="169" cy="118" r="4" fill="#262a31"/><line x1="233" y1="60" x2="251" y2="62" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="233" y1="80" x2="251" y2="78" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="215" cy="70" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="215" cy="70" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="251" y="55" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="266" y="75" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="258" y1="85" x2="258" y2="108" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="258" cy="108" r="4" fill="#c8372d"/><line x1="274" y1="85" x2="274" y2="118" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="274" cy="118" r="4" fill="#262a31"/><line x1="338" y1="60" x2="356" y2="62" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="338" y1="80" x2="356" y2="78" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="320" cy="70" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="320" cy="70" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="356" y="55" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="371" y="75" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="363" y1="85" x2="363" y2="108" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="363" cy="108" r="4" fill="#c8372d"/><line x1="379" y1="85" x2="379" y2="118" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="379" cy="118" r="4" fill="#262a31"/><line x1="443" y1="60" x2="461" y2="62" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="443" y1="80" x2="461" y2="78" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="425" cy="70" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="425" cy="70" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="461" y="55" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="476" y="75" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="468" y1="85" x2="468" y2="108" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="468" cy="108" r="4" fill="#c8372d"/><line x1="484" y1="85" x2="484" y2="118" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="484" cy="118" r="4" fill="#262a31"/><line x1="548" y1="60" x2="566" y2="62" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="548" y1="80" x2="566" y2="78" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="530" cy="70" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="530" cy="70" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="566" y="55" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="581" y="75" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="573" y1="85" x2="573" y2="108" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="573" cy="108" r="4" fill="#c8372d"/><line x1="589" y1="85" x2="589" y2="118" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="589" cy="118" r="4" fill="#262a31"/><rect x="655" y="100" width="16" height="16" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="678" y="113" font-size="13" text-anchor="start" fill="#c8372d" font-weight="700" >ROW1+</text><text x="48" y="175" font-size="14" text-anchor="start" fill="#1d2433" font-weight="700" >2행</text><line x1="75" y1="208" x2="655" y2="208" stroke="#c8372d" stroke-width="3" stroke-linecap="round"/><line x1="75" y1="218" x2="640" y2="218" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><line x1="128" y1="160" x2="146" y2="162" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="128" y1="180" x2="146" y2="178" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="110" cy="170" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="110" cy="170" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="146" y="155" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="161" y="175" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="153" y1="185" x2="153" y2="208" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="153" cy="208" r="4" fill="#c8372d"/><line x1="169" y1="185" x2="169" y2="218" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="169" cy="218" r="4" fill="#262a31"/><line x1="233" y1="160" x2="251" y2="162" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="233" y1="180" x2="251" y2="178" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="215" cy="170" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="215" cy="170" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="251" y="155" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="266" y="175" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="258" y1="185" x2="258" y2="208" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="258" cy="208" r="4" fill="#c8372d"/><line x1="274" y1="185" x2="274" y2="218" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="274" cy="218" r="4" fill="#262a31"/><line x1="338" y1="160" x2="356" y2="162" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="338" y1="180" x2="356" y2="178" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="320" cy="170" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="320" cy="170" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="356" y="155" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="371" y="175" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="363" y1="185" x2="363" y2="208" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="363" cy="208" r="4" fill="#c8372d"/><line x1="379" y1="185" x2="379" y2="218" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="379" cy="218" r="4" fill="#262a31"/><line x1="443" y1="160" x2="461" y2="162" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="443" y1="180" x2="461" y2="178" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="425" cy="170" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="425" cy="170" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="461" y="155" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="476" y="175" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="468" y1="185" x2="468" y2="208" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="468" cy="208" r="4" fill="#c8372d"/><line x1="484" y1="185" x2="484" y2="218" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="484" cy="218" r="4" fill="#262a31"/><line x1="548" y1="160" x2="566" y2="162" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="548" y1="180" x2="566" y2="178" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="530" cy="170" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="530" cy="170" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="566" y="155" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="581" y="175" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="573" y1="185" x2="573" y2="208" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="573" cy="208" r="4" fill="#c8372d"/><line x1="589" y1="185" x2="589" y2="218" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="589" cy="218" r="4" fill="#262a31"/><rect x="655" y="200" width="16" height="16" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="678" y="213" font-size="13" text-anchor="start" fill="#c8372d" font-weight="700" >ROW2+</text><text x="48" y="275" font-size="14" text-anchor="start" fill="#1d2433" font-weight="700" >3행</text><line x1="75" y1="308" x2="655" y2="308" stroke="#c8372d" stroke-width="3" stroke-linecap="round"/><line x1="75" y1="318" x2="640" y2="318" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><line x1="128" y1="260" x2="146" y2="262" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="128" y1="280" x2="146" y2="278" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="110" cy="270" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="110" cy="270" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="146" y="255" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="161" y="275" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="153" y1="285" x2="153" y2="308" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="153" cy="308" r="4" fill="#c8372d"/><line x1="169" y1="285" x2="169" y2="318" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="169" cy="318" r="4" fill="#262a31"/><line x1="233" y1="260" x2="251" y2="262" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="233" y1="280" x2="251" y2="278" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="215" cy="270" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="215" cy="270" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="251" y="255" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="266" y="275" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="258" y1="285" x2="258" y2="308" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="258" cy="308" r="4" fill="#c8372d"/><line x1="274" y1="285" x2="274" y2="318" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="274" cy="318" r="4" fill="#262a31"/><line x1="338" y1="260" x2="356" y2="262" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="338" y1="280" x2="356" y2="278" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="320" cy="270" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="320" cy="270" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="356" y="255" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="371" y="275" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="363" y1="285" x2="363" y2="308" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="363" cy="308" r="4" fill="#c8372d"/><line x1="379" y1="285" x2="379" y2="318" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="379" cy="318" r="4" fill="#262a31"/><line x1="443" y1="260" x2="461" y2="262" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="443" y1="280" x2="461" y2="278" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="425" cy="270" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="425" cy="270" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="461" y="255" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="476" y="275" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="468" y1="285" x2="468" y2="308" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="468" cy="308" r="4" fill="#c8372d"/><line x1="484" y1="285" x2="484" y2="318" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="484" cy="318" r="4" fill="#262a31"/><line x1="548" y1="260" x2="566" y2="262" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="548" y1="280" x2="566" y2="278" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="530" cy="270" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="530" cy="270" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="566" y="255" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="581" y="275" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="573" y1="285" x2="573" y2="308" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="573" cy="308" r="4" fill="#c8372d"/><line x1="589" y1="285" x2="589" y2="318" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="589" cy="318" r="4" fill="#262a31"/><rect x="655" y="300" width="16" height="16" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="678" y="313" font-size="13" text-anchor="start" fill="#c8372d" font-weight="700" >ROW3+</text><text x="48" y="375" font-size="14" text-anchor="start" fill="#1d2433" font-weight="700" >4행</text><line x1="75" y1="408" x2="655" y2="408" stroke="#c8372d" stroke-width="3" stroke-linecap="round"/><line x1="75" y1="418" x2="640" y2="418" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><line x1="128" y1="360" x2="146" y2="362" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="128" y1="380" x2="146" y2="378" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="110" cy="370" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="110" cy="370" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="146" y="355" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="161" y="375" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="153" y1="385" x2="153" y2="408" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="153" cy="408" r="4" fill="#c8372d"/><line x1="169" y1="385" x2="169" y2="418" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="169" cy="418" r="4" fill="#262a31"/><line x1="233" y1="360" x2="251" y2="362" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="233" y1="380" x2="251" y2="378" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="215" cy="370" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="215" cy="370" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="251" y="355" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="266" y="375" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="258" y1="385" x2="258" y2="408" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="258" cy="408" r="4" fill="#c8372d"/><line x1="274" y1="385" x2="274" y2="418" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="274" cy="418" r="4" fill="#262a31"/><line x1="338" y1="360" x2="356" y2="362" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="338" y1="380" x2="356" y2="378" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="320" cy="370" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="320" cy="370" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="356" y="355" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="371" y="375" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="363" y1="385" x2="363" y2="408" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="363" cy="408" r="4" fill="#c8372d"/><line x1="379" y1="385" x2="379" y2="418" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="379" cy="418" r="4" fill="#262a31"/><line x1="443" y1="360" x2="461" y2="362" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="443" y1="380" x2="461" y2="378" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="425" cy="370" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="425" cy="370" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="461" y="355" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="476" y="375" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="468" y1="385" x2="468" y2="408" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="468" cy="408" r="4" fill="#c8372d"/><line x1="484" y1="385" x2="484" y2="418" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="484" cy="418" r="4" fill="#262a31"/><line x1="548" y1="360" x2="566" y2="362" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><line x1="548" y1="380" x2="566" y2="378" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><circle cx="530" cy="370" r="26" fill="#d4ad55" stroke="#8a6516" stroke-width="2"/><circle cx="530" cy="370" r="16" fill="#f4f5f6" stroke="#98a2ad" stroke-width="1.5"/><rect x="566" y="355" width="30" height="30" rx="3" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="581" y="375" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="700" >BR</text><line x1="573" y1="385" x2="573" y2="408" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><circle cx="573" cy="408" r="4" fill="#c8372d"/><line x1="589" y1="385" x2="589" y2="418" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="589" cy="418" r="4" fill="#262a31"/><rect x="655" y="400" width="16" height="16" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="678" y="413" font-size="13" text-anchor="start" fill="#c8372d" font-weight="700" >ROW4+</text><line x1="640" y1="118" x2="640" y2="430" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><line x1="640" y1="430" x2="655" y2="430" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><rect x="655" y="422" width="16" height="16" fill="#fff" stroke="#262a31" stroke-width="1.5"/><text x="678" y="435" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >GND</text><text x="668" y="40" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >단자대</text><text x="668" y="56" font-size="12" text-anchor="start" fill="#555" font-weight="400" >→ LAN 케이블</text><line x1="60" y1="478" x2="95" y2="478" stroke="#c8372d" stroke-width="3" stroke-linecap="round"/><text x="102" y="483" font-size="13" text-anchor="start" fill="#1d2433" font-weight="400" >ROW+ (정류 출력 +)</text><line x1="265" y1="478" x2="300" y2="478" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><text x="307" y="483" font-size="13" text-anchor="start" fill="#1d2433" font-weight="400" >GND (정류 출력 −)</text><line x1="460" y1="478" x2="495" y2="478" stroke="#7b8794" stroke-width="2" stroke-linecap="round"/><text x="502" y="483" font-size="13" text-anchor="start" fill="#1d2433" font-weight="400" >디스크 선 2가닥 (극성 무관)</text></svg></div>
+<p class="hint">휴대폰에서는 그림을 옆으로 밀어서 보세요.</p>
+<ol>
+<li><b>디스크 → BR (납땜):</b> 디스크의 선 2가닥을 BR의 <b>~</b> 다리 2개에 하나씩 <b>납땜</b>하고 수축튜브를 씌웁니다. 극성은 상관없습니다. BR 다리는 가늘어서 와고에 꽂으면 밟을 때 진동으로 빠집니다.</li>
+<li><b>BR +, − 다리:</b> 각각 전선 10~20 cm를 납땜해 길게 뺍니다(+는 빨강, −는 검정).</li>
+<li><b>BR + → 그 행의 빨간 버스(ROWn+)</b>, <b>BR − → 검정 GND 버스</b>. BR 몸통에 +, − 가 찍혀 있습니다(DB107은 모서리가 깎인 쪽이 +).</li>
+<li>한 행의 BR 5개는 + 끼리, − 끼리 <b>병렬</b>로 연결합니다. 이때 <b>와고</b>를 씁니다. 한쪽에 선이 6가닥(BR 5 + 출력 1) 모이므로, <b>5구 와고에 BR 4개 + 연결선</b>을 꽂고 <b>3구 와고에 연결선 + BR 1개 + 출력선</b>을 꽂습니다. 행마다 + 쪽 1세트, − 쪽 1세트가 필요합니다. 출력은 ROW1+ ~ ROW4+ 4가닥과 공통 GND입니다.</li>
+<li>모든 행의 GND 버스는 타일 오른쪽 끝에서 하나로 합칩니다.</li>
+<li>행을 따로 측정하는 이유: 사람이 1행 → 4행 순서로 지나가므로, 행별 신호가 언제 들어왔는지로 발걸음 수와 방향, 디스크 위치별 출력 차이를 함께 얻을 수 있습니다.</li>
+</ol>
+<div class="fix"><b>정정:</b> 아래 이유는 철회된 계산이다. 1/(2πfC)는 사인파 식이라 한 번 누르는 펄스에 맞지 않고, 디스크마다 브리지가 있어 회로가 보는 원천은 디스크 1개(약 20 nF)다. 1.1 MΩ는 "보호·분압에 알맞은 값" 정도로만 본다. 1.1 MΩ × 20 nF ≈ 22 ms라서 A핀 값은 개방전압이 아니다. 개방전압에 가깝게 읽으려면 10 MΩ / 1 MΩ(시정수 약 220 ms)를 쓰고 10 nF는 그대로 둔다.</div>
+<div class="note"><b>(원문) 부하 1.1 MΩ로 정한 이유 (추정):</b> 한 행에서 디스크 5개가 병렬이면 C ≈ 5 × 15 nF = 75 nF입니다. 걸음 주파수 2 Hz에서 R_opt = 1/(2πfC) ≈ 1.06 MΩ이므로, R1+R2 = 1.1 MΩ가 행 하나의 최적 부하와 거의 같습니다. C_p는 아직 가정값이니 실측하면 R1을 맞춰 바꾸세요.</div>
+<div class="warn"><b>간단하게 하고 싶을 때:</b> BR을 행마다 1개(총 4개)만 쓰는 방법도 있습니다. 이때는 행 안에서 디스크 5개의 황동끼리, 은색끼리 같은 선에 묶어야 합니다. 대신 한 발에 1~2개만 눌리면 전압이 나머지 디스크로 나뉘어 1/3~1/5 정도로 줄어드니, 이 방식을 쓰면 보고서에 한계로 적으세요.</div>
+</section>
+
+<section>
+<h2>2. 측정 박스 회로 (아두이노 앞 보호·분압)</h2>
+<div class="scroll"><svg viewBox="0 0 780 520" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans KR, Noto Sans CJK KR, sans-serif"><rect x="8" y="8" width="764" height="242" rx="10" fill="#f3f6fa" stroke="#c9d3df"/><text x="22" y="32" font-size="14" text-anchor="start" fill="#1d2433" font-weight="700" >① 행(ROW) 측정 채널 — 4개 똑같이 (ROW1→A0, ROW2→A1, ROW3→A2, ROW4→A3)</text><text x="20" y="125" font-size="14" text-anchor="start" fill="#c8372d" font-weight="700" >ROWn +</text><line x1="80" y1="120" x2="150" y2="120" stroke="#c8372d" stroke-width="3" stroke-linecap="round"/><circle cx="150" cy="120" r="4" fill="#262a31"/><line x1="150" y1="120" x2="183.0" y2="120" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="187.0" cy="120" r="4" fill="#fff" stroke="#262a31" stroke-width="2"/><circle cx="203.0" cy="120" r="4" fill="#fff" stroke="#262a31" stroke-width="2"/><rect x="179.0" y="110" width="32" height="8" rx="2" fill="#e0a526"/><line x1="207.0" y1="120" x2="240" y2="120" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="195.0" y="104" font-size="13" text-anchor="middle" fill="#8a5a00" font-weight="700" >JS (S모드에 꽂음)</text><line x1="240" y1="120" x2="275.0" y2="120" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><rect x="275.0" y="111" width="60" height="18" fill="#fff" stroke="#262a31" stroke-width="2"/><line x1="335.0" y1="120" x2="370" y2="120" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="305.0" y="105" font-size="13" text-anchor="middle" fill="#1d2433" font-weight="700" >R1 1 MΩ</text><line x1="370" y1="120" x2="705" y2="120" stroke="#1e63a8" stroke-width="3" stroke-linecap="round"/><circle cx="370" cy="120" r="4" fill="#1e63a8"/><line x1="410" y1="60" x2="590" y2="60" stroke="#c8372d" stroke-width="2" stroke-linecap="round"/><text x="598" y="65" font-size="13" text-anchor="start" fill="#c8372d" font-weight="700" >아두이노 5V</text><line x1="420" y1="120" x2="420" y2="99.0" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><polygon points="410,99.0 430,99.0 420,81.0" fill="#262a31"/><line x1="409" y1="81.0" x2="431" y2="81.0" stroke="#262a31" stroke-width="2.5" stroke-linecap="round"/><line x1="420" y1="81.0" x2="420" y2="60" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="436" y="95.0" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >D1 BAT85</text><circle cx="420" cy="120" r="4" fill="#1e63a8"/><line x1="410" y1="205" x2="640" y2="205" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><line x1="580" y1="205" x2="580" y2="213" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><line x1="568" y1="213" x2="592" y2="213" stroke="#262a31" stroke-width="2.5" stroke-linecap="round"/><line x1="573" y1="218" x2="587" y2="218" stroke="#262a31" stroke-width="2.5" stroke-linecap="round"/><line x1="577" y1="223" x2="583" y2="223" stroke="#262a31" stroke-width="2.5" stroke-linecap="round"/><line x1="470" y1="205" x2="470" y2="171.5" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><polygon points="460,171.5 480,171.5 470,153.5" fill="#262a31"/><line x1="459" y1="153.5" x2="481" y2="153.5" stroke="#262a31" stroke-width="2.5" stroke-linecap="round"/><line x1="470" y1="153.5" x2="470" y2="120" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="486" y="167.5" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >D2</text><circle cx="470" cy="120" r="4" fill="#1e63a8"/><line x1="525" y1="120" x2="525" y2="138.5" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><rect x="517" y="138.5" width="16" height="48" fill="#fff" stroke="#262a31" stroke-width="2"/><line x1="525" y1="186.5" x2="525" y2="205" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="539" y="167.5" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >R2</text><text x="539" y="182.5" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >100 kΩ</text><circle cx="525" cy="120" r="4" fill="#1e63a8"/><line x1="625" y1="120" x2="625" y2="157.5" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><line x1="611" y1="157.5" x2="639" y2="157.5" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><line x1="611" y1="167.5" x2="639" y2="167.5" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><line x1="625" y1="167.5" x2="625" y2="205" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="645" y="167.5" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >10 nF</text><circle cx="625" cy="120" r="4" fill="#1e63a8"/><line x1="430" y1="205" x2="430" y2="205" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><rect x="705" y="104" width="70" height="32" rx="5" fill="#1e63a8"/><text x="740" y="125" font-size="14" text-anchor="middle" fill="#fff" font-weight="700" >A0~A3</text><line x1="150" y1="120" x2="150" y2="120" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><line x1="150" y1="120" x2="150" y2="155.5" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="150" cy="159.5" r="4" fill="#fff" stroke="#262a31" stroke-width="2"/><circle cx="150" cy="175.5" r="4" fill="#fff" stroke="#262a31" stroke-width="2"/><rect x="153" y="151.5" width="8" height="32" rx="2" fill="#e0a526"/><line x1="150" y1="179.5" x2="150" y2="215" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="168" y="172.5" font-size="13" text-anchor="start" fill="#8a5a00" font-weight="700" >JE (E모드에 꽂음)</text><text x="150" y="240" font-size="13" text-anchor="middle" fill="#c8372d" font-weight="700" >↓ 저장 버스로</text><rect x="8" y="262" width="764" height="250" rx="10" fill="#fbf4ec" stroke="#e2cfb6"/><text x="22" y="286" font-size="14" text-anchor="start" fill="#1d2433" font-weight="700" >② 에너지 저장 채널 — 4개 행의 JE가 모두 여기로 모임 (A4)</text><line x1="30" y1="315" x2="480" y2="315" stroke="#c8372d" stroke-width="3" stroke-linecap="round"/><text x="30" y="307" font-size="13" text-anchor="start" fill="#c8372d" font-weight="700" >저장 버스 (ROW1~4의 JE)</text><line x1="80" y1="470" x2="660" y2="470" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><line x1="300" y1="470" x2="300" y2="478" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><line x1="288" y1="478" x2="312" y2="478" stroke="#262a31" stroke-width="2.5" stroke-linecap="round"/><line x1="293" y1="483" x2="307" y2="483" stroke="#262a31" stroke-width="2.5" stroke-linecap="round"/><line x1="297" y1="488" x2="303" y2="488" stroke="#262a31" stroke-width="2.5" stroke-linecap="round"/><line x1="90" y1="315" x2="90" y2="387.5" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><line x1="76" y1="387.5" x2="104" y2="387.5" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><path d="M76,401.5 Q90,393.5 104,401.5" fill="none" stroke="#262a31" stroke-width="3"/><line x1="90" y1="399.5" x2="90" y2="470" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="110" y="397.5" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >C 47 µF 63V</text><text x="70" y="382.5" font-size="14" text-anchor="middle" fill="#c8372d" font-weight="700" >+</text><circle cx="90" cy="315" r="4" fill="#c8372d"/><line x1="225" y1="470" x2="225" y2="401.5" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><polygon points="215,401.5 235,401.5 225,383.5" fill="#262a31"/><line x1="214" y1="383.5" x2="236" y2="383.5" stroke="#262a31" stroke-width="2.5" stroke-linecap="round"/><line x1="225" y1="383.5" x2="225" y2="315" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="241" y="397.5" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >ZD 24V 1N4749A</text><circle cx="225" cy="315" r="4" fill="#c8372d"/><line x1="370" y1="315" x2="370" y2="350" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><line x1="370" y1="350" x2="370" y2="365.0" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><circle cx="370" cy="365.0" r="4" fill="#262a31"/><line x1="370" y1="385.0" x2="384" y2="363.0" stroke="#262a31" stroke-width="2.5"/><circle cx="370" cy="385.0" r="4" fill="#262a31"/><line x1="370" y1="385.0" x2="370" y2="400" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="390" y="380.0" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >방전 버튼</text><line x1="370" y1="400" x2="370" y2="410" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><line x1="370" y1="410" x2="370" y2="416.0" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><rect x="362" y="416.0" width="16" height="48" fill="#fff" stroke="#262a31" stroke-width="2"/><line x1="370" y1="464.0" x2="370" y2="470" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="356" y="445.0" font-size="13" text-anchor="end" fill="#1d2433" font-weight="700" >100 Ω</text><circle cx="370" cy="315" r="4" fill="#c8372d"/><line x1="470" y1="315" x2="470" y2="326.0" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><rect x="462" y="326.0" width="16" height="48" fill="#fff" stroke="#262a31" stroke-width="2"/><line x1="470" y1="374.0" x2="470" y2="385" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="456" y="355.0" font-size="13" text-anchor="end" fill="#1d2433" font-weight="700" >R3 10 MΩ</text><circle cx="470" cy="315" r="4" fill="#c8372d"/><circle cx="470" cy="385" r="4" fill="#1e63a8"/><line x1="470" y1="385" x2="470" y2="403.5" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><rect x="462" y="403.5" width="16" height="48" fill="#fff" stroke="#262a31" stroke-width="2"/><line x1="470" y1="451.5" x2="470" y2="470" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="456" y="432.5" font-size="13" text-anchor="end" fill="#1d2433" font-weight="700" >R4 2.2 MΩ</text><line x1="470" y1="385" x2="705" y2="385" stroke="#1e63a8" stroke-width="3" stroke-linecap="round"/><line x1="530" y1="385" x2="530" y2="369.0" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><polygon points="520,369.0 540,369.0 530,351.0" fill="#262a31"/><line x1="519" y1="351.0" x2="541" y2="351.0" stroke="#262a31" stroke-width="2.5" stroke-linecap="round"/><line x1="530" y1="351.0" x2="530" y2="335" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="546" y="365.0" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >D3→5V</text><circle cx="530" cy="385" r="4" fill="#1e63a8"/><line x1="580" y1="470" x2="580" y2="436.5" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><polygon points="570,436.5 590,436.5 580,418.5" fill="#262a31"/><line x1="569" y1="418.5" x2="591" y2="418.5" stroke="#262a31" stroke-width="2.5" stroke-linecap="round"/><line x1="580" y1="418.5" x2="580" y2="385" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="596" y="432.5" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >D4</text><circle cx="580" cy="385" r="4" fill="#1e63a8"/><line x1="640" y1="385" x2="640" y2="422.5" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><line x1="626" y1="422.5" x2="654" y2="422.5" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><line x1="626" y1="432.5" x2="654" y2="432.5" stroke="#262a31" stroke-width="3" stroke-linecap="round"/><line x1="640" y1="432.5" x2="640" y2="470" stroke="#262a31" stroke-width="2" stroke-linecap="round"/><text x="660" y="432.5" font-size="13" text-anchor="start" fill="#1d2433" font-weight="700" >10 nF</text><circle cx="640" cy="385" r="4" fill="#1e63a8"/><text x="530" y="328" font-size="12" text-anchor="middle" fill="#c8372d" font-weight="700" >5V</text><rect x="705" y="369" width="70" height="32" rx="5" fill="#1e63a8"/><text x="740" y="390" font-size="14" text-anchor="middle" fill="#fff" font-weight="700" >A4</text></svg></div>
+<p class="hint">①은 같은 회로를 4개 만듭니다(소형 브레드보드에 들어갑니다). ②는 E모드용이라 처음에는 빼도 됩니다.</p>
+<div class="note"><b>BAT85 대신 이미 산 5.1 V 제너(1N4733A)를 쓸 때:</b> D1·D2를 빼고 제너를 R2와 나란히 꽂습니다(띠는 신호선 쪽, 반대쪽은 GND). 행마다 1개씩 총 4개가 필요합니다. 아두이노 보호는 되지만, 제너는 5.1 V 아래에서도 전류가 조금 새서(데이터시트 최대 10 µA, 1 V 기준) 측정값이 실제보다 낮게 찍힐 수 있습니다. 이 방식을 쓰면 보고서 한계에 적고, 9 V 전지 시험값(0.82 V)과 비교해 오차를 확인하세요.</div>
+<h3>점퍼로 두 가지 모드 전환</h3>
+<div class="tbl"><table>
+<tr><th>모드</th><th>꽂는 점퍼</th><th>얻는 데이터</th></tr>
+<tr><td><b>S (센서)</b></td><td>JS ×4 꽂기, JE 빼기</td><td>발걸음마다 행별 피크 전압, 1.1 MΩ 부하에 전달된 에너지(µJ), 행별 첫 접촉 시각</td></tr>
+<tr><td><b>E (저장)</b></td><td>JE ×4 꽂기, JS 빼기</td><td>47 µF에 쌓인 전압 V를 1초마다 기록, E = ½CV²로 누적 에너지 계산</td></tr>
+</table></div>
+<h3>부품마다 하는 일</h3>
+<ul>
+<li><b>R1 / R2 분압 (1/11):</b> 행 전압 55 V가 A핀에서 5 V가 됩니다. 저항이 크기 때문에 넘치더라도 흐르는 전류는 수십 µA 수준입니다.</li>
+<li><b>D1·D2 BAT85 (쇼트키):</b> A핀 전압을 −0.3 V ~ 5.3 V 안으로 묶어 둡니다. D1의 띠는 5V 쪽, D2의 띠는 신호선 쪽으로 향하게 꽂습니다. 5V 핀은 전원을 공급하는 용도가 아니라 이 다이오드의 기준으로만 씁니다.</li>
+<li><b>10 nF:</b> 우노 ADC는 입력 임피던스가 10 kΩ 이하인 신호를 전제로 만들어졌습니다. 10 nF가 순간 전하를 공급하므로 채널끼리 섞이는 현상(crosstalk)이 줄고, 3.3 kHz 링잉도 걸러집니다. 시간상수가 약 0.9 ms라서 수십 ms 길이의 발걸음 펄스 모양은 유지됩니다.</li>
+<li><b>ZD 24 V:</b> 저장 커패시터가 24 V를 넘지 않게 막아 커패시터(63 V)와 분압 회로를 보호합니다. 띠(캐소드)는 + 쪽으로 향하게 꽂습니다.</li>
+<li><b>R3 / R4 = 10 MΩ / 2.2 MΩ:</b> 24 V일 때 A4가 4.3 V가 됩니다. 1 MΩ급을 쓰면 20 V에서 분압 저항 혼자 약 0.33 mW를 소모해, 예상 평균 발전량(약 0.19 mW)보다 커집니다. <i>(정정: 0.19 mW는 3월의 근거 없는 초기 추정이다. 중간보고서의 급식실 전면 포설 추정은 약 1.7 mW이며, 둘 다 측정값이 아니다. 어느 쪽이든 1 MΩ급 분압은 낭비가 크다는 결론은 같다.)</i> 그래서 10 MΩ급으로 정했습니다.</li>
+<li><b>방전 버튼 + 100 Ω:</b> 측정을 시작하기 전에 눌러 커패시터를 0 V로 비웁니다.</li>
+</ul>
+</section>
+
+<section>
+<h2>3. 아두이노 우노 핀 연결</h2>
+<div class="tbl"><table>
+<tr><th>우노 핀</th><th>연결할 곳</th><th>비고</th></tr>
+<tr><td class="pin">A0</td><td>ROW1 측정 노드 (R1·R2 사이)</td><td>1행 = 입구에서 먼 쪽</td></tr>
+<tr><td class="pin">A1</td><td>ROW2 측정 노드</td><td></td></tr>
+<tr><td class="pin">A2</td><td>ROW3 측정 노드</td><td></td></tr>
+<tr><td class="pin">A3</td><td>ROW4 측정 노드</td><td></td></tr>
+<tr><td class="pin">A4</td><td>저장 커패시터 측정 노드 (R3·R4 사이)</td><td>E모드</td></tr>
+<tr><td class="pin">5V</td><td>D1·D3의 캐소드(띠) 공통</td><td>클램프 기준으로만 사용</td></tr>
+<tr><td class="pin">GND</td><td>타일 GND, R2·R4, 10 nF, D2·D4 애노드, ZD, 47 µF의 −</td><td>모든 −는 여기로 모읍니다</td></tr>
+<tr><td class="pin">D8</td><td>(선택) LED + 220 Ω → GND</td><td>발걸음 표시용. USB 전원으로 켜지므로 <b>발전의 증거로 쓰면 안 됩니다</b></td></tr>
+<tr><td class="pin">USB</td><td>노트북</td><td>전원 공급 + 데이터 기록</td></tr>
+</table></div>
+<p class="small">A5는 남겨 둡니다. 나중에 로드셀(HX711)로 체중 하중을 함께 기록하려면 D2·D3을 쓰면 됩니다.</p>
+</section>
+
+<section>
+<h2>4. 타일 → 박스 연결선: LAN 케이블 하나로</h2>
+<p>Cat5e 랜선(8심, 2~3 m)을 쓰면 4쌍이 딱 맞습니다. 쌍마다 신호선과 GND를 꼬아 두면 잡음이 줄어듭니다.</p>
+<div class="tbl"><table>
+<tr><th>쌍</th><th>색선</th><th>흰색 줄무늬 선</th></tr>
+<tr><td>1</td><td class="red">주황 = ROW1+</td><td>흰주황 = GND</td></tr>
+<tr><td>2</td><td class="red">초록 = ROW2+</td><td>흰초록 = GND</td></tr>
+<tr><td>3</td><td class="red">파랑 = ROW3+</td><td>흰파랑 = GND</td></tr>
+<tr><td>4</td><td class="red">갈색 = ROW4+</td><td>흰갈색 = GND</td></tr>
+</table></div>
+<p class="small">흰색 줄무늬 선 4가닥은 양쪽 끝에서 각각 하나로 묶습니다. 케이블이 박스로 들어가는 구멍에는 고무 그로밋이나 케이블 글랜드를 끼우고, 박스 안에서는 케이블 타이로 고정합니다. 그러면 케이블을 잡아당겨도 납땜 부위에 힘이 걸리지 않습니다.</p>
+</section>
+
+<section>
+<h2>5. 밟힘 보호</h2>
+<h3>타일 단면: 디스크는 직접 밟히지 않게</h3>
+<div class="scroll"><svg viewBox="0 0 780 420" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans KR, Noto Sans CJK KR, sans-serif"><defs><pattern id="h" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="10" stroke="#9aa3ad" stroke-width="2"/></pattern></defs><rect x="0" y="282" width="780" height="16" fill="url(#h)"/><line x1="0" y1="282" x2="780" y2="282" stroke="#555" stroke-width="2" stroke-linecap="round"/><rect x="70" y="262" width="640" height="20" fill="#cfe3f0" stroke="#5b8db0" stroke-width="2"/><rect x="220" y="254" width="15" height="8" fill="#9aa1aa" stroke="#5f666f"/><rect x="285" y="254" width="15" height="8" fill="#9aa1aa" stroke="#5f666f"/><rect x="222" y="248" width="76" height="6" fill="#d4ad55" stroke="#8a6516"/><rect x="238" y="243" width="44" height="5" fill="#f4f5f6" stroke="#98a2ad"/><path d="M249,243 A11,11 0 0 1 271,243 Z" fill="#2f3237"/><rect x="480" y="254" width="15" height="8" fill="#9aa1aa" stroke="#5f666f"/><rect x="545" y="254" width="15" height="8" fill="#9aa1aa" stroke="#5f666f"/><rect x="482" y="248" width="76" height="6" fill="#d4ad55" stroke="#8a6516"/><rect x="498" y="243" width="44" height="5" fill="#f4f5f6" stroke="#98a2ad"/><path d="M509,243 A11,11 0 0 1 531,243 Z" fill="#2f3237"/><rect x="127" y="205" width="6" height="77" fill="#5f666f"/><rect x="121" y="236" width="18" height="8" fill="#3d434b"/><rect x="121" y="254" width="18" height="8" fill="#3d434b"/><rect x="387" y="205" width="6" height="77" fill="#5f666f"/><rect x="381" y="236" width="18" height="8" fill="#3d434b"/><rect x="381" y="254" width="18" height="8" fill="#3d434b"/><rect x="647" y="205" width="6" height="77" fill="#5f666f"/><rect x="641" y="236" width="18" height="8" fill="#3d434b"/><rect x="641" y="254" width="18" height="8" fill="#3d434b"/><rect x="70" y="212" width="640" height="20" fill="#cfe3f0" stroke="#5b8db0" stroke-width="2" opacity="0.92"/><rect x="70" y="203" width="640" height="9" fill="#4a4f57"/><rect x="123" y="200" width="14" height="5" fill="#3d434b"/><rect x="383" y="200" width="14" height="5" fill="#3d434b"/><rect x="643" y="200" width="14" height="5" fill="#3d434b"/><polygon points="18,282 70,200 70,282" fill="#7a7f87"/><polygon points="710,200 762,282 710,282" fill="#7a7f87"/><line x1="300" y1="258" x2="488" y2="258" stroke="#c8372d" stroke-width="2.5" stroke-dasharray="6 4" stroke-linecap="round"/><line x1="560" y1="258" x2="740" y2="258" stroke="#c8372d" stroke-width="2.5" stroke-dasharray="6 4" stroke-linecap="round"/><line x1="200" y1="206" x2="200" y2="40" stroke="#555" stroke-width="1.3" stroke-linecap="round"/><text x="204" y="45" font-size="13" text-anchor="start" fill="#1d2433" font-weight="500" >미끄럼 방지 테이프·매트</text><line x1="560" y1="222" x2="560" y2="40" stroke="#555" stroke-width="1.3" stroke-linecap="round"/><text x="564" y="45" font-size="13" text-anchor="start" fill="#1d2433" font-weight="500" >상판: 아크릴 (5 mm 이상)</text><line x1="266" y1="235" x2="330" y2="90" stroke="#555" stroke-width="1.3" stroke-linecap="round"/><text x="334" y="95" font-size="13" text-anchor="start" fill="#1d2433" font-weight="500" >고무 반구 — 디스크 가운데만 누름</text><line x1="390" y1="240" x2="450" y2="140" stroke="#555" stroke-width="1.3" stroke-linecap="round"/><text x="454" y="145" font-size="13" text-anchor="start" fill="#1d2433" font-weight="500" >스토퍼: M4 볼트 + 너트 — 상판과 간극 0.3~0.5 mm</text><line x1="45" y1="250" x2="45" y2="170" stroke="#555" stroke-width="1.3" stroke-linecap="round"/><text x="49" y="175" font-size="13" text-anchor="start" fill="#1d2433" font-weight="500" >경사 테두리·측면 고정</text><line x1="520" y1="250" x2="640" y2="320" stroke="#555" stroke-width="1.3" stroke-linecap="round"/><text x="636" y="325" font-size="13" text-anchor="end" fill="#1d2433" font-weight="500" >압전 디스크 — 테두리만 양면테이프</text><line x1="230" y1="258" x2="110" y2="330" stroke="#555" stroke-width="1.3" stroke-linecap="round"/><text x="114" y="335" font-size="13" text-anchor="start" fill="#1d2433" font-weight="500" >와셔 = 받침 링 (안지름 > 세라믹)</text><line x1="100" y1="275" x2="100" y2="375" stroke="#555" stroke-width="1.3" stroke-linecap="round"/><text x="104" y="380" font-size="13" text-anchor="start" fill="#1d2433" font-weight="500" >하판: 아크릴</text><line x1="690" y1="258" x2="700" y2="375" stroke="#555" stroke-width="1.3" stroke-linecap="round"/><text x="696" y="380" font-size="13" text-anchor="end" fill="#1d2433" font-weight="500" >전선은 하판 위 디스크 사이로, 테이프 고정</text><text x="770" y="410" font-size="12" text-anchor="end" fill="#777" font-weight="400" >※ 축척 아님</text></svg></div>
+<p class="hint">사진처럼 천이나 판 위에 디스크를 붙이고 그대로 밟으면 세라믹이 금방 깨지고, 납땜 부위도 떨어집니다.</p>
+<ul>
+<li><b>힘의 경로:</b> 발 → 매트 → 상판 → 고무 반구 → 디스크 가운데 → 디스크가 와셔 구멍 쪽으로 휨. 테두리만 받쳐지고 가운데만 눌리므로, 압전 디스크가 가장 잘 발전하는 굽힘 모드로 동작합니다. 와셔가 받침 링 역할을 하므로 아크릴에 구멍을 뚫을 필요가 없습니다.</li>
+<li><b>와셔 크기:</b> 황동 테두리만 받치고 세라믹은 떠 있어야 합니다. 27 mm 디스크는 <b>안지름 21~22 mm, 바깥지름 30 mm 이상</b>(M20 와셔급), 35 mm 디스크는 안지름 26~28 mm가 맞습니다. 작은 와셔(안지름 10 mm)는 세라믹 가운데를 받쳐서 디스크가 거의 휘지 않습니다.</li>
+<li><b>스토퍼:</b> M4 볼트를 두 판에 관통시키고 너트로 높이를 맞춰, 상판이 0.3~0.5 mm 넘게 내려가지 않게 받칩니다. 체중이 많이 실려도 나머지 하중은 스토퍼가 받습니다. 이 간극은 추정값이니 한 개로 시험하면서 깨지지 않는 값으로 조정하세요.</li>
+<li><b>배선:</b> 전선은 하판 위 디스크 사이로 지나가게 하고 테이프로 고정합니다. 고무 반구와 스토퍼 자리는 피해야 상판에 눌려 끊어지지 않습니다. 납땜 부위는 핫글루로 덮습니다.</li>
+<li><b>BR·와고 높이:</b> BR(약 8 mm)과 와고(약 8 mm)는 와셔+디스크+반구보다 높을 수 있습니다. 판 사이 간격보다 높으면 타일 바깥 가장자리 쪽에 두고, 상판이 덮지 않는 테두리 밖에 모으세요.</li>
+</ul>
+<h3>아두이노 보호 정리</h3>
+<div class="tbl"><table>
+<tr><th>위험</th><th>대책</th></tr>
+<tr><td>밟힘·발에 차임</td><td>아두이노와 보호 회로는 <b>타일 안에 넣지 않고</b> 통행로 밖 벽 쪽 책상 위의 플라스틱 박스에 넣습니다.</td></tr>
+<tr><td>고전압 펄스 (무부하 수십 V)</td><td>1 MΩ 직렬 저항 + 1/11 분압 + BAT85 클램프 + 10 nF (2절, 제너를 쓰면 R2와 나란히)</td></tr>
+<tr><td>저장 커패시터 과충전</td><td>24 V 제너, 63 V 정격 커패시터</td></tr>
+<tr><td>케이블에 걸림·당겨짐</td><td>바닥 케이블 덮개 + 테이프, 박스 입구에 그로밋과 케이블 타이</td></tr>
+<tr><td>정전기 (겨울 실내)</td><td>상판과 매트가 절연체입니다. 박스는 닫아 두고, 측정 중에는 회로를 만지지 않습니다.</td></tr>
+<tr><td>음식물·물</td><td>박스 뚜껑을 닫고, 바닥에서 떨어진 책상 위에 둡니다.</td></tr>
+</table></div>
+</section>
+
+<section>
+<h2>6. 급식실 앞 배치</h2>
+<div class="scroll"><svg viewBox="0 0 780 380" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans KR, Noto Sans CJK KR, sans-serif"><rect x="0" y="0" width="780" height="380" fill="#fff"/><line x1="20" y1="40" x2="290" y2="40" stroke="#333" stroke-width="8" stroke-linecap="round"/><line x1="490" y1="40" x2="760" y2="40" stroke="#333" stroke-width="8" stroke-linecap="round"/><line x1="760" y1="40" x2="760" y2="370" stroke="#333" stroke-width="8" stroke-linecap="round"/><text x="390" y="30" font-size="15" text-anchor="middle" fill="#1d2433" font-weight="700" >급식실 입구</text><line x1="360" y1="360" x2="360" y2="290" stroke="#9aa3ad" stroke-width="3" stroke-dasharray="8 6" stroke-linecap="round"/><polygon points="352,292 368,292 360,278" fill="#9aa3ad"/><line x1="360" y1="130" x2="360" y2="70" stroke="#9aa3ad" stroke-width="3" stroke-dasharray="8 6" stroke-linecap="round"/><polygon points="352,72 368,72 360,58" fill="#9aa3ad"/><line x1="420" y1="360" x2="420" y2="290" stroke="#9aa3ad" stroke-width="3" stroke-dasharray="8 6" stroke-linecap="round"/><polygon points="412,292 428,292 420,278" fill="#9aa3ad"/><line x1="420" y1="130" x2="420" y2="70" stroke="#9aa3ad" stroke-width="3" stroke-dasharray="8 6" stroke-linecap="round"/><polygon points="412,72 428,72 420,58" fill="#9aa3ad"/><text x="470" y="345" font-size="13" text-anchor="start" fill="#6b7480" font-weight="700" >보행 동선</text><rect x="315" y="150" width="150" height="115" rx="6" fill="#f3e6c7" stroke="#a8781e" stroke-width="3"/><text x="390" y="203" font-size="15" text-anchor="middle" fill="#a8781e" font-weight="700" >압전 타일</text><text x="390" y="224" font-size="13" text-anchor="middle" fill="#a8781e" font-weight="700" >5 × 4</text><rect x="465" y="198" width="235" height="16" rx="4" fill="#b9bfc7"/><line x1="465" y1="206" x2="700" y2="206" stroke="#c8372d" stroke-width="2.5" stroke-linecap="round"/><text x="580" y="240" font-size="13" text-anchor="middle" fill="#1d2433" font-weight="700" >바닥 케이블 덮개 + 테이프</text><rect x="660" y="95" width="90" height="70" rx="6" fill="#e8eef5" stroke="#5b6b80" stroke-width="2"/><text x="705" y="123" font-size="13" text-anchor="middle" fill="#1d2433" font-weight="700" >측정 박스</text><text x="705" y="143" font-size="12" text-anchor="middle" fill="#1d2433" font-weight="400" >아두이노+보호</text><line x1="700" y1="206" x2="700" y2="165" stroke="#c8372d" stroke-width="2.5" stroke-linecap="round"/><rect x="660" y="260" width="90" height="56" rx="5" fill="#f1f3f6" stroke="#5b6b80" stroke-width="2"/><text x="705" y="292" font-size="13" text-anchor="middle" fill="#1d2433" font-weight="700" >노트북</text><line x1="705" y1="165" x2="705" y2="260" stroke="#1e63a8" stroke-width="2" stroke-dasharray="4 3" stroke-linecap="round"/><text x="712" y="235" font-size="11" text-anchor="start" fill="#1e63a8" font-weight="700" >USB</text><polygon points="300,126 289,148 311,148" fill="#e8742a"/><polygon points="480,126 469,148 491,148" fill="#e8742a"/><polygon points="300,261 289,283 311,283" fill="#e8742a"/><text x="195" y="280" font-size="13" text-anchor="middle" fill="#b9541a" font-weight="700" >주의 표지·콘</text><text x="640" y="80" font-size="13" text-anchor="end" fill="#5b6b80" font-weight="700" >통행로 밖·벽 쪽 책상 위</text></svg></div>
+<ul>
+<li>타일은 입구 정면의 동선 위에 놓고, 행이 걷는 방향과 직각이 되게 둡니다(1행이 입구에서 먼 쪽).</li>
+<li>타일 둘레의 경사 테두리와 주의 표지로 걸려 넘어지는 것을 막습니다. 설치 전에 담당 선생님(생물정보학 ET)과 학교의 허가를 받으세요.</li>
+<li>사람 수 검증: 측정하는 동안 한 명이 수동 계수기로 지나간 사람 수를 세어 두면, STEP 수와 비교해 센서 정확도를 낼 수 있습니다.</li>
+</ul>
+</section>
+
+<section>
+<h2>7. 부품 목록</h2>
+<h3>준비한 것 점검</h3>
+<div class="tbl"><table>
+<tr><th>부품</th><th>판정</th><th>메모</th></tr>
+<tr><td>압전 소자 20개</td><td class="blue">OK</td><td>여분 2~4개가 있으면 좋습니다. 지름(27/35 mm)을 재서 와셔 크기를 정하세요.</td></tr>
+<tr><td>브리지 정류기(BR) 20개</td><td class="blue">OK</td><td>다리 있는 DIP형(DB107 등)인지 확인. MB6S 같은 표면실장형은 손납땜이 어렵습니다.</td></tr>
+<tr><td>와고 커넥터 20개</td><td class="brass">용도 변경</td><td>디스크↔BR은 납땜으로 잇고, 와고는 행 묶음에 씁니다. <b>5구 8개 + 3구 8개 = 16개</b>(1절 참고). 몇 구짜리인지 확인하세요.</td></tr>
+<tr><td>전선</td><td class="blue">OK</td><td>빨강·검정으로 나눠 쓰면 극성 실수가 줄어듭니다.</td></tr>
+<tr><td>납땜 도구</td><td class="red">필수</td><td>디스크↔BR 40곳 + BR 출력 40곳 = 약 80곳</td></tr>
+<tr><td>아크릴 판 2개 + 측면 고정</td><td class="blue">OK</td><td>상판 5 mm 이상. 가장자리는 경사 테두리나 테이프로 처리해 걸리지 않게.</td></tr>
+<tr><td>고무 반구 20개</td><td class="blue">OK</td><td>디스크 세라믹 가운데에 붙입니다.</td></tr>
+<tr><td>와셔 20개</td><td class="brass">크기 확인</td><td>디스크 <b>밑</b>의 받침 링. 27 mm 디스크 → 안지름 21~22 mm, 바깥지름 30 mm 이상</td></tr>
+<tr><td>아두이노 우노</td><td class="blue">OK</td><td>USB 케이블과 노트북 함께</td></tr>
+<tr><td>5.1 V 제너 1N4733A</td><td class="brass">수량 변경</td><td>1개 → <b>4개</b>(행마다 1개). 가능하면 BAT85 8개로 대체(2절 참고)</td></tr>
+<tr><td>저항 100 kΩ / 1 MΩ</td><td class="brass">수량 확정</td><td><b>각 5개</b>(4 + 여분). 1 MΩ는 직렬, 100 kΩ는 GND 쪽</td></tr>
+<tr><td>소형 브레드보드</td><td class="blue">OK</td><td>현장에서는 박스 안에 테이프로 고정. 나중에 만능기판으로 옮기면 더 확실합니다.</td></tr>
+</table></div>
+<h3>추가로 살 것 (S모드 필수)</h3>
+<div class="tbl"><table>
+<tr><th>부품</th><th>수량</th><th>이유</th></tr>
+<tr><td><b>스토퍼: M4 볼트 + 너트</b></td><td>6~9세트 (너트 2개씩)</td><td>가장 중요. 상판 처짐을 0.3~0.5 mm로 막아 세라믹 균열 방지</td></tr>
+<tr><td>세라믹 커패시터 10 nF</td><td>5</td><td>A핀 신호 안정, 채널끼리 섞임 방지</td></tr>
+<tr><td>BAT85 쇼트키 다이오드 (권장)</td><td>8~10</td><td>제너 대신 쓰면 측정 오차가 줄어듭니다</td></tr>
+<tr><td>미끄럼 방지 테이프·매트</td><td>1</td><td>아크릴 상판은 미끄럽습니다</td></tr>
+<tr><td>타일→아두이노 연결선 (랜선 2~3 m)</td><td>1</td><td>ROW 4개 + GND 4가닥 (4절)</td></tr>
+<tr><td>점퍼선 (수-수)</td><td>10~20</td><td>브레드보드 → 우노</td></tr>
+<tr><td>플라스틱 통 (박스)</td><td>1</td><td>우노·브레드보드 보관, 통행로 밖 책상 위</td></tr>
+<tr><td>수축튜브, 핫글루, 양면테이프, 전기테이프</td><td>조금씩</td><td>납땜 부위 보호, 디스크 테두리 고정</td></tr>
+<tr><td>바닥 케이블 덮개</td><td>1 (2 m)</td><td>연결선에 걸려 넘어지는 것 방지</td></tr>
+<tr><td>9 V 전지, 멀티미터</td><td>1</td><td>아두이노를 꽂기 전 보호 회로 확인 (A0 ≈ 0.82 V)</td></tr>
+</table></div>
+<h3>E모드용 (나중에 추가)</h3>
+<div class="tbl"><table>
+<tr><th>부품</th><th>수량</th></tr>
+<tr><td>전해 커패시터 47 µF 63 V</td><td>1</td></tr>
+<tr><td>제너 다이오드 1N4749A (24 V 1 W)</td><td>1</td></tr>
+<tr><td>저항 10 MΩ / 2.2 MΩ / 100 Ω (1/2 W)</td><td>각 1</td></tr>
+<tr><td>택트 스위치, 핀헤더 + 점퍼캡</td><td>1, 8세트</td></tr>
+<tr><td>BAT85 2개, 10 nF 1개</td><td>A4 보호용</td></tr>
+</table></div>
+</section>
+
+<section>
+<h2>8. 측정 코드</h2>
+<h3>아두이노 (우노에 업로드)</h3>
+<div class="codebox"><button class="copy" data-t="c1">복사</button><pre id="c1">// 유리프 압전 타일 5x4 측정 코드 — Arduino Uno
+// A0~A3 : ROW1~4 측정 노드 (R1 1MΩ / R2 100kΩ 분압)   → S모드
+// A4    : 저장 커패시터 노드 (R3 10MΩ / R4 2.2MΩ 분압) → E모드
+// 시리얼 115200. 'r' 를 보내면 RAW 파형 출력 켜기/끄기
+
+const float VREF = 5.00;                  // 멀티미터로 잰 5V 핀 실제 전압으로 바꿀 것
+const float R1 = 1000000.0, R2 = 100000.0;  // 실측 저항값으로 바꿀 것
+const float R3 = 10000000.0, R4 = 2200000.0;
+const float C_STORE = 47e-6;              // 47 µF
+
+const int ROW_PIN[4] = {A0, A1, A2, A3};
+const int CAP_PIN = A4;
+const int LED_PIN = 8;                    // 발걸음 표시용 (USB 전원 — 발전 증거 아님)
+
+const float TH_ON  = 1.0;                 // 발걸음 시작: 어느 행이든 1.0 V 초과
+const float TH_OFF = 0.3;                 // 발걸음 끝: 모든 행 0.3 V 미만이 50 ms 지속
+const unsigned long SAMPLE_US = 1000;     // 1 kHz (5채널 순차 읽기)
+const unsigned long NONE = 0xFFFFFFFF;
+
+float kRow, kCap, dt;
+bool inStep = false, rawMode = false;
+unsigned long lastSample, lastCapPrint, stepStart, quietSince, stepCount = 0;
+float peakV[4], energyJ[4];
+unsigned long firstHit[4];
+byte rawDiv = 0;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+  kRow = VREF / 1023.0 * (R1 + R2) / R2;   // ADC 값 → 행 버스 실제 전압
+  kCap = VREF / 1023.0 * (R3 + R4) / R4;   // ADC 값 → 커패시터 실제 전압
+  dt = SAMPLE_US * 1e-6;
+  Serial.println(F("# STEP,번호,시작ms,지속ms,피크1~4(V),에너지1~4(uJ),첫접촉1~4(ms,-1=없음)"));
+  Serial.println(F("# CAP,ms,Vcap(V),E=1/2CV^2(uJ)"));
+  lastSample = micros();
+}
+
+void endStep(unsigned long ms) {
+  stepCount++;
+  Serial.print(F("STEP,")); Serial.print(stepCount); Serial.print(',');
+  Serial.print(stepStart); Serial.print(','); Serial.print(ms - stepStart);
+  for (int i = 0; i &lt; 4; i++) { Serial.print(','); Serial.print(peakV[i], 2); }
+  for (int i = 0; i &lt; 4; i++) { Serial.print(','); Serial.print(energyJ[i] * 1e6, 3); }
+  for (int i = 0; i &lt; 4; i++) {
+    Serial.print(',');
+    if (firstHit[i] == NONE) Serial.print(-1); else Serial.print(firstHit[i]);
+  }
+  Serial.println();
+  inStep = false;
+  digitalWrite(LED_PIN, LOW);
+}
+
+void loop() {
+  if (Serial.available()) { if (Serial.read() == 'r') rawMode = !rawMode; }
+
+  unsigned long now = micros();
+  if (now - lastSample &lt; SAMPLE_US) return;
+  lastSample += SAMPLE_US;
+  if (now - lastSample &gt; 10 * SAMPLE_US) lastSample = now;   // 밀리면 재동기화
+
+  unsigned long ms = millis();
+  float v[4], vmax = 0;
+  for (int i = 0; i &lt; 4; i++) {
+    v[i] = analogRead(ROW_PIN[i]) * kRow;
+    if (v[i] &gt; vmax) vmax = v[i];
+  }
+
+  if (!inStep &amp;&amp; vmax &gt; TH_ON) {                 // 발걸음 시작
+    inStep = true; stepStart = ms; quietSince = 0;
+    for (int i = 0; i &lt; 4; i++) { peakV[i] = 0; energyJ[i] = 0; firstHit[i] = NONE; }
+    digitalWrite(LED_PIN, HIGH);
+  }
+
+  if (inStep) {
+    for (int i = 0; i &lt; 4; i++) {
+      if (v[i] &gt; peakV[i]) peakV[i] = v[i];
+      energyJ[i] += v[i] * v[i] / (R1 + R2) * dt;   // 부하(R1+R2)에 전달된 에너지
+      if (firstHit[i] == NONE &amp;&amp; v[i] &gt; TH_ON) firstHit[i] = ms - stepStart;
+    }
+    if (vmax &lt; TH_OFF) {
+      if (quietSince == 0) quietSince = ms;
+      else if (ms - quietSince &gt; 50) endStep(ms);
+    } else quietSince = 0;
+    if (inStep &amp;&amp; ms - stepStart &gt; 3000) endStep(ms);   // 3초 넘게 서 있으면 끊기
+  }
+
+  if (rawMode &amp;&amp; ++rawDiv &gt;= 4) {                // 250 Hz 파형 출력
+    rawDiv = 0;
+    Serial.print(F("RAW,")); Serial.print(ms);
+    for (int i = 0; i &lt; 4; i++) { Serial.print(','); Serial.print(v[i], 2); }
+    Serial.println();
+  }
+
+  if (ms - lastCapPrint &gt;= 1000) {               // 1초마다 저장 커패시터
+    lastCapPrint = ms;
+    float vc = analogRead(CAP_PIN) * kCap;
+    Serial.print(F("CAP,")); Serial.print(ms); Serial.print(',');
+    Serial.print(vc, 3); Serial.print(',');
+    Serial.println(0.5 * C_STORE * vc * vc * 1e6, 2);
+  }
+}
+</pre></div>
+<p class="small">출력 예: <code>STEP,12,53021,148,8.41,6.02,0.00,0.00,3.120,1.884,0.000,0.000,0,37,-1,-1</code> → 12번째 발걸음이고 148 ms 동안 지속, 1행이 먼저 눌리고 37 ms 뒤 2행이 눌렸다는 뜻입니다.</p>
+<h3>노트북에서 CSV로 저장 (Python)</h3>
+<div class="codebox"><button class="copy" data-t="c2">복사</button><pre id="c2"># pip install pyserial  /  python logger.py COM3   (맥: /dev/cu.usbmodemXXXX)
+import sys, serial, datetime
+
+port = sys.argv[1] if len(sys.argv) &gt; 1 else "COM3"
+name = datetime.datetime.now().strftime("piezo_%Y%m%d_%H%M%S.csv")
+with serial.Serial(port, 115200, timeout=1) as ser, open(name, "w", encoding="utf-8") as f:
+    print("저장 중:", name, "(끝내려면 Ctrl+C)")
+    try:
+        while True:
+            line = ser.readline().decode("utf-8", "ignore").strip()
+            if not line:
+                continue
+            stamp = datetime.datetime.now().isoformat(timespec="milliseconds")
+            f.write(stamp + "," + line + "\n")
+            f.flush()
+            if line.startswith("STEP"):
+                print(line)
+    except KeyboardInterrupt:
+        print("종료")
+</pre></div>
+</section>
+
+<section>
+<h2>9. 시험 순서</h2>
+<ol>
+<li><b>보정:</b> 멀티미터로 우노 5V 핀의 실제 전압과 R1·R2·R3·R4의 실제 저항값을 재서 코드 맨 위 숫자를 바꿉니다.</li>
+<li><b>보호 회로 확인:</b> 9 V 전지를 ROW1 입력에 연결했을 때 A0에서 약 0.82 V(= 9 × 100/1100)가 나오는지 확인합니다. 아두이노를 꽂기 전에 멀티미터로 먼저 확인하세요.</li>
+<li><b>책상 시험:</b> 디스크 1개 + BR 1개를 연결하고 손가락으로 눌러 STEP 줄이 찍히는지 봅니다. <i>(주의: 손가락 누름은 1.1~1.3 V인데 브리지가 약 0.7~1 V를 먹으므로 거의 0으로 읽힐 수 있다. 고장이 아니다. 발로 밟아 확인한다.)</i> 'r'을 보내 RAW 파형도 확인합니다.</li>
+<li><b>디스크 1개 하중 시험:</b> 와셔·디스크·고무 반구·상판 조각으로 하나만 만들어 체중을 천천히 실어 보고, 스토퍼 너트 높이를 조정합니다.</li>
+<li><b>타일 완성 후 실내 시험:</b> 여러 번 지나가며 행 순서와 에너지가 일정한지 확인합니다.</li>
+<li><b>저장 커패시터 자체 방전 측정 (E모드 전 필수):</b> 9 V 전지로 47 µF를 충전한 뒤 전지를 떼고, 밟지 않은 상태로 10분간 CAP 값을 기록합니다. 전해 커패시터의 누설 전류와 R3+R4의 누설이 합쳐진 감소 곡선이 나오며, E모드 결과를 이 값으로 보정합니다.</li>
+<li><b>현장 측정:</b> 방전 버튼을 누르고 S모드로 측정하면서 사람 수를 셉니다. 그다음 E모드로 같은 시간 동안 측정합니다.</li>
+</ol>
+</section>
+
+<section>
+<h2>10. 보고서에 적을 한계</h2>
+<ul>
+<li>BR 1개에서 다이오드 2개를 지나므로 약 1.4~2 V가 손실됩니다. 수십 V 펄스에서는 작지만, 약하게 밟았을 때는 비중이 커집니다.</li>
+<li>S모드 에너지는 1.1 MΩ 부하에 전달된 값입니다. E모드 에너지는 커패시터 충전 효율과 누설에 따라 달라지므로, 두 값이 다른 것이 정상입니다.</li>
+<li>디스크의 C_p(15 nF)와 R_opt 계산은 아직 가정값입니다. 실측하면 결과에 반영하세요.</li>
+<li>우노 ADC 1 kHz로는 3.3 kHz 링잉을 볼 수 없습니다. 발걸음 단위의 에너지와 계수용 측정이며, 링잉 파형은 기존 FFT 측정 결과를 인용하세요.</li>
+</ul>
+</section>
+
+</main>
+<script>
+document.querySelectorAll('.copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var t=document.getElementById(b.dataset.t).innerText;
+    try{navigator.clipboard.writeText(t).then(function(){b.textContent='복사됨';setTimeout(function(){b.textContent='복사'},1500)},function(){b.textContent='길게 눌러 복사'})}catch(e){b.textContent='길게 눌러 복사'}
+  });
+});
+</script>
+</body>
+</html>

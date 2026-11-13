@@ -1,0 +1,1340 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HAFS-108 압전 결정</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@500;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+:root{
+  --bg:#EDEFEE; --surface:#FFFFFF; --surface2:#E2E7E4; --sunk:#E6EAE8;
+  --text:#131A18; --muted:#5B6664; --faint:#7E8988; --line:#CBD3D0;
+  --accent:#C2611F; --accent-ink:#8F4512; --accent-soft:#F6E4D5;
+  --data:#256B7C; --data-soft:#DCEBEF;
+  --warn-soft:#F6EBD3;
+  --shadow:0 1px 2px rgba(19,26,24,.05), 0 8px 24px -14px rgba(19,26,24,.25);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1214; --surface:#171C1E; --surface2:#1F2629; --sunk:#12171A;
+    --text:#E9EEEC; --muted:#96A4A0; --faint:#778582; --line:#2B3437;
+    --accent:#E48B48; --accent-ink:#F3B689; --accent-soft:#3A2414;
+    --data:#6CB8CA; --data-soft:#13303A;
+    --warn-soft:#332810;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -14px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1214; --surface:#171C1E; --surface2:#1F2629; --sunk:#12171A;
+  --text:#E9EEEC; --muted:#96A4A0; --faint:#778582; --line:#2B3437;
+  --accent:#E48B48; --accent-ink:#F3B689; --accent-soft:#3A2414;
+  --data:#6CB8CA; --data-soft:#13303A;
+  --warn-soft:#332810;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -14px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;
+  font-size:16px; line-height:1.78; letter-spacing:-.003em;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:900px; margin:0 auto; padding-inline:20px; padding-block:0}
+
+h1,h2,h3{font-family:'Noto Serif KR','Noto Sans KR',serif; font-weight:700; text-wrap:balance; margin:0; line-height:1.38}
+h1{font-size:clamp(27px,5.2vw,43px); letter-spacing:-.02em}
+h2{font-size:clamp(21px,3.4vw,27px); letter-spacing:-.015em}
+h3{font-size:17px}
+h4{margin:0; font-weight:700}
+p{margin:0}
+a{color:var(--accent-ink)}
+figure{margin:0}
+
+.mono{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace; font-variant-numeric:tabular-nums}
+sub,sup{font-size:.68em; line-height:0}
+
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:500;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--faint);
+}
+.stack{display:flex; flex-direction:column}
+.g8{gap:8px} .g12{gap:12px} .g16{gap:16px} .g24{gap:24px} .g32{gap:32px}
+
+.mast{
+  border-bottom:1px solid var(--line);
+  background:
+    radial-gradient(120% 140% at 12% 0%, var(--accent-soft) 0%, transparent 58%),
+    var(--surface);
+}
+.mast .wrap{padding-block:clamp(34px,7vw,62px) clamp(28px,5vw,44px)}
+.mast-meta{
+  display:flex; flex-wrap:wrap; gap:6px 18px; align-items:baseline;
+  font-family:'IBM Plex Mono',monospace; font-size:11.5px;
+  letter-spacing:.11em; text-transform:uppercase; color:var(--faint);
+}
+.lede{font-size:clamp(15.5px,2.2vw,18px); color:var(--muted); max-width:62ch}
+
+.formula{
+  background:var(--sunk); border:1px solid var(--line);
+  border-left:3px solid var(--accent);
+  border-radius:3px; padding:16px 18px;
+}
+.formula .f{
+  font-family:'IBM Plex Mono',monospace; font-weight:600;
+  font-size:clamp(13px,2.7vw,20px); letter-spacing:-.01em;
+  color:var(--text); overflow-x:auto; white-space:nowrap; padding-bottom:2px;
+}
+.formula .cap{margin-top:9px; font-size:13px; color:var(--muted); line-height:1.75}
+
+section{border-top:1px solid var(--line)}
+section .wrap{padding-block:clamp(38px,6vw,62px)}
+.sec-head{display:flex; flex-direction:column; gap:10px; margin-bottom:26px}
+
+.note{
+  border-radius:3px; padding:14px 16px; font-size:14.5px; line-height:1.75;
+  border:1px solid var(--line); background:var(--surface);
+}
+.note.warn{background:var(--warn-soft); border-color:transparent}
+.note.key{background:var(--accent-soft); border-color:transparent}
+
+.term{
+  border-left:2px solid var(--data); background:var(--data-soft);
+  padding:11px 14px; border-radius:0 3px 3px 0; font-size:14px; line-height:1.72;
+}
+.term b{font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--data); letter-spacing:.01em}
+.term b + span::before{content:" — "; color:var(--faint)}
+
+.src{
+  display:inline-flex; align-items:center;
+  font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500;
+  padding:1.5px 7px; border-radius:2px; letter-spacing:.02em;
+  background:var(--data-soft); color:var(--data);
+  text-decoration:none; border:1px solid transparent;
+}
+a.src:hover,a.src:focus-visible{border-color:var(--data)}
+
+.lever{
+  display:grid; grid-template-columns:62px 1fr; gap:0 18px;
+  padding:26px 0; border-bottom:1px solid var(--line);
+}
+.lever:first-child{border-top:1px solid var(--line)}
+.lv-n{
+  font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:600;
+  color:var(--accent); letter-spacing:.06em; padding-top:5px;
+}
+.lv-body{display:flex; flex-direction:column; gap:11px; min-width:0}
+.lv-title{display:flex; flex-wrap:wrap; gap:7px 11px; align-items:baseline}
+.lv-body p{font-size:15px; color:var(--muted)}
+.lv-body p strong{color:var(--text); font-weight:500}
+.lv-take{
+  font-size:14px; padding:11px 14px; border-radius:3px;
+  background:var(--sunk); border-left:2px solid var(--accent); line-height:1.72;
+}
+@media (max-width:560px){
+  .lever{grid-template-columns:1fr; gap:10px}
+  .lv-n{padding-top:0}
+}
+
+.tbl-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:3px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; min-width:470px; font-size:14px}
+th,td{padding:9px 13px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top}
+thead th{
+  font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--faint);
+  background:var(--sunk); white-space:nowrap; vertical-align:bottom; line-height:1.5;
+}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; white-space:nowrap}
+tfoot td{background:var(--sunk); font-weight:600; border-top:1px solid var(--line); border-bottom:0}
+.hit{color:var(--accent); font-weight:600}
+tr.mark td{background:var(--accent-soft)}
+.cap-line{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--faint); line-height:1.75}
+
+.fig{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:18px 16px 14px}
+.fig svg{display:block; width:100%; max-width:100%; height:auto; color:var(--text)}
+.fig figcaption{margin-top:12px; font-size:13px; color:var(--muted); line-height:1.75}
+
+.occ-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:18px}
+.occ{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:16px}
+.occ h4{font-size:13px; margin-bottom:3px}
+.occ .sub{font-size:12.5px; color:var(--muted); margin-bottom:13px}
+.grid50{display:grid; grid-template-columns:repeat(10,1fr); gap:4px}
+.grid50 i{display:block; aspect-ratio:1; border-radius:50%; background:var(--surface2)}
+.occ .key{display:flex; flex-wrap:wrap; gap:5px 12px; margin-top:13px; font-size:12px; color:var(--muted)}
+.occ .key span{display:inline-flex; align-items:center; gap:5px; white-space:nowrap}
+.occ .key i{width:9px; height:9px; border-radius:50%; display:inline-block; flex:none}
+
+.viewer{
+  background:#0B0E10; color:#DDE4E3; border-radius:4px; overflow:hidden;
+  border:1px solid #232B2E; box-shadow:var(--shadow);
+}
+.vw-bar{
+  display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center;
+  padding:11px 13px; background:#11161A; border-bottom:1px solid #232B2E;
+}
+.seg{display:inline-flex; background:#0B0E10; border:1px solid #2A3338; border-radius:3px; overflow:hidden; flex-wrap:wrap}
+.seg button{
+  appearance:none; border:0; background:transparent; cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif; font-size:12.5px; font-weight:500;
+  color:#8D9B99; padding:6px 12px; border-right:1px solid #2A3338; line-height:1.5;
+}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:#E48B48; color:#12161A; font-weight:700}
+.seg button:focus-visible{outline:2px solid #E48B48; outline-offset:-2px}
+.chk{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:#8D9B99; cursor:pointer; user-select:none}
+.chk input{accent-color:#E48B48; width:14px; height:14px; margin:0; flex:none}
+.chk:focus-within{color:#DDE4E3}
+
+.vw-stage{display:grid; grid-template-columns:1fr 210px}
+@media (max-width:680px){.vw-stage{grid-template-columns:1fr}}
+#cv{display:block; width:100%; height:auto; aspect-ratio:1/.82; max-width:100%; touch-action:none; cursor:grab; background:#0B0E10}
+#cv:active{cursor:grabbing}
+.vw-side{border-left:1px solid #232B2E; padding:14px; display:flex; flex-direction:column; gap:15px; min-width:0}
+@media (max-width:680px){.vw-side{border-left:0; border-top:1px solid #232B2E}}
+.vw-side h4{
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:#6E7C7A; margin:0 0 8px;
+}
+.legend{display:flex; flex-direction:column; gap:1px}
+.legend button{
+  display:grid; grid-template-columns:12px 1fr auto; gap:9px; align-items:center;
+  width:100%; appearance:none; border:0; background:transparent; cursor:pointer;
+  padding:4px 6px; border-radius:2px; text-align:left;
+  font-family:'Noto Sans KR',sans-serif; font-size:12.5px; color:#B9C4C2; line-height:1.5;
+}
+.legend button:hover,.legend button:focus-visible{background:#1A2124; color:#EAF0EF; outline:none}
+.legend i{width:12px; height:12px; border-radius:50%; display:block; flex:none}
+.legend .lg-sub{color:#6E7C7A; font-size:11px}
+.legend em{font-family:'IBM Plex Mono',monospace; font-style:normal; font-size:11.5px; color:#77857F; font-variant-numeric:tabular-nums}
+.readout{display:flex; flex-direction:column; gap:6px}
+.readout div{display:flex; justify-content:space-between; gap:10px; font-size:12px; color:#8D9B99}
+.readout b{font-family:'IBM Plex Mono',monospace; font-weight:500; color:#E8EEEC; font-variant-numeric:tabular-nums; white-space:nowrap}
+.vw-foot{
+  padding:11px 14px; border-top:1px solid #232B2E; background:#11161A;
+  font-size:12.5px; color:#8D9B99; line-height:1.72;
+}
+.vw-foot b{color:#D3DCDA; font-weight:600}
+.vw-fallback{padding:20px; font-size:13.5px; color:#8D9B99; line-height:1.75}
+
+ol.refs{margin:0; padding-left:1.5em; display:flex; flex-direction:column; gap:11px; font-size:14px; color:var(--muted); line-height:1.72}
+ol.refs li::marker{font-family:'IBM Plex Mono',monospace; color:var(--faint); font-size:12px}
+ol.refs a{word-break:break-word}
+
+footer{border-top:1px solid var(--line); background:var(--surface)}
+footer .wrap{padding-block:26px; font-size:13px; color:var(--faint); line-height:1.8}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+<style>.repo-note{box-sizing:border-box;max-width:960px;margin:12px auto;padding:12px 16px;background:#fff7e0;color:#3a2e10;border:1px solid #e0c060;border-left:6px solid #c89a1e;border-radius:8px;font:14px/1.6 system-ui,-apple-system,'Noto Sans KR',sans-serif;overflow-wrap:anywhere;word-break:keep-all}.repo-note b{color:#5a3e00}.repo-note ul{margin:6px 0 0;padding-left:20px}.repo-note li{margin:2px 0}@media (max-width:600px){.repo-note{margin:8px;font-size:13.5px}}</style>
+</head>
+<body>
+<div class="repo-note" role="note"><b>저장소 메모 — 2026-09-18 스냅숏. 계속 고쳐지는 텍스트판은 <code>docs/05_material_design.md</code></b><ul><li>이 페이지에서 고친 것: d·g 순위(APC 850 = 7위, Ferroperm Pz24 = 8위), Sm<sup>3+</sup> CN 12 반경은 Shannon 표 값, 특허 US 7,686,974 발명자는 S. Priya 단독, 철회된 Q ≈ 6.9.</li><li>"상용 소재" 표의 UTA(PZT–PZN + Mn)는 상용품이 아니라 연구 조성이다. 상용 10종만 보면 ρ(d<sub>33</sub>, d·g) = +0.830이라, "d<sub>33</sub>만으로는 d·g를 예측할 수 없다"는 문장은 UTA 한 점 때문에 생긴 과장이다.</li><li>"릴랙서 성분이 ε<sub>r</sub>를 낮춘다"는 근거가 약하다. 특허는 ε<sub>r</sub> 감소를 주로 Mn 첨가 효과로 설명한다.</li><li>Yue 2025는 Mn을 넣은 PbTiO<sub>3</sub> 연구이며 반복 하중(피로) 실험은 없다. 효과는 Mn<sup>3+</sup> 우세 쌍극자에서 가장 컸다.</li><li>d<sub>31</sub> ≈ −0.4·d<sub>33</sub>는 PZT-4/5A/5H 계열에만 맞는다. 변성 PbTiO<sub>3</sub> 계열은 훨씬 작으므로 굽힘 소자 순위는 따로 확인해야 한다.</li><li>3D 모델 좌표(z(B) 0.4509, O2 0.3786)는 Noheda 2000 Table I의 Model II 값인데 Pb는 Model I 자리(원점)에 두었다. 자세한 내용은 <code>docs/05</code>와 CIF 파일 머리말 참고.</li></ul></div>
+
+
+<header class="mast">
+  <div class="wrap stack g24">
+    <div class="mast-meta">
+      <span>HAFS 유리프 압전 타일 연구</span><span>압전 타일 연구 5차시</span><span>2026-09-18</span>
+    </div>
+    <div class="stack g16">
+      <h1>밟는 속도에 맞춘 압전 결정</h1>
+      <p class="lede">
+        4차시 실측에서 이 디스크가 <strong>굽힘으로 동작하는 유니모프</strong>이고, 발걸음은
+        실측 공진(3,332 Hz)에서 세 자릿수 떨어진 <strong>준정적 영역</strong>이라는 것이 확인됐다.
+        그렇다면 최적화해야 할 값은 교과서가 첫 줄에 적어 두는 d<sub>33</sub>이 아니다.
+        이 문서는 그 판단에서 출발해 조성을 다시 설계하고, 결과를 원자 좌표 수준에서 제시한다.
+      </p>
+    </div>
+    <div class="formula">
+      <div class="f">(Pb<sub>0.96</sub>Sm<sub>0.04</sub>)[(Zr<sub>0.52</sub>Ti<sub>0.48</sub>)<sub>0.88</sub>(Zn<sub>1/3</sub>Nb<sub>2/3</sub>)<sub>0.10</sub>Mn<sub>0.02</sub>]O<sub>3</sub></div>
+      <div class="cap">
+        MPB 조성 유지 · 정방정 <span class="mono">P4mm</span> 기반 · [001] 배향 조직화 ·
+        공공(vacancy) 없이 전하 중성 성립
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">00 · 기호 읽는 법</span>
+      <h2>d₃₃의 3과 3은 무엇인가</h2>
+      <p class="lede" style="font-size:15px">
+        이 문서의 기호를 처음 나올 때마다 정의한다. 특히 아래 첨자 규칙을 모르면
+        “우리 소자에 d<sub>33</sub>을 대입하면 안 된다”는 이 연구의 핵심 판단이 성립하지 않는다.
+      </p>
+    </div>
+
+    <div class="stack g16">
+      <div class="term">
+        <b>압전 효과</b><span>결정을 누르면 전압이 생기고, 전압을 걸면 결정이 변형되는 성질.
+        결정 안에 <strong>대칭 중심이 없어야</strong> 일어난다. 양이온과 음이온의 무게중심이 애초에 어긋나 있어야
+        누를 때 그 어긋남이 변하고, 변한 만큼이 표면 전하로 나타난다.
+        §03의 3D 모델에서 이 어긋남을 직접 확인할 수 있다.</span>
+      </div>
+
+      <div class="term">
+        <b>분극 (polarization) · 폴링 (poling)</b><span>단위포마다 생긴 전기 쌍극자가 한 방향으로 정렬된 상태가 분극이다.
+        갓 구워낸 세라믹은 미소 영역마다 방향이 제각각이라 전체로는 0이다.
+        고온에서 강한 직류 전계를 걸어 방향을 맞추는 공정이 폴링이고, 이때 정해진 축을
+        <strong>3축</strong>이라 부른다. 압전 상수의 첨자는 모두 이 축을 기준으로 붙는다.</span>
+      </div>
+
+      <div class="term">
+        <b>첨자 규칙 d<sub>ij</sub></b><span>앞 숫자 i는 <strong>전기가 나오는 방향</strong>(전극면의 법선),
+        뒤 숫자 j는 <strong>힘이 걸리는 방향</strong>. 3은 분극축, 1과 2는 그에 수직인 두 축이다.
+        따라서 d<sub>33</sub>은 분극축으로 누르고 분극축에서 전하를 뽑는 경우,
+        d<sub>31</sub>은 분극축에 <strong>수직으로</strong> 늘어나거나 줄어들면서 분극축에서 전하를 뽑는 경우다.</span>
+      </div>
+
+      <figure class="fig">
+        <svg viewBox="0 0 660 296" role="img" aria-label="왼쪽은 분극축 방향으로 누르는 33 모드, 오른쪽은 황동판 위 세라믹이 굽으면서 면내 방향으로 변형되는 31 모드. 우리 디스크는 오른쪽에 해당한다.">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,1 10,5 0,9" fill="currentColor"></polygon>
+            </marker>
+            <marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,1 10,5 0,9" fill="#C2611F"></polygon>
+            </marker>
+          </defs>
+
+          <line x1="330" y1="26" x2="330" y2="276" stroke="currentColor" stroke-width="1" opacity="0.18"></line>
+
+          <text x="20" y="26" font-size="13" font-weight="600" fill="currentColor">d₃₃ 모드 — 문헌값이 측정된 조건</text>
+          <text x="20" y="46" font-size="11.5" fill="currentColor" opacity="0.62">힘 ∥ 분극축 · 두께 방향으로 눌린다</text>
+
+          <line x1="52" y1="230" x2="52" y2="98" stroke="currentColor" stroke-width="1.2" opacity="0.55" marker-end="url(#ah)"></line>
+          <text x="40" y="94" font-size="11" fill="currentColor" opacity="0.62">3</text>
+          <line x1="52" y1="230" x2="100" y2="230" stroke="currentColor" stroke-width="1.2" opacity="0.55" marker-end="url(#ah)"></line>
+          <text x="106" y="234" font-size="11" fill="currentColor" opacity="0.62">1</text>
+
+          <rect x="130" y="118" width="116" height="96" fill="currentColor" opacity="0.07" stroke="currentColor" stroke-width="1.2"></rect>
+          <line x1="130" y1="118" x2="246" y2="118" stroke="#C2611F" stroke-width="4"></line>
+          <line x1="130" y1="214" x2="246" y2="214" stroke="#C2611F" stroke-width="4"></line>
+          <text x="254" y="115" font-size="11" fill="#C2611F">＋</text>
+          <text x="254" y="222" font-size="11" fill="#C2611F">−</text>
+          <text x="254" y="170" font-size="11" fill="currentColor" opacity="0.62">전극</text>
+
+          <line x1="188" y1="204" x2="188" y2="132" stroke="#C2611F" stroke-width="1.8" marker-end="url(#ahA)"></line>
+          <text x="196" y="170" font-size="11.5" fill="#C2611F" font-weight="600">P</text>
+
+          <line x1="160" y1="72" x2="160" y2="110" stroke="currentColor" stroke-width="1.6" marker-end="url(#ah)"></line>
+          <line x1="216" y1="72" x2="216" y2="110" stroke="currentColor" stroke-width="1.6" marker-end="url(#ah)"></line>
+          <text x="136" y="66" font-size="11.5" fill="currentColor">가한 힘 F</text>
+
+          <text x="130" y="248" font-size="11.5" fill="currentColor" opacity="0.72">두께가 줄어든다 → 전하</text>
+          <text x="130" y="268" font-size="11.5" fill="currentColor" opacity="0.72" font-weight="600">계수 = d₃₃</text>
+
+          <text x="356" y="26" font-size="13" font-weight="600" fill="currentColor">우리 디스크 — 유니모프 굽힘</text>
+          <text x="356" y="46" font-size="11.5" fill="currentColor" opacity="0.62">힘 ⊥ 면 · 굽힘이 면내 변형으로 바뀐다</text>
+
+          <polygon points="372,196 386,220 358,220" fill="currentColor" opacity="0.30"></polygon>
+          <polygon points="616,196 630,220 602,220" fill="currentColor" opacity="0.30"></polygon>
+          <line x1="348" y1="220" x2="640" y2="220" stroke="currentColor" stroke-width="1" opacity="0.30"></line>
+
+          <path d="M372,150 Q494,196 616,150 L616,162 Q494,208 372,162 Z" fill="#C2611F" opacity="0.45"></path>
+          <path d="M372,162 Q494,208 616,162 L616,180 Q494,226 372,180 Z" fill="currentColor" opacity="0.22"></path>
+
+          <text x="638" y="146" font-size="11" fill="#C2611F" text-anchor="end">PZT 세라믹</text>
+          <text x="638" y="198" font-size="11" fill="currentColor" opacity="0.62" text-anchor="end">황동판</text>
+
+          <line x1="494" y1="80" x2="494" y2="164" stroke="currentColor" stroke-width="1.6" marker-end="url(#ah)"></line>
+          <text x="468" y="74" font-size="11.5" fill="currentColor">발로 누름</text>
+
+          <line x1="410" y1="120" x2="578" y2="120" stroke="#C2611F" stroke-width="1.6" marker-start="url(#ahA)" marker-end="url(#ahA)"></line>
+          <text x="494" y="112" font-size="11.5" fill="#C2611F" text-anchor="middle" font-weight="600">면내 변형 ε₁</text>
+
+          <line x1="404" y1="176" x2="404" y2="152" stroke="#C2611F" stroke-width="1.6" marker-end="url(#ahA)"></line>
+          <text x="386" y="148" font-size="11" fill="#C2611F">P</text>
+
+          <text x="356" y="248" font-size="11.5" fill="currentColor" opacity="0.72">면내로 늘거나 줄면서 → 전하</text>
+          <text x="356" y="268" font-size="11.5" fill="currentColor" opacity="0.72" font-weight="600">계수 = d₃₁ (＋ 굽힘에 의한 기계적 증폭)</text>
+        </svg>
+        <figcaption>
+          문헌의 d<sub>33</sub>은 왼쪽 조건에서 측정된 값이다. 우리 디스크는 오른쪽이다.
+          4차시 연구일지에서 <span class="mono">F = Q / d₃₃</span>으로 가한 힘을 역산한 열을 삭제한 이유가 이것이다 —
+          모드가 다르므로 대입 자체가 성립하지 않는다.
+        </figcaption>
+      </figure>
+
+      <div class="term">
+        <b>d (압전 전하 상수), 단위 pC/N</b><span>1 N의 힘당 표면에 몇 피코쿨롱(10⁻¹² C)의 전하가 생기는가.
+        <strong>전하</strong>를 세는 값이다.</span>
+      </div>
+      <div class="term">
+        <b>g (압전 전압 상수), 단위 10⁻³ V·m/N</b><span>같은 응력에서 소재 내부에 생기는 <strong>전계</strong>의 크기.
+        전하가 같아도 소재가 전기를 잘 머금는 성질이면 전압은 낮아진다. 그래서
+        <span class="mono">g = d / (ε₀ε<sub>r</sub>)</span> 이다.</span>
+      </div>
+      <div class="term">
+        <b>ε<sub>r</sub> (비유전율)</b><span>그 물질이 진공보다 몇 배 더 전하를 담아 두는가. 축전기 용량을 키우는 성질이고,
+        발전 관점에서는 <strong>스스로 만든 전하를 스스로 가둬 버리는</strong> 손해다.
+        ε₀ = 8.854 × 10⁻¹² F/m는 진공의 유전율.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">01 · 설계 목표의 재정의</span>
+      <h2>왜 d₃₃이 아니라 d·g 인가</h2>
+    </div>
+    <div class="stack g16">
+      <p>
+        압전 소재를 소개하는 글은 거의 언제나 d<sub>33</sub>을 성능 지표로 쓴다. 그런데 소자가 한 번 눌릴 때
+        실제로 저장하는 전기 에너지는 전하와 전압의 곱이다. 전하는 d에, 전압은 g에 비례하므로
+        에너지는 두 값의 <strong>곱</strong>에 비례한다.
+      </p>
+      <div class="formula">
+        <div class="f">U = ½ (d · g) σ² V&nbsp;&nbsp;,&nbsp;&nbsp;d · g = d² / (ε₀ ε<sub>r</sub>)</div>
+        <div class="cap">
+          U: 한 번 누를 때 저장되는 에너지 [J] · σ: 응력 [N/m²] · V: 소재 부피 [m³].
+          비공진 하베스팅에서 소재 선택 기준이 d 단독이 아니라 곱 d·g라는 것은
+          Priya(2010)가 별도 논문으로 정리한 판단 기준이다.
+          <a class="src" href="https://ieeexplore.ieee.org/document/5610546/">Priya 2010</a>
+        </div>
+      </div>
+      <p>
+        오른쪽 형태를 보면 문제가 드러난다. d를 키우려면 보통 ε<sub>r</sub>가 <strong>더 크게</strong> 따라 오른다.
+        d는 제곱이지만 ε<sub>r</sub>는 분모에 그대로 있으므로, ε<sub>r</sub>가 d²보다 빠르게 커지는 순간
+        d·g는 오히려 줄어든다. 이것이 가설이 아니라 실제로 일어나는 일인지 상용 소재로 확인했다.
+      </p>
+
+      <div class="tbl-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>상용 소재</th><th>d₃₃<br>순위</th>
+              <th>d₃₃ (pC/N)<br><span style="font-weight:400;text-transform:none;letter-spacing:0">d·g ÷ g₃₃로 역산</span></th>
+              <th>g₃₃<br>(10⁻³ m²/C)</th><th>d·g<br>(10⁻¹⁵ m²/N)</th><th>d·g<br>순위</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>EDO EC-98</td><td class="num">1</td><td class="num">730</td><td class="num">15.6</td><td class="num">11,388</td><td class="num">5</td></tr>
+            <tr><td>Morgan PZT-507</td><td class="num">2</td><td class="num">700</td><td class="num">20.0</td><td class="num">14,000</td><td class="num">2</td></tr>
+            <tr><td>Fuji C-8</td><td class="num">3</td><td class="num">627</td><td class="num">19.7</td><td class="num">12,351</td><td class="num">4</td></tr>
+            <tr><td>APC 855</td><td class="num">4</td><td class="num">600</td><td class="num">21.0</td><td class="num">12,600</td><td class="num">3</td></tr>
+            <tr><td>Channel 5600 Navy</td><td class="num">5</td><td class="num">505</td><td class="num">22.0</td><td class="num">11,110</td><td class="num">6</td></tr>
+            <tr><td>APC 850</td><td class="num">6</td><td class="num">400</td><td class="num">26.0</td><td class="num">10,400</td><td class="num">7</td></tr>
+            <tr><td>EDO EC-65</td><td class="num">7</td><td class="num">380</td><td class="num">25.0</td><td class="num">9,500</td><td class="num">9</td></tr>
+            <tr><td>Channel 5400 Navy</td><td class="num">8</td><td class="num">300</td><td class="num">26.1</td><td class="num">7,830</td><td class="num">11</td></tr>
+            <tr class="mark"><td>UTA (PZT–PZN + Mn)</td><td class="num">9</td><td class="num">291</td><td class="num hit">55.6</td><td class="num hit">16,168</td><td class="num hit">1</td></tr>
+            <tr><td>Dongil D211</td><td class="num">10</td><td class="num">210</td><td class="num">42.0</td><td class="num">8,820</td><td class="num">10</td></tr>
+            <tr><td>Ferroperm Pz24</td><td class="num">11</td><td class="num">190</td><td class="num">54.0</td><td class="num">10,260</td><td class="num">8</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cap-line">
+        출처: US 7,686,974 B2, FIG. 13 — 하나의 문서에 실린 d·g와 g₃₃ 값이므로 서로 일관된다.
+        d₃₃은 두 값에서 역산했다(d = d·g ÷ g).
+      </p>
+
+      <div class="note key">
+        <strong>순위상관계수로 확인한 결과.</strong> 11종에 대해 Spearman 순위상관을 계산하면
+        <span class="mono">ρ(d₃₃, g₃₃) = −0.955</span> — d가 큰 소재일수록 g는 거의 예외 없이 작다.
+        두 값의 맞교환이 실재한다는 뜻이다. 그리고
+        <span class="mono">ρ(d₃₃, d·g) = +0.518</span>, <span class="mono">Pearson r = +0.399</span>로
+        상관이 약하다. <strong>d₃₃만 보고는 d·g를 예측할 수 없다.</strong>
+        실제로 d₃₃ 1위(730 pC/N)는 d·g 5위이고, d·g 1위 소재의 d₃₃은 291 pC/N로 9위다.
+      </div>
+
+      <div class="term">
+        <b>Spearman 순위상관 ρ</b><span>두 값을 크기 순으로 줄 세웠을 때 순위가 얼마나 같은 방향으로 움직이는지를
+        −1에서 +1 사이로 나타낸 수. +1은 순위 완전 일치, −1은 완전히 거꾸로, 0은 무관.
+        값 자체가 아니라 <strong>순서</strong>만 보므로 단위가 다른 두 물성을 비교할 때 적합하다.</span>
+      </div>
+
+      <h3 style="margin-top:12px">그래서 조성을 바꾸면 에너지가 얼마나 늘어나는가</h3>
+      <p>
+        U = ½(d·g)σ²V에서 같은 힘으로 같은 부피를 누른다면 σ와 V가 같으므로,
+        에너지 비는 d·g의 비와 정확히 같다. 표의 최하위 소재를 1.00으로 놓고 계산했다.
+      </p>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>소재</th><th>d·g (10⁻¹⁵ m²/N)</th><th>같은 조건에서의 에너지 비</th></tr></thead>
+          <tbody>
+            <tr><td>Channel 5400 Navy (기준)</td><td class="num">7,830</td><td class="num">1.00 배</td></tr>
+            <tr><td>APC 850</td><td class="num">10,400</td><td class="num">1.33 배</td></tr>
+            <tr><td>Morgan PZT-507</td><td class="num">14,000</td><td class="num">1.79 배</td></tr>
+            <tr><td>UTA (PZT–PZN + Mn)</td><td class="num">16,168</td><td class="num">2.06 배</td></tr>
+            <tr><td>[001] 조직화 PMN–PZT</td><td class="num">59,000</td><td class="num hit">7.54 배</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note">
+        <strong>이 숫자가 조성 설계의 목표치다.</strong> 4차시에 확인한 것처럼 급식실 전면 포설(581장)로도
+        실용 발전에는 한참 못 미친다. 조성을 바꿔 7배를 얻어도 그 결론은 바뀌지 않는다.
+        다만 <strong>센서로 쓰겠다는 방향</strong>에서는 7배가 결정적이다.
+        발걸음 한 번이 만드는 전압이 7배면, 잡음 바닥 위로 확실히 올라오는 신호가 되기 때문이다.
+      </div>
+
+      <div class="note key">
+        <strong>우리 소자 조건에서의 단서.</strong> 위 표의 d·g는 모두 33 모드 측정값이다.
+        굽힘으로 동작하는 우리 디스크에 걸리는 계수는 d<sub>31</sub>·g<sub>31</sub>이고,
+        d<sub>31</sub>은 대략 d<sub>33</sub>의 −0.4배 수준이라 절대값은 훨씬 작다.
+        그러나 <strong>소재 사이의 비(比)</strong>는 같은 방향으로 움직이므로 순위 비교에는 쓸 수 있다.
+        보고서에는 “33 모드 기준의 상대 비교”라고 명시한다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">02 · 설계 레버</span>
+      <h2>다섯 단계로 조성을 쌓는다</h2>
+      <p class="lede" style="font-size:15px">
+        각 단계는 앞 단계가 만든 제약을 받아 결정된다. 순서를 바꾸면 성립하지 않으므로 번호를 붙였다.
+        모든 단계의 목표는 하나 — <strong>d를 지키면서 ε<sub>r</sub>를 낮춘다.</strong>
+      </p>
+    </div>
+
+    <div>
+      <article class="lever">
+        <div class="lv-n">LEVER 01</div>
+        <div class="lv-body">
+          <div class="lv-title">
+            <h3>기반 — MPB 조성 Zr : Ti = 52 : 48 유지</h3>
+            <a class="src" href="https://pubs.aip.org/aip/apl/article-abstract/74/14/2059/74096/A-monoclinic-ferroelectric-phase-in-the-Pb-Zr1">Noheda 1999, APL 74, 2059</a>
+          </div>
+          <div class="term">
+            <b>페로브스카이트 ABO₃</b><span>정육면체의 꼭짓점에 큰 양이온 A, 중심에 작은 양이온 B,
+            여섯 면의 중심에 산소가 놓인 구조. 산소 6개가 B를 둘러싼 <strong>팔면체</strong>를 이루고,
+            그 팔면체 안에서 B가 중심을 벗어나 있는 것이 압전성의 근원이다.
+            PZT는 A = Pb, B = Zr 또는 Ti다.</span>
+          </div>
+          <div class="term">
+            <b>MPB (상경계, Morphotropic Phase Boundary)</b><span>조성을 바꿀 때 결정 구조가 한 형태에서
+            다른 형태로 바뀌는 경계. PZT에서는 Zr가 많으면 <strong>능면체정</strong>(분극이 정육면체 대각선 ⟨111⟩ 방향),
+            Ti가 많으면 <strong>정방정</strong>(분극이 모서리 ⟨001⟩ 방향)이고, 그 경계가 Zr:Ti ≈ 52:48이다.
+            여기서 압전 응답이 최대가 된다.</span>
+          </div>
+          <p>
+            최대가 되는 이유는 오랫동안 “두 구조의 영역이 섞여 있어 전환이 쉽기 때문”으로 설명됐다.
+            그러나 싱크로트론 X선 분말 회절로 <strong>단사정(monoclinic, 공간군 Cm) 중간상</strong>이
+            실제로 존재한다는 것이 밝혀졌다. 단사정에서는 분극 벡터가 ⟨001⟩과 ⟨111⟩ 사이를
+            <strong>연속적으로 회전</strong>할 수 있다. 계단처럼 튀는 것이 아니라 미끄러지듯 돌아가므로
+            작은 응력에도 분극이 크게 반응한다.
+          </p>
+          <div class="lv-take">
+            <strong>결정:</strong> 기반 조성을 MPB에서 벗어나게 하는 어떤 치환도 허용하지 않는다.
+            아래의 모든 도핑은 §04의 허용인자 t를 페로브스카이트 안정 구간에 두는 범위로 제한된다.
+          </div>
+        </div>
+      </article>
+
+      <article class="lever">
+        <div class="lv-n">LEVER 02</div>
+        <div class="lv-body">
+          <div class="lv-title">
+            <h3>B자리 — Zr/Ti의 10 %를 (Zn<sub>1/3</sub>Nb<sub>2/3</sub>)로 치환</h3>
+            <a class="src" href="https://pubs.aip.org/aip/apl/article-abstract/88/3/032903/117775/Realization-of-high-energy-density-polycrystalline">Islam &amp; Priya 2006, APL 88, 032903</a>
+          </div>
+          <div class="term">
+            <b>릴랙서 (relaxor)</b><span>B자리에 <strong>원자가가 서로 다른 두 이온</strong>(여기서는 Zn<sup>2+</sup>와 Nb<sup>5+</sup>)이
+            무작위로 섞여 들어간 상태. 국소적으로 전하가 들쭉날쭉해지면서 수 나노미터 크기의
+            작은 분극 영역이 생긴다. 이 영역은 잘 움직여 d를 올리지만 큰 도메인처럼 통째로 뒤집히지는 않아
+            ε<sub>r</sub>의 증가는 제한된다. 평균 원자가는 (2 + 5×2)/3 = 4로 Zr·Ti와 같아 전하 균형을 깨지 않는다.</span>
+          </div>
+          <p>
+            Islam과 Priya는 g가 커지는 조건을 |d| = ε<sup>n</sup> 꼴로 유도하고, 지수 n이 1에 가까울수록
+            g가 급격히 커진다는 것을 보였다. 실제로
+            <strong>0.9 Pb(Zr<sub>0.52</sub>Ti<sub>0.48</sub>)O₃ – 0.1 Pb(Zn<sub>1/3</sub>Nb<sub>2/3</sub>)O₃ + 0.7 wt % MnCO₃</strong>
+            조성에서 n = 1.151, g<sub>33</sub> = 55.56 × 10⁻³ m²/C, d<sub>33</sub> = 291 pC/N를 얻어
+            d·g = 16,168 × 10⁻¹⁵ m²/N를 기록했다.
+          </p>
+          <p>
+            이 값들을 <span class="mono">ε<sub>r</sub> = d / (ε₀ g)</span>로 되돌리면
+            <strong>ε<sub>r</sub> ≈ 592</strong>가 나온다. 고성능 연질 PZT가 3,000–3,400인 것과 비교하면 약 1/5.7이다.
+            d<sub>33</sub>을 절반으로 줄이는 대신 ε<sub>r</sub>를 6분의 1로 낮춰 d·g를 2배 이상 올린 것이
+            이 조성의 실체다.
+          </p>
+          <div class="lv-take">
+            <strong>결정:</strong> 이 조성을 채택하되, 단위포 표기를 위해 몰분율로 환산해
+            B자리 점유율을 (Zr, Ti) 0.88 / (Zn<sub>1/3</sub>Nb<sub>2/3</sub>) 0.10 / Mn 0.02로 둔다.
+          </div>
+        </div>
+      </article>
+
+      <article class="lever">
+        <div class="lv-n">LEVER 03</div>
+        <div class="lv-body">
+          <div class="lv-title">
+            <h3>A자리 — Sm<sup>3+</sup> 4 %, 국소 구조 불균질성</h3>
+            <a class="src" href="https://www.nature.com/articles/s41563-018-0034-4">Li 2018, Nat. Mater. 17, 349</a>
+            <a class="src" href="https://www.nature.com/articles/ncomms13089">Yan 2016, Nat. Commun. 7, 13089</a>
+          </div>
+          <div class="term">
+            <b>국소 구조 불균질성 (local structural heterogeneity)</b><span>크기와 전하가 다른 이온을 소량 넣으면
+            그 주변 수 나노미터가 나머지와 다른 형태로 일그러진다. 이 일그러짐이 여러 상(相)의
+            에너지 차이를 줄여 <strong>자유에너지 지형을 평탄하게</strong> 만든다.
+            평탄한 지형에서는 분극 방향을 바꾸는 데 드는 힘이 작아지므로 d가 커진다.</span>
+          </div>
+          <p>
+            Li 등은 Sm을 넣은 PMN–PT에서 d<sub>33</sub> = 1,500 pC/N, ε<sub>33</sub>/ε₀ &gt; 13,000을 얻었다.
+            d는 최고 기록이지만 ε도 함께 폭증했다. d·g = d²/(ε₀ε<sub>r</sub>)에 넣어 보면
+            <span class="mono">(1500×10⁻¹²)² / (8.854×10⁻¹² × 13000) ≈ 19,500 × 10⁻¹⁵ m²/N</span>로,
+            d<sub>33</sub>이 5배인데도 UTA 조성(16,168)보다 20 % 나은 데 그친다.
+          </p>
+          <p>
+            같은 Sm으로 정반대 전략을 쓴 사례가 있다. Yan 등은
+            <strong>(Pb<sub>0.8725</sub>Sm<sub>0.085</sub>)(Ti<sub>0.98</sub>Mn<sub>0.02</sub>)O₃</strong>를
+            [001]로 조직화해 d<sub>33</sub>을 53 → 127 pC/N로 올리면서 ε<sub>r</sub>는 오히려 낮춰
+            g<sub>33</sub> = 115 × 10⁻³ Vm/N라는 단일상 산화물 최고값을 얻었다. 역산하면
+            <strong>ε<sub>r</sub> ≈ 125</strong> — PZT-5H의 약 1/27이다.
+          </p>
+          <div class="lv-take">
+            <strong>결정:</strong> Sm을 4 %로 <em>제한</em>한다. 지형 평탄화 효과는 취하되
+            ε가 폭증하는 구간에는 들어가지 않는 선. 또한 Sm<sup>3+</sup>는 Pb<sup>2+</sup> 자리에 들어가
+            전하가 +1 남으므로, 반드시 다음 레버의 억셉터와 짝을 이뤄야 한다.
+          </div>
+        </div>
+      </article>
+
+      <article class="lever">
+        <div class="lv-n">LEVER 04</div>
+        <div class="lv-body">
+          <div class="lv-title">
+            <h3>B자리 — Mn<sup>2+</sup> 2 %, 결함 쌍극자로 도메인벽 고정</h3>
+            <a class="src" href="https://pubs.aip.org/aip/jap/article/138/17/174103/3370869/Valence-state-dependent-defect-engineering-in-Mn">Yue 2025, JAP 138, 174103</a>
+          </div>
+          <div class="term">
+            <b>도메인 · 도메인벽 · 외인성 기여</b><span>세라믹 안에서 분극 방향이 같은 미소 영역이 도메인,
+            그 경계면이 도메인벽이다. 응력을 받으면 도메인벽이 옆으로 밀려 이동하는데, 이 움직임이 만드는 응답을
+            <strong>외인성(extrinsic) 기여</strong>라 한다. d를 키우지만 ε<sub>r</sub>를 <strong>훨씬 더</strong> 키우고,
+            반복 하중에서 가장 먼저 열화된다.</span>
+          </div>
+          <div class="term">
+            <b>억셉터 도핑 · 산소 공공 · 결함 쌍극자</b><span>Mn<sup>2+</sup>가 Ti<sup>4+</sup> 자리에 들어가면
+            전하가 2만큼 모자란다. 결정은 이를 메우려고 산소를 하나 비워 <strong>산소 공공</strong>
+            V<sub>O</sub><sup>••</sup>을 만든다. 전하가 모자란 Mn과 양전하처럼 행동하는 빈자리가 서로 붙어
+            <strong>결함 쌍극자</strong> (Mn″<sub>Ti</sub> – V<sub>O</sub><sup>••</sup>)를 이루고,
+            이것이 말뚝처럼 박혀 도메인벽의 이동을 막는다. 이런 도핑을 받은 소재를
+            <strong>경질(hard)</strong> 압전체라 부른다.</span>
+          </div>
+          <p>
+            도메인벽을 묶으면 d가 깎이므로 보통은 손해로 본다. 그러나 <strong>타일은 하루 수천 번 밟히는 소자</strong>다.
+            외인성 기여는 반복 하중에서 먼저 무너지는 성분이고, 동시에 ε<sub>r</sub>를 부풀리는 주범이다.
+            ε<sub>r</sub>를 억제하면 g = d/(ε₀ε<sub>r</sub>)는 오른다. Yan 등의 상장(phase-field) 시뮬레이션도
+            <strong>조직화된 재료에서는 도메인벽 운동의 기여가 사실상 0</strong>이라는 것을 보였다 —
+            어차피 쓰지 않을 성분이라면 묶어서 손실과 ε를 줄이는 쪽이 이득이다.
+          </p>
+          <div class="term">
+            <b>Q<sub>m</sub> (기계적 품질계수) · tan δ (유전손실)</b><span>Q<sub>m</sub>은 진동이 얼마나 오래 유지되는지,
+            tan δ는 전기 에너지가 열로 얼마나 새는지를 나타낸다. 억셉터 도핑은 Q<sub>m</sub>을 올리고 tan δ를 내린다.
+            (4차시의 Q ≈ 6.9는 피팅 구간이 한 주기뿐이라 이후 <strong>철회</strong>했다. 이 수치와 비교하지 않는다.)</span>
+          </div>
+          <div class="lv-take">
+            <strong>결정:</strong> Mn 2 %를 넣는다. 목적은 ① ε<sub>r</sub> 억제로 g 확보
+            ② Sm 도너의 전하 보상 ③ 반복 하중 내구성, 세 가지다.
+          </div>
+        </div>
+      </article>
+
+      <article class="lever">
+        <div class="lv-n">LEVER 05</div>
+        <div class="lv-body">
+          <div class="lv-title">
+            <h3>미세구조 — [001] 배향 조직화 (TGG)</h3>
+            <a class="src" href="https://pubs.aip.org/aip/apl/article-abstract/102/4/042903/237061/Giant-energy-density-in-001-textured-Pb-Mg1-3Nb2-3">Yan 2013, APL 102, 042903</a>
+          </div>
+          <div class="term">
+            <b>조직화 (texturing) · TGG · Lotgering 계수 f</b><span>세라믹은 수많은 결정립이 제각각 방향으로
+            모인 덩어리다. 판상(板狀) 씨앗 결정을 테이프 캐스팅으로 눕혀 정렬한 뒤 소결하면
+            주변 결정립이 그 씨앗을 본떠 같은 방향으로 자란다. 이것이 Templated Grain Growth.
+            얼마나 정렬됐는지는 X선 회절 봉우리의 세기 비로 계산하는 <strong>Lotgering 계수 f</strong>로 나타내며,
+            f = 0이면 무작위, f = 1이면 단결정처럼 완전 정렬이다.</span>
+          </div>
+          <p>
+            정방정 페로브스카이트는 [001] 방향에서 <strong>d가 최대이면서 동시에 ε<sub>r</sub>가 최소</strong>다.
+            g = d/(ε₀ε<sub>r</sub>)이므로 두 효과가 같은 방향으로 겹친다.
+            레버 02–04가 조성으로 ε를 낮췄다면, 이 레버는 <strong>방향으로</strong> 한 번 더 낮춘다.
+            Yan 등은 f ≈ 0.9의 PMN–PZT에서 d·g = <strong>59,000 × 10⁻¹⁵ m²/N</strong>
+            (상용 최고 조성 대비 +359 %)를 얻었다.
+          </p>
+          <div class="lv-take">
+            <strong>결정:</strong> f ≳ 0.9를 목표로 한다. 조성의 잠재력을 실제 값으로 바꾸는 단계이자,
+            <strong>학교에서 재현할 수 없는 단계</strong>이기도 하다(§06).
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">03 · 3D 결정 구조</span>
+      <h2>단위포를 직접 돌려 본다</h2>
+      <p class="lede" style="font-size:15px">
+        원자 좌표는 지어낸 값이 아니라 Noheda 등(2000)이 PbZr<sub>0.52</sub>Ti<sub>0.48</sub>O₃를
+        Rietveld 정밀화해 얻은 실측값이다.
+      </p>
+    </div>
+
+    <div class="stack g16" style="margin-bottom:26px">
+      <div class="term">
+        <b>단위포 (unit cell)</b><span>결정을 이루는 최소 반복 단위. 이 상자 하나를 x·y·z 방향으로
+        무한히 복사해 붙이면 결정 전체가 된다. 아래 모델은 그 상자 하나다.</span>
+      </div>
+      <div class="term">
+        <b>공간군 P4mm</b><span>결정이 가진 대칭의 종류를 적은 국제 표기. P는 단순 격자,
+        4는 c축을 중심으로 90° 돌려도 같다는 뜻(4회 회전축), mm은 그 축을 포함하는 거울면 두 종류.
+        <strong>c축 방향으로는 대칭 중심이 없으므로</strong> 그 방향으로 분극이 생길 수 있다 —
+        §00에서 말한 “대칭 중심이 없어야 한다”는 조건이 기호로 적힌 것이다.</span>
+      </div>
+      <div class="term">
+        <b>Rietveld 정밀화</b><span>측정한 회절 패턴 전체를, 원자 위치를 조금씩 바꿔 가며
+        계산 패턴과 가장 잘 맞을 때까지 맞추는 방법. 그래서 아래 좌표는 이론값이 아니라
+        <strong>실험에서 뽑아낸 값</strong>이다. 좌표는 격자 길이에 대한 비율(분율좌표)로 적는다 —
+        z = 0.4509는 c축 길이의 45.09 % 높이라는 뜻.</span>
+      </div>
+      <div class="term">
+        <b>부분 점유 (partial occupancy)</b><span>한 자리를 여러 원소가 나눠 쓰는 상태.
+        Zr와 Ti는 같은 B자리에 52 : 48로 섞여 있고, 어느 한 칸을 열어 보면 52 %의 확률로 Zr다.
+        모델에서는 구면을 각도 비율로 나눠 이 비율을 그대로 표시했다 — 결정학에서 쓰는 표기다.</span>
+      </div>
+    </div>
+
+    <div class="viewer">
+      <div class="vw-bar">
+        <div class="seg" role="group" aria-label="표시 모드">
+          <button type="button" data-mode="base" aria-pressed="true">기준 PZT 52/48</button>
+          <button type="button" data-mode="doped" aria-pressed="false">제안 조성</button>
+          <button type="button" data-mode="polar" aria-pressed="false">분극 변위</button>
+        </div>
+        <label class="chk" for="opt-oct"><input type="checkbox" id="opt-oct" checked> 산소 팔면체</label>
+        <label class="chk" for="opt-cell"><input type="checkbox" id="opt-cell" checked> 단위격자</label>
+        <label class="chk" for="opt-spin"><input type="checkbox" id="opt-spin" checked> 자동 회전</label>
+      </div>
+
+      <div class="vw-stage">
+        <canvas id="cv" width="820" height="672" aria-label="페로브스카이트 단위포 3차원 모델"></canvas>
+        <div class="vw-side">
+          <div>
+            <h4>원자 · 점유율</h4>
+            <div class="legend" id="legend"></div>
+          </div>
+          <div>
+            <h4>측정 격자상수</h4>
+            <div class="readout">
+              <div><span>a = b</span><b>4.0460 Å</b></div>
+              <div><span>c</span><b>4.1394 Å</b></div>
+              <div><span>c / a</span><b>1.0231</b></div>
+              <div><span>공간군</span><b>P4mm</b></div>
+            </div>
+          </div>
+          <div id="ro-geom">
+            <h4>결합 기하</h4>
+            <div class="readout">
+              <div><span>B–O1 짧은쪽</span><b>1.848 Å</b></div>
+              <div><span>B–O1 긴쪽</span><b>2.292 Å</b></div>
+              <div><span>B–O2 (×4)</span><b>2.045 Å</b></div>
+              <div><span>비대칭 Δ</span><b>0.444 Å</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vw-foot" id="vw-cap">
+        <b>기준 구조.</b> Pb가 꼭짓점에, Zr/Ti가 산소 팔면체 중심에 놓인 정방정 페로브스카이트.
+        드래그해 회전, 휠·핀치로 확대. 범례의 원소를 누르면 해당 원자가 강조된다.
+      </div>
+    </div>
+
+    <div class="stack g16" style="margin-top:28px">
+      <div class="note">
+        <strong>분극이 생기는 이유를 좌표로 확인할 수 있다.</strong> 왜곡이 없는 입방 페로브스카이트라면
+        B 양이온도 z = 0.5, 적도 산소도 z = 0.5여서 두 평면이 겹친다. 실제 정밀화 값은
+        B가 z = 0.4509, 적도 산소가 z = 0.3786이다. 즉 <strong>양이온이 산소 평면보다 0.299 Å 위</strong>에 있다.
+        c축 길이의 7.2 %에 해당하는 어긋남이다. 그 결과 B–O 결합이 한쪽은 1.848 Å,
+        반대쪽은 2.292 Å로 <strong>0.444 Å이나 차이 난다</strong>. 이 비대칭이 단위포마다 쌓인 것이
+        자발분극 P<sub>s</sub>이고, 밟는 힘이 이 간격을 바꾸는 것이 전압이 생기는 원인이다.
+        ‘분극 변위’ 모드에서 두 평면과 그 간격을 볼 수 있다.
+      </div>
+
+      <div class="term">
+        <b>c / a = 1.0231 (정방성, tetragonality)</b><span>단위포가 c축으로 얼마나 늘어났는지의 비.
+        1이면 정육면체(입방, 압전성 없음)이고 클수록 왜곡이 심하다.
+        순수 PbTiO₃는 1.064로 너무 커서 소결 중 갈라지지만, Zr를 섞어 MPB로 가면
+        1.023까지 내려와 세라믹으로 만들 수 있게 된다.</span>
+      </div>
+
+      <h3 style="margin-top:8px">치환량 4 %와 2 %는 실제로 얼마나 드문가</h3>
+      <div class="occ-row">
+        <div class="occ">
+          <h4>A자리 · Sm 4 %</h4>
+          <p class="sub">Pb 자리 50개 중 Sm 2개</p>
+          <div class="grid50" id="gridA" aria-hidden="true"></div>
+          <div class="key">
+            <span><i style="background:#5A5A66"></i>Pb 0.96</span>
+            <span><i style="background:#EFD264"></i>Sm 0.04</span>
+          </div>
+        </div>
+        <div class="occ">
+          <h4>B자리 · Zn/Nb 10 %, Mn 2 %</h4>
+          <p class="sub">B 자리 50개 중 Zn·Nb 5개, Mn 1개</p>
+          <div class="grid50" id="gridB" aria-hidden="true"></div>
+          <div class="key">
+            <span><i style="background:#7FC87A"></i>Zr</span>
+            <span><i style="background:#B9BEC7"></i>Ti</span>
+            <span><i style="background:#67A6CC"></i>Nb</span>
+            <span><i style="background:#8B7BC6"></i>Zn</span>
+            <span><i style="background:#B657C6"></i>Mn</span>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:14px;color:var(--muted)">
+        도펀트는 이만큼 희박하다. 구조 자체를 바꾸는 것이 아니라 <strong>국소적으로 교란</strong>해
+        에너지 지형과 도메인벽 거동을 조정하는 것이 목적이기 때문이다.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">04 · 검증</span>
+      <h2>이 조성이 실제로 성립하는가</h2>
+      <p class="lede" style="font-size:15px">
+        조성을 제안하려면 최소한 두 가지를 통과해야 한다. 전하가 맞아야 하고,
+        페로브스카이트 구조가 유지돼야 한다. 둘 다 계산으로 확인했다.
+      </p>
+    </div>
+
+    <div class="stack g32">
+      <div class="stack g12">
+        <h3>검증 1 · 전하 중성 — 공공 없이 정확히 성립</h3>
+        <div class="term">
+          <b>전하 중성 (charge neutrality)</b><span>결정 전체의 양전하 합과 음전하 합이 같아야 한다.
+          안 맞으면 결정은 빈자리(공공)를 만들거나 전자를 붙잡아 억지로 맞추는데,
+          그 빈자리가 누설전류와 시효(성능이 시간에 따라 떨어지는 현상)의 원인이 된다.</span>
+        </div>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>자리</th><th>이온</th><th>몰분율 x</th><th>원자가</th><th>기여 전하</th></tr></thead>
+            <tbody>
+              <tr><td>A</td><td>Pb<sup>2+</sup></td><td class="num">0.96</td><td class="num">+2</td><td class="num">+1.92</td></tr>
+              <tr><td>A</td><td>Sm<sup>3+</sup></td><td class="num">0.04</td><td class="num">+3</td><td class="num">+0.12</td></tr>
+              <tr><td>B</td><td>Zr<sup>4+</sup> / Ti<sup>4+</sup></td><td class="num">0.88</td><td class="num">+4</td><td class="num">+3.52</td></tr>
+              <tr><td>B</td><td>Zn<sup>2+</sup><sub>1/3</sub>Nb<sup>5+</sup><sub>2/3</sub></td><td class="num">0.10</td><td class="num">+4.00</td><td class="num">+0.40</td></tr>
+              <tr><td>B</td><td>Mn<sup>2+</sup></td><td class="num">0.02</td><td class="num">+2</td><td class="num">+0.04</td></tr>
+              <tr><td>X</td><td>O<sup>2−</sup></td><td class="num">3.00</td><td class="num">−2</td><td class="num">−6.00</td></tr>
+            </tbody>
+            <tfoot><tr><td colspan="4">합계</td><td class="num hit">0.00</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="note key">
+          우연이 아니라 <strong>그렇게 설계한 결과</strong>다. Sm<sup>3+</sup>가 Pb<sup>2+</sup>를 대체해 만드는
+          잉여 전하(+0.04)와 Mn<sup>2+</sup>가 Ti<sup>4+</sup>를 대체해 만드는 결손 전하(−0.04)가 정확히 상쇄된다.
+          일반화하면 <span class="mono">x<sub>Sm</sub> = (4 − v<sub>Mn</sub>) · x<sub>Mn</sub></span>이고,
+          Mn<sup>2+</sup>이면 x<sub>Sm</sub> = 2 x<sub>Mn</sub> = 0.04다.
+          <strong>Mn이 Mn<sup>3+</sup>로 존재하면 x<sub>Sm</sub>은 0.02로 내려야 한다.</strong>
+          Mn의 원자가는 XPS나 EPR로 확인해야 하는 미결 변수이므로 그대로 남긴다.
+        </div>
+        <div class="note warn">
+          <strong>여기에 모순이 하나 있고, 숨기지 않는다.</strong> 레버 04는 Mn이 만드는
+          <em>산소 공공</em>과의 결함 쌍극자를 도메인벽 고정 수단으로 쓰겠다는 것인데,
+          검증 1은 Sm으로 그 전하를 보상해 <em>산소 공공을 만들지 않겠다</em>는 것이다. 둘은 상충한다.
+          완전 보상은 Mn을 전기적으로 중성화해 쌍극자 형성을 억제하므로, 실제 설계에서는
+          x<sub>Sm</sub>을 0.04보다 <strong>약간 낮게</strong> 잡아 일부 Mn만 공공과 짝짓게 하는 중간 지점이 필요하다.
+          이 문서는 전하가 정확히 맞는 지점을 <strong>기준선</strong>으로 제시하고,
+          최적 보상비는 실험으로 결정할 변수로 남긴다.
+        </div>
+      </div>
+
+      <div class="stack g12">
+        <h3>검증 2 · Goldschmidt 허용인자 — 페로브스카이트 유지</h3>
+        <div class="term">
+          <b>허용인자 t · Shannon 이온반경 · 배위수 CN</b><span>A와 B 이온의 크기 비가 맞아야 페로브스카이트가
+          유지된다. 그 비를 하나의 수로 나타낸 것이 허용인자다. 이온반경은 주변에 이온이 몇 개 붙어 있는지
+          (배위수 CN)에 따라 달라지므로, A자리는 산소 12개에 둘러싸이니 CN = 12,
+          B자리는 산소 6개이니 CN = 6 값을 쓴다. Shannon(1976)이 정리한 표가 표준이다.</span>
+        </div>
+        <div class="formula">
+          <div class="f">t = (r<sub>A</sub> + r<sub>O</sub>) / [ √2 · (r<sub>B</sub> + r<sub>O</sub>) ]</div>
+          <div class="cap">
+            t ≈ 1이면 이상적인 입방 페로브스카이트, 0.9 &lt; t &lt; 1이면 왜곡된 페로브스카이트가 안정,
+            0.9 미만이면 산소 팔면체가 기울어지거나 다른 구조로 무너진다. O<sup>2−</sup> = 1.40 Å.
+          </div>
+        </div>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>조성</th><th>r<sub>A</sub> (Å)</th><th>r<sub>B</sub> (Å)</th><th>t</th><th>판정</th></tr></thead>
+            <tbody>
+              <tr><td>PZT 52/48 (기준)</td><td class="num">1.4900</td><td class="num">0.6648</td><td class="num">0.9897</td><td>안정</td></tr>
+              <tr class="mark"><td><strong>제안 조성</strong></td><td class="num">1.4800</td><td class="num">0.6690</td><td class="num hit">0.9843</td><td>안정</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:14px;color:var(--muted)">
+          t가 0.9897 → 0.9843으로 <strong>0.0054</strong>만큼 내려간다. Sm<sup>3+</sup>(1.24 Å)가
+          Pb<sup>2+</sup>(1.49 Å)보다 작아 r<sub>A</sub>가 줄고, Mn<sup>2+</sup>(0.83 Å)는 Ti<sup>4+</sup>(0.605 Å)보다
+          커서 r<sub>B</sub>가 소폭 는다. 두 변화 모두 t를 낮추는 방향이지만 안정 구간을 벗어나지 않으며,
+          t &lt; 1 쪽으로의 미세한 이동은 능면체정 쪽 상경계를 향하므로
+          <strong>MPB 근방에 머문다는 레버 01의 제약과도 모순되지 않는다.</strong>
+        </p>
+        <div class="note warn">
+          <strong>이 계산의 한계를 명시한다.</strong> ① Sm<sup>3+</sup>의 CN = 12 반경 1.24 Å는 Shannon(1976) 표에 실린 값이다. ② Mn을 Mn<sup>2+</sup> 고스핀으로 가정했는데, Mn<sup>3+</sup>(0.645 Å)이면
+          r<sub>B</sub>가 거의 변하지 않아 결론은 같다. ③ 허용인자는
+          <strong>필요조건이지 충분조건이 아니다.</strong> 실제 상 형성은 XRD로 이차상(pyrochlore 등)의 유무를
+          확인해야 확정된다.
+        </div>
+      </div>
+
+      <div class="stack g12">
+        <h3>예상 성능 — 예측이 아니라 두 실측값 사이의 내삽</h3>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>기준점</th><th>성격</th><th>d·g (10⁻¹⁵ m²/N)</th><th>에너지 비</th></tr></thead>
+            <tbody>
+              <tr><td>PZT–PZN + Mn, 무배향</td><td>실측 · 레버 02 + 04에 해당</td><td class="num">16,168</td><td class="num">2.06 배</td></tr>
+              <tr><td>PMN–PZT, f ≈ 0.9 배향</td><td>실측 · 레버 05에 해당</td><td class="num">59,000</td><td class="num">7.54 배</td></tr>
+              <tr class="mark"><td><strong>제안 조성 (f ≳ 0.9 가정)</strong></td><td><strong>내삽 · 미측정</strong></td><td class="num hit">2 ~ 4 × 10⁴</td><td class="num hit">2.6 ~ 5.1 배</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note warn">
+          <strong>이 숫자는 우리가 측정한 값이 아니다.</strong> 조성이 서로 다른 두 실측 시스템 사이의 내삽이고,
+          레버 03(Sm)의 기여는 정량화하지 않았다. 보고서에서는 반드시
+          “문헌 실측값에 근거한 범위 추정”으로 표기하고, 우리 조의 측정 결과와 같은 표에 넣지 않는다.
+          4차시에서 시뮬레이터가 문헌 d<sub>33</sub>을 입력으로 받아 같은 d<sub>33</sub>을 검증할 수 없었던 것과
+          <strong>같은 종류의 순환논증</strong>을 여기서도 피해야 한다.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">05 · 검토했으나 채택하지 않은 선택지</span>
+      <h2>납을 쓰는 결정에 대하여</h2>
+    </div>
+    <div class="stack g16">
+      <p>
+        제안 조성은 무게의 절반 이상이 납이다. 사람이 매일 밟고 지나가는 바닥에 설치하겠다는
+        연구에서 이것을 언급하지 않고 넘어갈 수는 없다. 무연 대안을 검토한 결과와 판단 근거를 남긴다.
+      </p>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>대안</th><th>대표 성능</th><th>채택하지 않은 이유</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>BZT–BCT<br><span class="mono" style="font-size:12px">Ba(Zr₀.₂Ti₀.₈)O₃–(Ba₀.₇Ca₀.₃)TiO₃</span></td>
+              <td>d₃₃ ≈ 620 pC/N<br>(Liu &amp; Ren 2009)</td>
+              <td>d는 PZT급이지만 ε<sub>r</sub>가 3,000대로 커서 g가 낮다. 우리 기준인 d·g에서 불리하다.
+                  게다가 상전이 온도가 상온 부근이라 <strong>계절 온도 변화에 물성이 흔들린다</strong> —
+                  복도에 까는 타일에는 치명적이다.</td>
+            </tr>
+            <tr>
+              <td>KNN 계열<br><span class="mono" style="font-size:12px">(K,Na)NbO₃</span></td>
+              <td>d₃₃ × g₃₃ ≈ 5,508<br>(J. Adv. Ceram. 2022)</td>
+              <td>d·g가 UTA 조성의 약 1/3. K·Na가 흡습성이라 소결 재현성도 나쁘다.</td>
+            </tr>
+            <tr>
+              <td>PVDF (고분자)</td>
+              <td>d₃₃ = 33 pC/N, ε<sub>r</sub> = 13<br>g₃₃ = 287 × 10⁻³<br>(Yan 2016이 인용)</td>
+              <td>g는 압도적이지만 d가 작아 d·g ≈ 9,500으로 상용 세라믹 수준. 대신 <strong>유연하고 납이 없다</strong> —
+                  아래 판단 참조.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note key">
+        <strong>판단.</strong> 이 문서의 목표는 “d·g를 최대화하는 조성이 무엇인가”이고, 그 답은 현재 납 계열이다.
+        그러나 <strong>바닥 타일이라는 용도</strong>만 놓고 보면 다르다. 발전량이 어차피 실용 수준에 못 미치고
+        우리가 센서 쪽으로 방향을 잡고 있다면, 절대 성능보다 <strong>안전성·내충격성·가공성</strong>이 앞선다.
+        PVDF는 d·g가 UTA의 약 60 % 수준인데 납이 없고 깨지지 않는다.
+        보고서에는 이렇게 쓴다 — <em>“성능 상한을 밝히는 목적에서는 납 계열을 설계했고,
+        실제 시공을 전제한다면 PVDF 복합체가 합리적 절충안이다.”</em>
+        두 결론을 모두 적는 것이 이 탐구에서 더 정직하다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">06 · 한계와 검증 계획</span>
+      <h2>이 조성을 우리가 만들 수 없는 이유</h2>
+    </div>
+    <div class="stack g16">
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>공정 단계</th><th>요구 조건</th><th>학교 수준 가능 여부</th></tr></thead>
+          <tbody>
+            <tr><td>원료 칭량 · 볼밀</td><td>PbO, Sm₂O₃, ZrO₂, TiO₂, MnO₂, ZnO, Nb₂O₅ / 24 h</td><td>부분적 — PbO 독성</td></tr>
+            <tr><td>하소 (calcination)</td><td>850 °C, 4 h</td><td>불가</td></tr>
+            <tr><td>템플릿 합성</td><td>PbBi₄Ti₄O₁₅ → PbTiO₃ 위상화학 변환, 1,050 °C</td><td>불가</td></tr>
+            <tr><td>테이프 캐스팅 · 적층</td><td>닥터블레이드 250 µm, 80 °C / 20 MPa 라미네이션</td><td>불가</td></tr>
+            <tr><td>소결</td><td>1,230 °C, 10 h</td><td>불가</td></tr>
+            <tr><td>분극 (poling)</td><td>수 kV/mm 직류 전계</td><td>불가 · 위험</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note warn">
+        <strong>따라서 이 파트는 “제작”이 아니라 “설계 제안”이다.</strong> 3D 프린팅으로 만들 수 있는 것은
+        타일 하우징뿐이고 PZT 세라믹 소자 자체는 아니라는 것은 이미 3차시에 확인한 사실이다.
+        이 절을 빼면 실현 불가능한 조성을 실현 가능한 것처럼 제시하게 되므로 반드시 포함한다.
+      </div>
+
+      <h3 style="margin-top:8px">그렇다면 이 제안은 어떻게 검증하는가</h3>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>#</th><th>검증 방법</th><th>확인 대상</th><th>실행 가능성</th></tr></thead>
+          <tbody>
+            <tr class="mark">
+              <td class="num">1</td>
+              <td>상용 소자 3종(경질 PZT-4 계열 / PZT-5A / PZT-5H 계열)에서 같은 힘·같은 부하로 개방전압과 정전용량 C<sub>p</sub>를 측정해 g를 역산하고, 데이터시트 d와 곱해 d·g 순위를 만든다</td>
+              <td>ρ(d₃₃, d·g) = +0.518 — “d₃₃ 순위와 d·g 순위가 어긋난다”는 이 문서의 출발점</td>
+              <td>가능 · 최우선</td>
+            </tr>
+            <tr><td class="num">2</td><td>P–R 곡선의 최대점에서 실효 g를 역산</td><td>레버 01의 전제(비공진에서 d·g가 지배)</td><td>가능 · C<sub>p</sub> 실측 후</td></tr>
+            <tr><td class="num">3</td><td>10⁴ 회 반복 타격 후 출력 감쇠율 측정 — 연질과 경질 소자를 나란히</td><td>레버 04의 근거(외인성 기여가 먼저 열화된다)</td><td>가능 · 낙하추 지그 필요</td></tr>
+            <tr><td class="num">4</td><td>동일 소자를 20 / 40 / 60 °C에서 재측정</td><td>§05에서 BZT–BCT를 배제한 근거(상전이 온도 문제)</td><td>가능 · 항온 환경 필요</td></tr>
+            <tr><td class="num">5</td><td>조성 합성 후 XRD 상분석</td><td>허용인자 계산의 충분조건</td><td>불가 · 대학 협력 필요</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note key">
+        <strong>①번이 이 파트를 ‘탐구’로 만든다.</strong> 조성을 직접 만들 수는 없지만,
+        조성 설계의 <em>근거가 된 명제</em>는 지금 가진 소자로 검증할 수 있다.
+        d<sub>33</sub>이 서로 다른 상용 소자에서 d·g 순위가 d<sub>33</sub> 순위와 어긋나는 것을
+        실측으로 보이면, 이 문서 전체의 출발점이 문헌 인용이 아니라 우리 데이터가 된다.
+        C<sub>p</sub> 측정은 이미 다음 차시 최우선 과제로 잡혀 있으므로 추가 장비도 필요 없다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">07 · 참고문헌</span>
+      <h2>인용 출처</h2>
+    </div>
+    <ol class="refs">
+      <li>B. Noheda, D. E. Cox, G. Shirane, J. A. Gonzalo, L. E. Cross, S-E. Park, “A monoclinic ferroelectric phase in the Pb(Zr<sub>1−x</sub>Ti<sub>x</sub>)O₃ solid solution,” <em>Appl. Phys. Lett.</em> <b>74</b>, 2059 (1999). <a href="https://pubs.aip.org/aip/apl/article-abstract/74/14/2059/74096/A-monoclinic-ferroelectric-phase-in-the-Pb-Zr1">doi:10.1063/1.123756</a></li>
+      <li>B. Noheda, J. A. Gonzalo, L. E. Cross, R. Guo, S-E. Park, D. E. Cox, G. Shirane, “Tetragonal-to-monoclinic phase transition in a ferroelectric perovskite: the structure of PbZr<sub>0.52</sub>Ti<sub>0.48</sub>O₃,” <em>Phys. Rev. B</em> <b>61</b>, 8687 (2000). — <strong>3D 모델 원자 좌표의 출처.</strong> <a href="https://pure.rug.nl/ws/files/3122832/2000PhysRevBNoheda.pdf">PDF</a></li>
+      <li>R. A. Islam, S. Priya, “Realization of high-energy density polycrystalline piezoelectric ceramics,” <em>Appl. Phys. Lett.</em> <b>88</b>, 032903 (2006). <a href="https://pubs.aip.org/aip/apl/article-abstract/88/3/032903/117775/Realization-of-high-energy-density-polycrystalline">doi:10.1063/1.2166201</a></li>
+      <li>S. Priya, US Patent 7,686,974 B2 (Univ. of Texas System, 2010; 발명자 Priya 단독), “High energy density piezoelectric ceramic materials,” FIG. 13. — <strong>§01 상용 소재 비교표의 출처.</strong> <a href="https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7686974">USPTO</a></li>
+      <li>S. Priya, “Criterion for material selection in design of bulk piezoelectric energy harvesters,” <em>IEEE Trans. Ultrason. Ferroelectr. Freq. Control</em> <b>57</b>, 2610 (2010). <a href="https://ieeexplore.ieee.org/document/5610546/">IEEE Xplore</a></li>
+      <li>Y. Yan, K.-H. Cho, D. Maurya, A. Kumar, S. Kalinin, A. Khachaturyan, S. Priya, “Giant energy density in [001]-textured Pb(Mg<sub>1/3</sub>Nb<sub>2/3</sub>)O₃–PbZrO₃–PbTiO₃ piezoelectric ceramics,” <em>Appl. Phys. Lett.</em> <b>102</b>, 042903 (2013). <a href="https://pubs.aip.org/aip/apl/article-abstract/102/4/042903/237061/Giant-energy-density-in-001-textured-Pb-Mg1-3Nb2-3">doi:10.1063/1.4789854</a></li>
+      <li>Y. Yan, J. E. Zhou, D. Maurya, Y. U. Wang, S. Priya, “Giant piezoelectric voltage coefficient in grain-oriented modified PbTiO₃ material,” <em>Nat. Commun.</em> <b>7</b>, 13089 (2016). — 오픈 액세스. PVDF 물성값도 이 논문에서 인용. <a href="https://www.nature.com/articles/ncomms13089">nature.com</a></li>
+      <li>F. Li <em>et al.</em>, “Ultrahigh piezoelectricity in ferroelectric ceramics by design,” <em>Nat. Mater.</em> <b>17</b>, 349 (2018). <a href="https://www.nature.com/articles/s41563-018-0034-4">doi:10.1038/s41563-018-0034-4</a></li>
+      <li>H. Yue, Y. Li, A. Kassiba, C.-H. Park, L. Zheng, G. Li, “Valence-state-dependent defect engineering in Mn-doped PbTiO₃ ceramics,” <em>J. Appl. Phys.</em> <b>138</b>, 174103 (2025). <a href="https://pubs.aip.org/aip/jap/article/138/17/174103/3370869/Valence-state-dependent-defect-engineering-in-Mn">doi:10.1063/5.0300496</a></li>
+      <li>W. Liu, X. Ren, “Large piezoelectric effect in Pb-free ceramics,” <em>Phys. Rev. Lett.</em> <b>103</b>, 257602 (2009). — §05 BZT–BCT 검토. <a href="https://link.aps.org/doi/10.1103/PhysRevLett.103.257602">APS</a></li>
+      <li>“Optimizing energy harvesting performance by tailoring ferroelectric/relaxor behavior in KNN-based piezoceramics,” <em>J. Adv. Ceram.</em> (2022). — §05 KNN 계열 d₃₃×g₃₃ = 5,508. <a href="https://link.springer.com/article/10.1007/s40145-022-0587-1">Springer</a></li>
+      <li>R. D. Shannon, “Revised effective ionic radii and systematic studies of interatomic distances in halides and chalcogenides,” <em>Acta Cryst.</em> <b>A32</b>, 751 (1976). — 허용인자 계산의 이온반경 출처.</li>
+    </ol>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    HAFS 유리프 압전 타일 연구 · 5차시 화학구조 제안 파트<br>
+    측정 데이터·코드: 이 저장소 (<a href="../">piezo_hafs_108</a>)
+  </div>
+</footer>
+
+<script>
+(function(){
+  var cv=document.getElementById('cv');
+  if(typeof THREE==='undefined'){
+    cv.outerHTML='<div class="vw-fallback">3D 라이브러리를 불러오지 못했습니다. 페이지를 새로고침해 주세요. 원자 좌표(P4mm, a = 4.0460 Å, c = 4.1394 Å, z(B) = 0.4509, z(O1) = −0.1027, z(O2) = 0.3786)는 오른쪽 표와 본문에 그대로 실려 있습니다.</div>';
+    return;
+  }
+
+  var A_=4.0460, C_=4.1394;
+  var zB=0.4509, zO1=-0.1027, zO2=0.3786;
+  var S=0.62;
+
+  var COL={Pb:0x5A5A66, Sm:0xEFD264, Zr:0x7FC87A, Ti:0xB9BEC7,
+           Zn:0x8B7BC6, Nb:0x67A6CC, Mn:0xB657C6, O:0xD9503F};
+
+  var OCC={
+    base :{A:[['Pb',1]], B:[['Zr',0.52],['Ti',0.48]]},
+    doped:{A:[['Pb',0.96],['Sm',0.04]],
+           B:[['Zr',0.4576],['Ti',0.4224],['Nb',0.0667],['Zn',0.0333],['Mn',0.02]]}
+  };
+  OCC.polar=OCC.base;
+
+  var LEGEND={
+    base :[['Pb','Pb','A자리',1],['Zr','Zr','B자리',0.52],['Ti','Ti','B자리',0.48],['O','O','X자리',1]],
+    polar:[['Pb','Pb','A자리',1],['Zr','Zr','B자리',0.52],['Ti','Ti','B자리',0.48],['O','O','X자리',1]],
+    doped:[['Pb','Pb','A자리',0.96],['Sm','Sm','A자리',0.04],['Zr','Zr','B자리',0.458],
+           ['Ti','Ti','B자리',0.422],['Nb','Nb','B자리',0.067],['Zn','Zn','B자리',0.033],
+           ['Mn','Mn','B자리',0.020],['O','O','X자리',1]]
+  };
+
+  var CAPS={
+    base :'<b>기준 구조.</b> Pb가 꼭짓점에, Zr/Ti가 산소 팔면체 중심에 놓인 정방정 페로브스카이트. 드래그해 회전, 휠·핀치로 확대. 범례의 원소를 누르면 해당 원자가 강조된다.',
+    doped:'<b>제안 조성.</b> 구면을 나눈 색 구획의 각도 비율이 그 자리의 실제 점유율이다 — A자리는 Pb 96 % / Sm 4 %, B자리는 Zr·Ti 88 %에 Zn·Nb 10 %와 Mn 2 %가 더해진다.',
+    polar:'<b>분극 변위.</b> 주황 평면이 적도 산소(z = 0.3786), 청색 평면이 양이온(z = 0.4509). 두 평면의 간격 <b>0.299 Å</b>이 자발분극의 기하학적 실체다. 회색 격자 구는 왜곡이 없을 때의 이상 위치.'
+  };
+
+  var renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setClearColor(0x0B0E10,1);
+
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(36,820/672,0.1,100);
+  scene.add(new THREE.AmbientLight(0xffffff,0.60));
+  var k1=new THREE.DirectionalLight(0xffffff,0.80); k1.position.set(4,6,7); scene.add(k1);
+  var k2=new THREE.DirectionalLight(0x9FD8FF,0.26); k2.position.set(-5,-3,-4); scene.add(k2);
+
+  var root=new THREE.Group(); scene.add(root);
+  var cellG=new THREE.Group(), octG=new THREE.Group(), atomG=new THREE.Group(), polarG=new THREE.Group();
+  root.add(cellG); root.add(octG); root.add(atomG); root.add(polarG);
+
+  function P(x,y,z){ return new THREE.Vector3((x-0.5)*A_*S,(z-0.5)*C_*S,(y-0.5)*A_*S); }
+
+  (function cell(){
+    var c=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
+    var e=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    var pts=[];
+    for(var i=0;i<e.length;i++){
+      for(var j=0;j<2;j++){ var q=c[e[i][j]]; pts.push(P(q[0],q[1],q[2])); }
+    }
+    cellG.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts),
+      new THREE.LineBasicMaterial({color:0x4A585C})));
+  })();
+
+  function siteMesh(parts,r){
+    var g=new THREE.Group(), phi=0;
+    for(var i=0;i<parts.length;i++){
+      var len=Math.PI*2*parts[i][1];
+      if(len<=0.0005) continue;
+      var geo=new THREE.SphereGeometry(r,56,32,phi,len,0,Math.PI);
+      var mat=new THREE.MeshStandardMaterial({color:COL[parts[i][0]],roughness:0.42,metalness:0.06,side:THREE.DoubleSide});
+      var m=new THREE.Mesh(geo,mat);
+      m.userData.el=parts[i][0];
+      g.add(m); phi+=len;
+    }
+    return g;
+  }
+
+  var R={A:0.62*S*0.74, B:0.40*S*0.80, O:0.36*S*0.80};
+  var built=[];
+
+  function clear(g){
+    while(g.children.length){
+      var c=g.children.pop();
+      if(c.geometry) c.geometry.dispose();
+      if(c.children) clear(c);
+    }
+  }
+
+  function build(mode){
+    clear(atomG); clear(octG); clear(polarG); built=[];
+    var occ=OCC[mode]||OCC.base;
+    var polar=(mode==='polar');
+
+    var corners=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
+    for(var i=0;i<corners.length;i++){
+      var m=siteMesh(occ.A,R.A);
+      m.position.copy(P(corners[i][0],corners[i][1],corners[i][2]));
+      atomG.add(m); built.push(m);
+    }
+
+    var b=siteMesh(occ.B,R.B);
+    b.position.copy(P(0.5,0.5,zB));
+    atomG.add(b); built.push(b);
+
+    var oPos=[[0.5,0.5,zO1],[0.5,0.5,1+zO1],[0.5,0,zO2],[0,0.5,zO2],[0.5,1,zO2],[1,0.5,zO2]];
+    var oGeo=new THREE.SphereGeometry(R.O,32,24);
+    var oPts=[];
+    for(var n=0;n<oPos.length;n++){
+      var om=new THREE.Mesh(oGeo,new THREE.MeshStandardMaterial({color:COL.O,roughness:0.40,metalness:0.05}));
+      om.position.copy(P(oPos[n][0],oPos[n][1],oPos[n][2]));
+      om.userData.el='O';
+      atomG.add(om); built.push(om); oPts.push(om.position.clone());
+    }
+
+    var ap=[oPts[0],oPts[1]];
+    var ring=[oPts[2],oPts[4],oPts[3],oPts[5]];
+    var verts=[];
+    function tri(a,b2,c2){ verts.push(a.x,a.y,a.z,b2.x,b2.y,b2.z,c2.x,c2.y,c2.z); }
+    for(var t=0;t<4;t++){
+      var p1=ring[t], p2=ring[(t+1)%4];
+      tri(ap[0],p1,p2); tri(ap[1],p2,p1);
+    }
+    var fg=new THREE.BufferGeometry();
+    fg.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+    fg.computeVertexNormals();
+    octG.add(new THREE.Mesh(fg,new THREE.MeshStandardMaterial({
+      color:0xE48B48,transparent:true,opacity:polar?0.10:0.17,
+      side:THREE.DoubleSide,roughness:0.9,depthWrite:false})));
+    var ePts=[];
+    for(var u=0;u<4;u++){
+      var q1=ring[u], q2=ring[(u+1)%4];
+      ePts.push(q1,q2,ap[0],q1,ap[1],q1);
+    }
+    octG.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(ePts),
+      new THREE.LineBasicMaterial({color:0xE48B48,transparent:true,opacity:0.55})));
+
+    if(polar){
+      var w=A_*S*1.04;
+      var pg=new THREE.PlaneGeometry(w,w);
+      function plane(col,yy){
+        var p=new THREE.Mesh(pg,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.22,side:THREE.DoubleSide,depthWrite:false}));
+        p.rotation.x=-Math.PI/2; p.position.y=yy; return p;
+      }
+      polarG.add(plane(0xE48B48,P(0,0,zO2).y));
+      polarG.add(plane(0x6CB8CA,P(0,0,zB).y));
+
+      var ghost=new THREE.MeshBasicMaterial({color:0x9BA8A6,transparent:true,opacity:0.26,wireframe:true});
+      var gb=new THREE.Mesh(new THREE.SphereGeometry(R.B,18,12),ghost);
+      gb.position.copy(P(0.5,0.5,0.5)); polarG.add(gb);
+      var ideal=[[0.5,0,0.5],[0,0.5,0.5],[0.5,1,0.5],[1,0.5,0.5]];
+      for(var v=0;v<4;v++){
+        var g2=new THREE.Mesh(new THREE.SphereGeometry(R.O,16,10),ghost);
+        g2.position.copy(P(ideal[v][0],ideal[v][1],ideal[v][2])); polarG.add(g2);
+      }
+      var y0=P(0,0,zO2).y, dy=P(0,0,zB).y-y0;
+      polarG.add(new THREE.ArrowHelper(new THREE.Vector3(0,1,0),new THREE.Vector3(0,y0,0),dy,0xE48B48,0.10,0.075));
+      var yb=P(0,0,0).y, yt=P(0,0,1).y;
+      polarG.add(new THREE.ArrowHelper(new THREE.Vector3(0,1,0),new THREE.Vector3(0,yb*1.22,0),(yt-yb)*1.34,0x6CB8CA,0.16,0.10));
+    }
+
+    octG.visible=document.getElementById('opt-oct').checked;
+    cellG.visible=document.getElementById('opt-cell').checked;
+  }
+
+  var hiEl=null, hiT=0;
+  function eachMesh(fn){
+    for(var i=0;i<built.length;i++){
+      var o=built[i];
+      var list=(o.children&&o.children.length)?o.children:[o];
+      for(var j=0;j<list.length;j++) fn(list[j]);
+    }
+  }
+
+  var th=0.74, ph=1.12, rad=9.4, spin=true, drag=false, lx=0, ly=0;
+  function place(){
+    camera.position.set(rad*Math.sin(ph)*Math.sin(th), rad*Math.cos(ph), rad*Math.sin(ph)*Math.cos(th));
+    camera.lookAt(0,0,0);
+  }
+  cv.addEventListener('pointerdown',function(e){drag=true;lx=e.clientX;ly=e.clientY;try{cv.setPointerCapture(e.pointerId);}catch(_){}});
+  cv.addEventListener('pointerup',function(e){drag=false;try{cv.releasePointerCapture(e.pointerId);}catch(_){}});
+  cv.addEventListener('pointercancel',function(){drag=false;});
+  cv.addEventListener('pointermove',function(e){
+    if(!drag) return;
+    th-=(e.clientX-lx)*0.0088; ph-=(e.clientY-ly)*0.0088;
+    ph=Math.max(0.20,Math.min(Math.PI-0.20,ph));
+    lx=e.clientX; ly=e.clientY;
+  });
+  cv.addEventListener('wheel',function(e){
+    e.preventDefault(); rad=Math.max(4.4,Math.min(16,rad+e.deltaY*0.006));
+  },{passive:false});
+
+  function resize(){
+    var w=cv.clientWidth||820;
+    var h=cv.clientHeight||Math.round(w*0.82);
+    renderer.setSize(w,h,false);
+    camera.aspect=w/h; camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize',resize);
+
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function loop(){
+    requestAnimationFrame(loop);
+    if(spin&&!drag&&!reduce) th+=0.0026;
+    place();
+    if(hiEl){
+      var dt=(performance.now()-hiT)/1000;
+      if(dt>2.4){
+        hiEl=null;
+        eachMesh(function(m){ if(m.material&&m.material.emissive){ m.material.emissive.setHex(0x000000); m.material.emissiveIntensity=0; } });
+      }else{
+        var pulse=0.5+0.5*Math.sin(dt*8);
+        eachMesh(function(m){
+          if(!m.material||!m.material.emissive) return;
+          var on=(m.userData.el===hiEl);
+          m.material.emissive.setHex(on?0xFFFFFF:0x000000);
+          m.material.emissiveIntensity=on?pulse*0.5:0;
+        });
+      }
+    }
+    renderer.render(scene,camera);
+  }
+
+  var mode='base';
+  function hex(n){ var s=n.toString(16); while(s.length<6) s='0'+s; return s; }
+
+  function drawLegend(){
+    var el=document.getElementById('legend');
+    el.innerHTML='';
+    var rows=LEGEND[mode];
+    for(var i=0;i<rows.length;i++){
+      (function(r){
+        var b=document.createElement('button');
+        b.type='button';
+        var pct=r[3]*100;
+        b.innerHTML='<i style="background:#'+hex(COL[r[0]])+'"></i>'+
+                    '<span>'+r[1]+' <span class="lg-sub">'+r[2]+'</span></span>'+
+                    '<em>'+((pct>=99.9)?'1.00':(pct.toFixed(1)+'%'))+'</em>';
+        b.addEventListener('click',function(){ hiEl=r[0]; hiT=performance.now(); });
+        el.appendChild(b);
+      })(rows[i]);
+    }
+  }
+
+  function setMode(m){
+    mode=m;
+    var btns=document.querySelectorAll('.seg button');
+    for(var i=0;i<btns.length;i++){
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-mode')===m?'true':'false');
+    }
+    document.getElementById('vw-cap').innerHTML=CAPS[m];
+    document.getElementById('ro-geom').hidden=(m==='polar');
+    hiEl=null;
+    build(m);
+    drawLegend();
+  }
+
+  var segBtns=document.querySelectorAll('.seg button');
+  for(var i=0;i<segBtns.length;i++){
+    (function(b){ b.addEventListener('click',function(){ setMode(b.getAttribute('data-mode')); }); })(segBtns[i]);
+  }
+  document.getElementById('opt-oct').addEventListener('change',function(e){ octG.visible=e.target.checked; });
+  document.getElementById('opt-cell').addEventListener('change',function(e){ cellG.visible=e.target.checked; });
+  document.getElementById('opt-spin').addEventListener('change',function(e){ spin=e.target.checked; });
+
+  setMode('base');
+  resize(); place(); loop();
+
+  function fill(id,list){
+    var g=document.getElementById(id); if(!g) return;
+    var html='';
+    for(var i=0;i<50;i++) html+='<i style="background:#'+hex(list[i])+'"></i>';
+    g.innerHTML=html;
+  }
+  var aL=[]; for(var p=0;p<50;p++) aL.push(COL.Pb);
+  aL[13]=COL.Sm; aL[36]=COL.Sm;
+  fill('gridA',aL);
+
+  var bL=[]; for(var q=0;q<50;q++) bL.push(q%2===0?COL.Zr:COL.Ti);
+  var nbzn=[7,19,28,41,45];
+  for(var z=0;z<nbzn.length;z++) bL[nbzn[z]]=(z<3?COL.Nb:COL.Zn);
+  bL[24]=COL.Mn;
+  fill('gridB',bL);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,798 @@
+<!-- repo note: v1 is an old version kept as history; superseded by sim/pzt_simulator_v6.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PZT 압전체 시뮬레이터 v1 — Pb(Zr,Ti)O₃</title>
+<style>
+  :root {
+    --bg-beige: #f5f0e6;
+    --grid-line: rgba(120, 100, 70, 0.06);
+    --grid-bold: rgba(120, 100, 70, 0.13);
+    --ink: #2b2620;
+    --ink-soft: rgba(43, 38, 32, 0.65);
+    --accent: #c05621;
+    --accent-deep: #8a3a14;
+    --panel-bg: rgba(245, 240, 230, 0.93);
+    --panel-border: rgba(120, 100, 70, 0.22);
+    --polar-green: #1a7a4a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background-color: var(--bg-beige);
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to right, var(--grid-bold) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-bold) 1px, transparent 1px);
+    background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+    color: var(--ink);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    overflow: hidden;
+    height: 100vh; width: 100vw;
+  }
+  #scene-container {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+  }
+  #scene-container canvas { background: transparent !important; display: block; }
+  #header {
+    position: absolute; top: 20px; left: 20px; z-index: 10;
+    padding: 16px 22px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    backdrop-filter: blur(6px);
+    max-width: 380px;
+  }
+  #header h1 {
+    margin: 0 0 6px 0;
+    font-size: 19px; font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  #header p {
+    margin: 0; font-size: 12px; line-height: 1.5;
+    color: var(--ink-soft);
+  }
+  #readout {
+    position: absolute; top: 20px; right: 20px; z-index: 10;
+    padding: 14px 20px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    backdrop-filter: blur(6px);
+    min-width: 240px;
+    font-size: 13px;
+  }
+  #readout .row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin: 6px 0;
+  }
+  #readout .label {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--ink-soft);
+  }
+  #readout .value {
+    font-family: 'Courier New', monospace;
+    font-weight: 700; font-size: 14px;
+  }
+  .phase-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-size: 11px; font-weight: 600;
+    background: var(--accent);
+    color: var(--bg-beige);
+    letter-spacing: 0.03em;
+  }
+  #pulse-button {
+    position: absolute; bottom: 32px; left: 50%;
+    transform: translateX(-50%); z-index: 10;
+    padding: 14px 34px;
+    background: var(--accent);
+    color: var(--bg-beige);
+    border: none; border-radius: 2px;
+    font-family: 'Georgia', serif;
+    font-size: 15px; font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(192, 86, 33, 0.32);
+    transition: transform 0.1s, box-shadow 0.2s, background 0.2s;
+  }
+  #pulse-button:hover:not(:disabled) {
+    transform: translateX(-50%) translateY(-1px);
+    box-shadow: 0 6px 20px rgba(192, 86, 33, 0.42);
+  }
+  #pulse-button:active:not(:disabled) {
+    transform: translateX(-50%) translateY(1px);
+  }
+  #pulse-button:disabled {
+    background: var(--accent-deep);
+    opacity: 0.8;
+    cursor: wait;
+  }
+  #legend {
+    position: absolute; bottom: 30px; left: 20px; z-index: 10;
+    padding: 12px 16px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    font-size: 11px;
+  }
+  #legend .item {
+    display: flex; align-items: center; gap: 9px;
+    margin: 4px 0;
+  }
+  #legend .swatch {
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    box-shadow: inset -2px -2px 3px rgba(0,0,0,0.25);
+  }
+  #legend .arrow-swatch {
+    width: 13px; height: 13px;
+    background: var(--polar-green);
+    clip-path: polygon(50% 0%, 100% 50%, 70% 50%, 70% 100%, 30% 100%, 30% 50%, 0% 50%);
+  }
+  #legend .pressure-swatch {
+    width: 13px; height: 13px;
+    background: var(--accent);
+    clip-path: polygon(50% 100%, 100% 50%, 70% 50%, 70% 0%, 30% 0%, 30% 50%, 0% 50%);
+  }
+  .lil-gui {
+    --background-color: rgba(245, 240, 230, 0.93) !important;
+    --text-color: #2b2620 !important;
+    --title-background-color: rgba(192, 86, 33, 0.18) !important;
+    --title-text-color: #2b2620 !important;
+    --widget-color: rgba(120, 100, 70, 0.22) !important;
+    --highlight-color: rgba(192, 86, 33, 0.55) !important;
+    --font-family: 'Georgia', serif !important;
+    border: 1px solid var(--panel-border) !important;
+    --width: 280px !important;
+  }
+  .lil-gui.root { top: 130px !important; right: 20px !important; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+    "lil-gui": "https://unpkg.com/lil-gui@0.19/dist/lil-gui.esm.min.js"
+  }
+}
+</script>
+</head>
+<body>
+<div style="position:fixed;left:8px;bottom:8px;z-index:99999;max-width:min(560px,calc(100vw - 16px));box-sizing:border-box;padding:6px 10px;background:rgba(255,247,224,.95);color:#3a2e10;border:1px solid #c89a1e;border-radius:6px;font:12px/1.45 system-ui,sans-serif;pointer-events:none;overflow-wrap:anywhere"><b>v1 — 이전 버전</b> (최신: <code>sim/pzt_simulator_v6.html</code>). 화면의 V·mW·mJ는 임의 배율 값이라 실측(손 누름 약 15 nJ)과 비교할 수 없고, 소재 순위는 d₃₃만 반영한 것이다.</div>
+  <div id="header">
+    <h1>PZT 압전체 시뮬레이터</h1>
+    <p>Pb(Zr<sub>x</sub>Ti<sub>1-x</sub>)O<sub>3</sub> — Zr:Ti 비율과 외부 응력에 따른 결정 구조 변형과 분극 발생을 실시간으로 시각화합니다. 슬라이더로 비율을 조절하고, 아래 버튼으로 압력 펄스를 인가하세요.</p>
+  </div>
+
+  <div id="readout">
+    <div class="row">
+      <span class="label">Zr fraction (x)</span>
+      <span class="value" id="rd-x">0.520</span>
+    </div>
+    <div class="row">
+      <span class="label">Phase</span>
+      <span><span class="phase-badge" id="rd-phase">MPB</span></span>
+    </div>
+    <div class="row">
+      <span class="label">Lattice a (Å)</span>
+      <span class="value" id="rd-a">4.020</span>
+    </div>
+    <div class="row">
+      <span class="label">Stress σ (norm.)</span>
+      <span class="value" id="rd-stress">0.000</span>
+    </div>
+    <div class="row">
+      <span class="label">Polarization |P|</span>
+      <span class="value" id="rd-pol">0.000</span>
+    </div>
+  </div>
+
+  <div id="legend">
+    <div class="item"><div class="swatch" style="background:#3a3530"></div>Pb (납, 꼭짓점)</div>
+    <div class="item"><div class="swatch" style="background:#5a9ad6"></div>Zr (지르코늄, 중심)</div>
+    <div class="item"><div class="swatch" style="background:#2c5588"></div>Ti (타이타늄, 중심)</div>
+    <div class="item"><div class="swatch" style="background:#c44545"></div>O (산소, 면 중심)</div>
+    <div class="item"><div class="pressure-swatch"></div>외부 응력 σ</div>
+    <div class="item"><div class="arrow-swatch"></div>분극 벡터 P</div>
+  </div>
+
+  <button id="pulse-button">▼ 압력 펄스 인가</button>
+
+  <div id="scene-container"></div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import GUI from 'lil-gui';
+
+    // ============================================================
+    // 1. CONSTANTS — 물리 및 시각 파라미터
+    // ============================================================
+
+    // 원자 색상 (PCS / Jmol convention 약간 변형)
+    const ATOM_COLORS = {
+      Pb: 0x3a3530,   // 어두운 회색
+      Zr: 0x5a9ad6,   // 하늘빛 파랑
+      Ti: 0x2c5588,   // 짙은 파랑
+      O:  0xc44545,   // 빨강
+    };
+    // 시각화 반지름 (이온 반지름 비율 유지, 절대 크기는 가독성용 과장)
+    const ATOM_RADII = {
+      Pb: 0.34,   // Pb²⁺ : 1.49 Å
+      Zr: 0.24,   // Zr⁴⁺ : 0.72 Å
+      Ti: 0.22,   // Ti⁴⁺ : 0.605 Å
+      O:  0.28,   // O²⁻  : 1.40 Å
+    };
+    // 격자 상수 (Å, Vegard's law 양 끝점)
+    const A_TI = 3.90;  // PbTiO₃ pseudocubic
+    const A_ZR = 4.13;  // PbZrO₃ pseudocubic
+    // 상 경계 (Zr fraction 기준)
+    const PHASE_TET_MAX  = 0.48;
+    const PHASE_RHOMB_MIN = 0.52;
+    // Supercell
+    const N_CELLS = 3;
+    // Scene unit per Å
+    const SCENE_UNIT_PER_A = 0.55;
+    // 압력 펄스 (가우시안 프로파일)
+    const PULSE_DURATION   = 2.6;  // 초
+    const PULSE_PEAK_TIME  = 1.1;  // 정점 시각
+    const PULSE_WIDTH      = 0.42; // 가우시안 표준편차
+    const MAX_DISPLACEMENT = 0.22; // 시각화 변위 (scene unit)
+    // 분극 계수 (MPB 부근에서 압전 응답 최대)
+    function piezoCoefficient(x) {
+      const dist = Math.abs(x - 0.5);
+      const mpbBoost = Math.exp(-Math.pow(dist / 0.08, 2));
+      return 0.6 + 0.9 * mpbBoost;  // 0.6 ~ 1.5
+    }
+
+    // ============================================================
+    // 2. STATE
+    // ============================================================
+
+    const state = {
+      x: 0.52,
+      pulseActive: false,
+      pulseStartTime: 0,
+      currentStress: 0,
+      currentPolarization: 0,
+      polarDir: new THREE.Vector3(0, -1, 0),
+    };
+
+    // 원자 모음 (rebuild 시 갱신)
+    const atoms = { Pb: [], B: [], O: [] };
+    const bonds = [];          // { mesh, b, o }
+    let pressureArrows = [];   // 외부 응력 화살표
+    let polarizationArrow = null;
+
+    // ============================================================
+    // 3. SCENE SETUP
+    // ============================================================
+
+    const container = document.getElementById('scene-container');
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(
+      42, window.innerWidth / window.innerHeight, 0.1, 1000
+    );
+    camera.position.set(8.5, 6.5, 9);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    container.appendChild(renderer.domElement);
+
+    // 조명 (베이지 톤에 맞게 따뜻한 광원 + 차가운 보조광)
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    scene.add(new THREE.HemisphereLight(0xfff3df, 0xc4a574, 0.35));
+
+    const keyLight = new THREE.DirectionalLight(0xfff5e0, 0.85);
+    keyLight.position.set(8, 12, 6);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xcfdde6, 0.35);
+    fillLight.position.set(-6, 4, -8);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0xffe8c0, 0.25);
+    rimLight.position.set(0, -5, -4);
+    scene.add(rimLight);
+
+    // 카메라 컨트롤
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 5;
+    controls.maxDistance = 30;
+    controls.target.set(0, 0, 0);
+
+    // 결정 컨테이너 (격자 왜곡은 이 그룹의 scale로)
+    const crystalGroup = new THREE.Group();
+    scene.add(crystalGroup);
+
+    // ============================================================
+    // 4. PHYSICS / PHASE LOGIC
+    // ============================================================
+
+    function determinePhase(x) {
+      if (x < PHASE_TET_MAX) return 'Tetragonal';
+      if (x > PHASE_RHOMB_MIN) return 'Rhombohedral';
+      return 'MPB';
+    }
+
+    function latticeConstantA(x) {
+      // Vegard's law
+      return A_TI + (A_ZR - A_TI) * x;
+    }
+
+    function getLatticeDistortion(x) {
+      const phase = determinePhase(x);
+      if (phase === 'Tetragonal') {
+        const t = (PHASE_TET_MAX - x) / PHASE_TET_MAX;     // 0~1
+        return { scaleX: 1.0, scaleY: 1.0 + 0.07 * t, scaleZ: 1.0 };
+      } else if (phase === 'Rhombohedral') {
+        const t = (x - PHASE_RHOMB_MIN) / (1 - PHASE_RHOMB_MIN);
+        // 의사 rhombohedral: 세 축 약간 다르게
+        return { scaleX: 1.0 + 0.025 * t, scaleY: 1.0 - 0.012 * t, scaleZ: 1.0 - 0.012 * t };
+      } else {
+        return { scaleX: 1.003, scaleY: 1.008, scaleZ: 1.003 };
+      }
+    }
+
+    function polarizationDirection(x) {
+      const phase = determinePhase(x);
+      if (phase === 'Tetragonal') {
+        return new THREE.Vector3(0, -1, 0);
+      } else if (phase === 'Rhombohedral') {
+        return new THREE.Vector3(-1, -1, -1).normalize();
+      } else {
+        return new THREE.Vector3(-0.3, -1, -0.3).normalize();
+      }
+    }
+
+    function pulseProfile(t) {
+      if (t < 0 || t > PULSE_DURATION) return 0;
+      const arg = (t - PULSE_PEAK_TIME) / PULSE_WIDTH;
+      return Math.exp(-arg * arg);
+    }
+
+    // ============================================================
+    // 5. CRYSTAL BUILDER
+    // ============================================================
+
+    const sphereGeomCache = {};
+    function getSphereGeometry(radius) {
+      const key = radius.toFixed(3);
+      if (!sphereGeomCache[key]) {
+        sphereGeomCache[key] = new THREE.SphereGeometry(radius, 28, 22);
+      }
+      return sphereGeomCache[key];
+    }
+
+    function atomMat(color, opts = {}) {
+      return new THREE.MeshPhongMaterial({
+        color: color,
+        shininess: opts.shininess ?? 75,
+        specular: opts.specular ?? 0x333333,
+      });
+    }
+    const materials = {
+      Pb: atomMat(ATOM_COLORS.Pb, { shininess: 50, specular: 0x222222 }),
+      O:  atomMat(ATOM_COLORS.O,  { shininess: 90, specular: 0x553322 }),
+    };
+
+    function makeBSiteMaterial(zrFraction) {
+      const c = new THREE.Color(ATOM_COLORS.Ti).lerp(
+        new THREE.Color(ATOM_COLORS.Zr), zrFraction
+      );
+      return new THREE.MeshPhongMaterial({
+        color: c, shininess: 95, specular: 0x445566,
+      });
+    }
+
+    // 결합용 cylinder (재사용)
+    const bondGeometry = new THREE.CylinderGeometry(0.035, 0.035, 1, 8, 1, true);
+    const bondMaterial = new THREE.MeshBasicMaterial({
+      color: 0x7a6855,
+      transparent: true,
+      opacity: 0.42,
+    });
+
+    function makeBond() {
+      return new THREE.Mesh(bondGeometry, bondMaterial);
+    }
+
+    function updateBondGeometry(mesh, fromVec, toVec) {
+      const direction = new THREE.Vector3().subVectors(toVec, fromVec);
+      const length = direction.length();
+      if (length < 1e-6) {
+        mesh.visible = false;
+        return;
+      }
+      mesh.visible = true;
+      mesh.scale.set(1, length, 1);
+      const mid = new THREE.Vector3().addVectors(fromVec, toVec).multiplyScalar(0.5);
+      mesh.position.copy(mid);
+      const up = new THREE.Vector3(0, 1, 0);
+      mesh.quaternion.setFromUnitVectors(up, direction.normalize());
+    }
+
+    function buildCrystal(x) {
+      // 기존 정리
+      while (crystalGroup.children.length > 0) {
+        const c = crystalGroup.children[0];
+        crystalGroup.remove(c);
+      }
+      atoms.Pb.length = 0;
+      atoms.B.length  = 0;
+      atoms.O.length  = 0;
+      bonds.length    = 0;
+
+      const aReal  = latticeConstantA(x);            // Å
+      const aScene = aReal * SCENE_UNIT_PER_A;       // scene unit
+      const offset = -(N_CELLS * aScene) / 2;
+
+      // Pb (꼭짓점)
+      const pbGeom = getSphereGeometry(ATOM_RADII.Pb);
+      for (let i = 0; i <= N_CELLS; i++) {
+        for (let j = 0; j <= N_CELLS; j++) {
+          for (let k = 0; k <= N_CELLS; k++) {
+            const mesh = new THREE.Mesh(pbGeom, materials.Pb);
+            const pos = new THREE.Vector3(
+              offset + i * aScene,
+              offset + j * aScene,
+              offset + k * aScene
+            );
+            mesh.position.copy(pos);
+            mesh.userData = { type: 'Pb', basePos: pos.clone() };
+            crystalGroup.add(mesh);
+            atoms.Pb.push(mesh);
+          }
+        }
+      }
+
+      // B-site (Zr/Ti 보간 색)
+      const bMaterial = makeBSiteMaterial(x);
+      const bRadius = ATOM_RADII.Ti + (ATOM_RADII.Zr - ATOM_RADII.Ti) * x;
+      const bGeom = getSphereGeometry(bRadius);
+      for (let i = 0; i < N_CELLS; i++) {
+        for (let j = 0; j < N_CELLS; j++) {
+          for (let k = 0; k < N_CELLS; k++) {
+            const mesh = new THREE.Mesh(bGeom, bMaterial);
+            const pos = new THREE.Vector3(
+              offset + (i + 0.5) * aScene,
+              offset + (j + 0.5) * aScene,
+              offset + (k + 0.5) * aScene
+            );
+            mesh.position.copy(pos);
+            mesh.userData = { type: 'B', basePos: pos.clone() };
+            crystalGroup.add(mesh);
+            atoms.B.push(mesh);
+          }
+        }
+      }
+
+      // O (면 중심) — 세 종류
+      const oGeom = getSphereGeometry(ATOM_RADII.O);
+      const addO = (xc, yc, zc) => {
+        const mesh = new THREE.Mesh(oGeom, materials.O);
+        const pos = new THREE.Vector3(xc, yc, zc);
+        mesh.position.copy(pos);
+        mesh.userData = { type: 'O', basePos: pos.clone() };
+        crystalGroup.add(mesh);
+        atoms.O.push(mesh);
+      };
+      // xy 평면 면 (k는 정수)
+      for (let i = 0; i < N_CELLS; i++)
+        for (let j = 0; j < N_CELLS; j++)
+          for (let k = 0; k <= N_CELLS; k++)
+            addO(offset + (i+0.5)*aScene, offset + (j+0.5)*aScene, offset + k*aScene);
+      // xz 평면 면 (j는 정수)
+      for (let i = 0; i < N_CELLS; i++)
+        for (let j = 0; j <= N_CELLS; j++)
+          for (let k = 0; k < N_CELLS; k++)
+            addO(offset + (i+0.5)*aScene, offset + j*aScene, offset + (k+0.5)*aScene);
+      // yz 평면 면 (i는 정수)
+      for (let i = 0; i <= N_CELLS; i++)
+        for (let j = 0; j < N_CELLS; j++)
+          for (let k = 0; k < N_CELLS; k++)
+            addO(offset + i*aScene, offset + (j+0.5)*aScene, offset + (k+0.5)*aScene);
+
+      // B-O bonds (각 B의 가장 가까운 6개 O)
+      for (const b of atoms.B) {
+        const bPos = b.position;
+        const candidates = atoms.O.map(o => ({ o, d: o.position.distanceTo(bPos) }));
+        candidates.sort((p, q) => p.d - q.d);
+        for (let n = 0; n < 6; n++) {
+          const bond = makeBond();
+          updateBondGeometry(bond, bPos, candidates[n].o.position);
+          crystalGroup.add(bond);
+          bonds.push({ mesh: bond, b: b, o: candidates[n].o });
+        }
+      }
+
+      applyLatticeDistortion(x);
+    }
+
+    function applyLatticeDistortion(x) {
+      const d = getLatticeDistortion(x);
+      crystalGroup.scale.set(d.scaleX, d.scaleY, d.scaleZ);
+    }
+
+    // ============================================================
+    // 6. PRESSURE ARROWS (외부 응력)
+    // ============================================================
+
+    function buildPressureArrows() {
+      const arrows = [];
+      const aScene = latticeConstantA(state.x) * SCENE_UNIT_PER_A;
+      const span = N_CELLS * aScene;
+      const dist = getLatticeDistortion(state.x);
+      const topY = (span / 2) * dist.scaleY;
+
+      const arrowMat = new THREE.MeshPhongMaterial({
+        color: 0xc05621,
+        emissive: 0x4a1808,
+        emissiveIntensity: 0.3,
+        shininess: 70,
+        transparent: true,
+        opacity: 1.0,
+      });
+
+      const grid = 4;
+      for (let i = 0; i < grid; i++) {
+        for (let j = 0; j < grid; j++) {
+          const gx = -span/2 + 0.35*aScene + i * (span - 0.7*aScene) / (grid - 1);
+          const gz = -span/2 + 0.35*aScene + j * (span - 0.7*aScene) / (grid - 1);
+          const baseY = topY + 2.0;
+
+          const group = new THREE.Group();
+          // shaft: 위→아래로 향하는 화살, 길이 0.9
+          const shaftGeom = new THREE.CylinderGeometry(0.055, 0.055, 0.9, 12);
+          const shaft = new THREE.Mesh(shaftGeom, arrowMat);
+          shaft.position.y = 0.45;
+          group.add(shaft);
+          // arrowhead at the bottom, pointing -y
+          const headGeom = new THREE.ConeGeometry(0.16, 0.32, 16);
+          const head = new THREE.Mesh(headGeom, arrowMat);
+          head.position.y = -0.16;
+          head.rotation.x = Math.PI;
+          group.add(head);
+
+          group.position.set(gx, baseY, gz);
+          group.userData = { restY: baseY, mat: arrowMat };
+          group.visible = false;
+          scene.add(group);
+          arrows.push(group);
+        }
+      }
+      return arrows;
+    }
+
+    function updatePressureArrows(stress) {
+      const visible = stress > 0.015;
+      const compressionShift = 1.6 * stress;
+      for (const arrow of pressureArrows) {
+        if (!visible) {
+          arrow.visible = false;
+          continue;
+        }
+        arrow.visible = true;
+        arrow.position.y = arrow.userData.restY - compressionShift;
+        arrow.userData.mat.opacity = Math.min(1.0, stress * 1.4);
+      }
+    }
+
+    // ============================================================
+    // 7. POLARIZATION VECTOR
+    // ============================================================
+
+    function buildPolarizationArrow() {
+      const group = new THREE.Group();
+      const mat = new THREE.MeshPhongMaterial({
+        color: 0x1a7a4a,
+        emissive: 0x0d3d24,
+        emissiveIntensity: 0.45,
+        shininess: 110,
+        transparent: true,
+        opacity: 0.95,
+      });
+      // shaft: 기본적으로 위로 +y 방향, 나중에 quaternion으로 회전
+      const shaftGeom = new THREE.CylinderGeometry(0.095, 0.095, 1.6, 16);
+      const shaft = new THREE.Mesh(shaftGeom, mat);
+      shaft.position.y = 0.8;
+      group.add(shaft);
+
+      const headGeom = new THREE.ConeGeometry(0.26, 0.55, 20);
+      const head = new THREE.Mesh(headGeom, mat);
+      head.position.y = 1.875;
+      group.add(head);
+
+      group.userData = { mat: mat };
+      group.visible = false;
+      scene.add(group);
+      return group;
+    }
+
+    function updatePolarizationArrow(stress) {
+      if (!polarizationArrow) return;
+      const piezo = piezoCoefficient(state.x);
+      const polMag = stress * piezo;
+      state.currentPolarization = polMag;
+
+      if (polMag < 0.02) {
+        polarizationArrow.visible = false;
+        return;
+      }
+      polarizationArrow.visible = true;
+      const up = new THREE.Vector3(0, 1, 0);
+      // 분극 벡터는 polar 방향과 같은 쪽으로 향함
+      const dir = state.polarDir.clone().negate(); // 화살표가 +y 기준이므로 polarDir 반대로 회전
+      polarizationArrow.quaternion.setFromUnitVectors(up, dir.normalize());
+      polarizationArrow.scale.set(1, polMag * 1.3, 1);
+      polarizationArrow.userData.mat.opacity = Math.min(1.0, polMag * 1.5);
+    }
+
+    // ============================================================
+    // 8. DISPLACEMENT UPDATE (B-site 변위 + 결합 갱신)
+    // ============================================================
+
+    function applyDisplacement(stress) {
+      const piezo = piezoCoefficient(state.x);
+      const delta = MAX_DISPLACEMENT * stress * piezo;
+      const dir = state.polarDir;
+
+      for (const b of atoms.B) {
+        const base = b.userData.basePos;
+        b.position.set(
+          base.x + dir.x * delta,
+          base.y + dir.y * delta,
+          base.z + dir.z * delta
+        );
+      }
+      // 결합선 업데이트 (B만 움직이므로 B-O 길이 변경)
+      for (const bond of bonds) {
+        updateBondGeometry(bond.mesh, bond.b.position, bond.o.position);
+      }
+    }
+
+    // ============================================================
+    // 9. READOUT
+    // ============================================================
+
+    const phaseLabels = {
+      'Tetragonal': 'Tetragonal',
+      'Rhombohedral': 'Rhombohedral',
+      'MPB': 'MPB (52:48)',
+    };
+    function updateReadout() {
+      document.getElementById('rd-x').textContent = state.x.toFixed(3);
+      document.getElementById('rd-phase').textContent = phaseLabels[determinePhase(state.x)];
+      document.getElementById('rd-a').textContent = latticeConstantA(state.x).toFixed(3);
+      document.getElementById('rd-stress').textContent = state.currentStress.toFixed(3);
+      document.getElementById('rd-pol').textContent = state.currentPolarization.toFixed(3);
+    }
+
+    // ============================================================
+    // 10. REBUILD (Zr fraction 변경 시)
+    // ============================================================
+
+    function rebuildAll() {
+      buildCrystal(state.x);
+      // 압력 화살표 갱신
+      for (const a of pressureArrows) scene.remove(a);
+      pressureArrows = buildPressureArrows();
+      // 분극 화살표
+      if (polarizationArrow) scene.remove(polarizationArrow);
+      polarizationArrow = buildPolarizationArrow();
+      // 분극 방향
+      state.polarDir = polarizationDirection(state.x);
+      updateReadout();
+    }
+
+    // ============================================================
+    // 11. GUI 및 펄스 트리거
+    // ============================================================
+
+    const gui = new GUI({ title: '제어 패널' });
+    const xCtrl = gui.add(state, 'x', 0.0, 1.0, 0.01)
+                     .name('Zr fraction (x)')
+                     .onChange(() => { if (!state.pulseActive) rebuildAll(); });
+
+    const presets = gui.addFolder('빠른 프리셋');
+    presets.add({ pure_Ti: () => { state.x = 0.00; xCtrl.updateDisplay(); rebuildAll(); } },
+                'pure_Ti').name('PbTiO₃ (x=0)');
+    presets.add({ ti_rich: () => { state.x = 0.30; xCtrl.updateDisplay(); rebuildAll(); } },
+                'ti_rich').name('Ti-rich (x=0.30)');
+    presets.add({ mpb_left: () => { state.x = 0.48; xCtrl.updateDisplay(); rebuildAll(); } },
+                'mpb_left').name('MPB 좌측 (x=0.48)');
+    presets.add({ mpb: () => { state.x = 0.52; xCtrl.updateDisplay(); rebuildAll(); } },
+                'mpb').name('MPB 중심 (x=0.52)');
+    presets.add({ zr_rich: () => { state.x = 0.75; xCtrl.updateDisplay(); rebuildAll(); } },
+                'zr_rich').name('Zr-rich (x=0.75)');
+    presets.add({ pure_Zr: () => { state.x = 1.00; xCtrl.updateDisplay(); rebuildAll(); } },
+                'pure_Zr').name('PbZrO₃ (x=1)');
+
+    const advanced = gui.addFolder('표시 옵션');
+    const viewOpts = { wireframe: false, showBonds: true, autoRotate: false };
+    advanced.add(viewOpts, 'wireframe').name('Wireframe').onChange(v => {
+      for (const arr of [atoms.Pb, atoms.B, atoms.O])
+        for (const m of arr) m.material.wireframe = v;
+    });
+    advanced.add(viewOpts, 'showBonds').name('결합 표시').onChange(v => {
+      for (const bond of bonds) bond.mesh.visible = v;
+    });
+    advanced.add(viewOpts, 'autoRotate').name('자동 회전').onChange(v => {
+      controls.autoRotate = v;
+      controls.autoRotateSpeed = 0.7;
+    });
+    advanced.close();
+
+    // 펄스 버튼
+    const pulseButton = document.getElementById('pulse-button');
+    pulseButton.addEventListener('click', () => {
+      if (state.pulseActive) return;
+      state.pulseActive = true;
+      state.pulseStartTime = performance.now() / 1000;
+      pulseButton.disabled = true;
+      pulseButton.textContent = '⚡ 압력 인가 중...';
+      xCtrl.disable();
+    });
+
+    // ============================================================
+    // 12. ANIMATION LOOP
+    // ============================================================
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const now = performance.now() / 1000;
+
+      if (state.pulseActive) {
+        const t = now - state.pulseStartTime;
+        const stress = pulseProfile(t);
+        state.currentStress = stress;
+        applyDisplacement(stress);
+        updatePressureArrows(stress);
+        updatePolarizationArrow(stress);
+        updateReadout();
+
+        if (t > PULSE_DURATION) {
+          state.pulseActive = false;
+          state.currentStress = 0;
+          state.currentPolarization = 0;
+          applyDisplacement(0);
+          updatePressureArrows(0);
+          updatePolarizationArrow(0);
+          pulseButton.disabled = false;
+          pulseButton.textContent = '▼ 압력 펄스 인가';
+          xCtrl.enable();
+          updateReadout();
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // ============================================================
+    // 13. INIT
+    // ============================================================
+
+    rebuildAll();
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

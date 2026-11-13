@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스타터 키트 배선도</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root{
+    --bg:#EDF1F4; --surface:#FFFFFF; --surface2:#F4F8FA;
+    --ink:#131A20; --ink2:#46535E; --muted:#6B7A87;
+    --rule:#D1DAE1; --rule-soft:#E3EAEF;
+    --accent:#0B6E62; --accent-soft:#D8EDE9;
+    --amber:#8F5D05; --amber-soft:#FAEFD6;
+    --red:#A2362A; --red-soft:#F8E2DE;
+    --code-bg:#0E151A; --code-ink:#C9D7E0; --code-dim:#6C808F; --code-key:#6FD3BC;
+    --shadow:0 1px 2px rgba(19,26,32,.06), 0 6px 18px -10px rgba(19,26,32,.18);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0D1317; --surface:#151D23; --surface2:#1B252C;
+      --ink:#E3EBF1; --ink2:#A8B7C3; --muted:#7D8D9A;
+      --rule:#28343D; --rule-soft:#1F2A32;
+      --accent:#46C7B0; --accent-soft:#11332C;
+      --amber:#DCA33D; --amber-soft:#2F2611;
+      --red:#E07E6E; --red-soft:#37201B;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -12px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0D1317; --surface:#151D23; --surface2:#1B252C;
+    --ink:#E3EBF1; --ink2:#A8B7C3; --muted:#7D8D9A;
+    --rule:#28343D; --rule-soft:#1F2A32;
+    --accent:#46C7B0; --accent-soft:#11332C;
+    --amber:#DCA33D; --amber-soft:#2F2611;
+    --red:#E07E6E; --red-soft:#37201B;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -12px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans KR", system-ui, -apple-system, "Malgun Gothic", sans-serif;
+    font-size:15px; line-height:1.72; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:860px; margin:0 auto; padding-inline:18px; padding-block:0 72px}
+
+  .navbar{position:sticky; top:env(safe-area-inset-top,0px); z-index:30; background:var(--bg); border-bottom:1px solid var(--rule)}
+  .navinner{max-width:860px; margin:0 auto; padding:9px 18px; display:flex; gap:7px; overflow-x:auto; scrollbar-width:none}
+  .navinner::-webkit-scrollbar{display:none}
+  .navinner a{
+    flex:0 0 auto; text-decoration:none; color:var(--ink2); font-size:12.5px; font-weight:600;
+    padding:5px 11px; border:1px solid var(--rule); border-radius:999px; background:var(--surface); white-space:nowrap;
+  }
+  .navinner a:hover{border-color:var(--accent); color:var(--accent)}
+  .navinner a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  header.top{padding-block:40px 26px}
+  .eyebrow{font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 12px}
+  h1{font-size:clamp(28px,6.4vw,42px); line-height:1.16; font-weight:700; margin:0 0 14px; letter-spacing:-.025em; text-wrap:balance}
+  .lede{font-size:16.5px; color:var(--ink2); margin:0; max-width:60ch}
+
+  h2{font-size:21px; font-weight:700; letter-spacing:-.02em; margin:0 0 6px; text-wrap:balance; display:flex; align-items:baseline; gap:11px}
+  h2 .num{font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; color:var(--accent); border:1px solid var(--accent); border-radius:5px; padding:1px 6px; flex:0 0 auto}
+  h3{font-size:15.5px; font-weight:600; margin:24px 0 8px; letter-spacing:-.01em}
+  section{padding-block:30px; border-top:1px solid var(--rule)}
+  .sec-note{color:var(--muted); font-size:13.5px; margin:0 0 18px}
+  p{margin:0 0 13px}
+  p:last-child{margin-bottom:0}
+
+  .tbl-wrap{overflow-x:auto; border:1px solid var(--rule); border-radius:10px; background:var(--surface); margin:16px 0}
+  table{border-collapse:collapse; width:100%; min-width:520px; font-size:13.5px}
+  th,td{text-align:left; padding:9px 13px; border-bottom:1px solid var(--rule-soft); vertical-align:top}
+  th{background:var(--surface2); font-weight:600; font-size:12px; letter-spacing:.03em; color:var(--ink2); white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  td.mono, th.mono, span.mono{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; white-space:nowrap}
+  .ok{color:var(--accent); font-weight:600}
+  .no{color:var(--red); font-weight:600}
+  tr.node td{background:var(--accent-soft)}
+
+  figure{margin:20px 0 0; background:var(--surface); border:1px solid var(--rule); border-radius:10px; padding:14px; box-shadow:var(--shadow)}
+  .svg-scroll{overflow-x:auto}
+  figure svg{display:block; width:100%; min-width:500px; height:auto}
+  figcaption{font-size:12.5px; color:var(--muted); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule-soft)}
+
+  .call{border-radius:9px; padding:13px 15px; margin:16px 0; font-size:13.8px; line-height:1.65; border:1px solid}
+  .call b{font-weight:600}
+  .call.warn{background:var(--amber-soft); border-color:var(--amber); color:var(--ink)}
+  .call.stop{background:var(--red-soft); border-color:var(--red); color:var(--ink)}
+  .call.key{background:var(--accent-soft); border-color:var(--accent); color:var(--ink)}
+  .call .tag{font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; display:block; margin-bottom:5px}
+  .call.warn .tag{color:var(--amber)}
+  .call.stop .tag{color:var(--red)}
+  .call.key .tag{color:var(--accent)}
+
+  ol.steps{margin:14px 0; padding-left:0; list-style:none; counter-reset:s}
+  ol.steps li{counter-increment:s; position:relative; padding-left:34px; margin-bottom:11px; font-size:14px}
+  ol.steps li::before{
+    content:counter(s); position:absolute; left:0; top:2px; width:22px; height:22px; border-radius:50%;
+    background:var(--accent-soft); color:var(--accent); font-family:"IBM Plex Mono",monospace;
+    font-size:11.5px; font-weight:600; display:flex; align-items:center; justify-content:center;
+  }
+  ul.plain{margin:12px 0; padding-left:20px; font-size:14px}
+  ul.plain li{margin-bottom:7px}
+
+  .check{display:flex; gap:10px; align-items:flex-start; padding:9px 12px; border:1px solid var(--rule); border-radius:8px; background:var(--surface); margin-bottom:7px; cursor:pointer}
+  .check input{margin:4px 0 0; accent-color:var(--accent); flex:0 0 auto; width:15px; height:15px}
+  .check span{font-size:13.8px; line-height:1.55}
+  .check:has(input:checked){background:var(--accent-soft); border-color:var(--accent)}
+  .check:has(input:checked) span{color:var(--ink2); text-decoration:line-through}
+  .check:focus-within{outline:2px solid var(--accent); outline-offset:1px}
+
+  pre{background:var(--code-bg); color:var(--code-ink); border-radius:10px; padding:15px; overflow-x:auto;
+      font-family:"IBM Plex Mono",monospace; font-size:12.3px; line-height:1.62; margin:14px 0; border:1px solid var(--rule)}
+  pre .c{color:var(--code-dim)}
+  pre .k{color:var(--code-key)}
+  code.inl{font-family:"IBM Plex Mono",monospace; font-size:.88em; background:var(--surface2); border:1px solid var(--rule-soft); border-radius:4px; padding:1px 5px; color:var(--ink)}
+
+  footer{padding-block:28px 0; border-top:1px solid var(--rule); color:var(--muted); font-size:12.5px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+<style>.repo-note{box-sizing:border-box;max-width:960px;margin:12px auto;padding:12px 16px;background:#fff7e0;color:#3a2e10;border:1px solid #e0c060;border-left:6px solid #c89a1e;border-radius:8px;font:14px/1.6 system-ui,-apple-system,'Noto Sans KR',sans-serif;overflow-wrap:anywhere;word-break:keep-all}.repo-note b{color:#5a3e00}.repo-note ul{margin:6px 0 0;padding-left:20px}.repo-note li{margin:2px 0}@media (max-width:600px){.repo-note{margin:8px;font-size:13.5px}}</style>
+</head>
+<body>
+<div class="repo-note" role="note"><b>저장소 메모 — 2026-09-18 스타터 키트 배선표 (실행 기록 없음)</b><ul><li>"뜻밖의 좋은 소식" 상자는 틀렸다: 50 kΩ+50 kΩ 바이어스(실효 25 kΩ)는 20 nF 디스크와 시정수 약 0.5 ms를 만들어 0.1초 누름을 대부분 깎는다. 디스크 자체가 커패시터라 ADC의 "10 kΩ 이하" 권장은 이 경우 거의 문제가 되지 않는다.</li><li>"꼭짓점 3.2 kΩ"은 공진에서의 사인파 식 1/(2πfC)로 계산한 값으로, 이후 철회됐다(발걸음 펄스의 최적 부하는 MΩ대로 예상되며 실측이 필요).</li><li>바이어스 방식은 2026-11-13 설계에서 디스크별 전파 정류로 대체됐다. 코드: <code>arduino/v2_bench/*_v2_kit10k.ino</code>.</li></ul></div>
+
+
+<nav class="navbar">
+  <div class="navinner">
+    <a href="#check">키트 점검</a>
+    <a href="#series">저항 직렬</a>
+    <a href="#a">회로 A 배선</a>
+    <a href="#pot">가변저항 값</a>
+    <a href="#b">회로 B 배선</a>
+    <a href="#c">회로 C</a>
+    <a href="#code">코드 수정</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow">2026-09-18 · eduino 스타터 키트 기준</p>
+  <h1>스타터 키트 배선도</h1>
+  <p class="lede">키트에 1 MΩ 저항·다이오드·커패시터가 없습니다. 있는 부품만으로 회로 A와 B는 그대로 할 수 있고, 회로 C는 부품 두 개를 구해야 합니다. 아래는 실제로 꽂을 자리까지 적은 배선표입니다.</p>
+</header>
+
+<section id="check">
+  <h2><span class="num">00</span>키트 점검 결과</h2>
+  <p class="sec-note">부품 목록 사진과 실험에 필요한 부품을 하나씩 대조한 결과입니다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>필요한 것</th><th>키트</th><th>대체 방법</th></tr></thead>
+      <tbody>
+        <tr><td>바이어스 저항 1 MΩ ×2</td><td class="no">없음</td><td class="mono">10kΩ ×5 직렬 = 50kΩ, 양쪽에</td></tr>
+        <tr><td>C<sub>p</sub> 기준저항 100 kΩ</td><td class="no">없음</td><td class="mono">10kΩ ×10 직렬 = 100kΩ</td></tr>
+        <tr><td>다이오드 1N4148</td><td class="no">없음</td><td>구해야 함 — 회로 C 보류</td></tr>
+        <tr><td>세라믹 커패시터 104</td><td class="no">없음</td><td>구해야 함 — 회로 C 보류</td></tr>
+        <tr><td>가변저항 10 kΩ</td><td class="ok">1개 있음</td><td>그대로 사용 (부하 0~10 kΩ)</td></tr>
+        <tr><td>부하용 고정저항</td><td class="ok">있음</td><td class="mono">220 / 330 / 1k / 10k 각 10개</td></tr>
+        <tr><td>멀티미터</td><td class="no">없음</td><td>과학실에서 빌리거나, 아두이노로 가변저항만 읽음</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call key">
+    <span class="tag">뜻밖의 좋은 소식</span>
+    바이어스가 1 MΩ에서 50 kΩ으로 내려가면서 <b>ADC 정확도 문제가 상당 부분 사라졌습니다.</b> 아두이노 ADC는 신호원 임피던스 10 kΩ 이하를 권장하는데, 원래 계획(실효 500 kΩ)은 그 한참 위였습니다. 이제 실효 부하 최댓값이 25 kΩ이라 훨씬 안전합니다. 대신 <b>MΩ대 보행 조건은 여전히 못 잽니다</b> — 그건 보고서에 한계로 그대로 남습니다.
+  </div>
+
+  <div class="call warn">
+    <span class="tag">그래도 꼭짓점은 잡힙니다</span>
+    공진(3,332 Hz)에서 이론적 최적 부하는 <code class="inl">1/(2πfC) ≈ 3.2 kΩ</code>입니다(C<sub>p</sub>=15 nF 가정). 가변저항 0~10 kΩ 범위의 한가운데라 <b>P–R 곡선의 꼭짓점을 실제로 찾을 수 있습니다.</b> 오늘 목표 세 개 중 R<sub>opt</sub>는 키트만으로 달성 가능합니다.
+  </div>
+</section>
+
+<section id="series">
+  <h2><span class="num">01</span>큰 저항은 직렬로 만든다</h2>
+  <p class="sec-note">10 kΩ 저항이 10개 있으니, 옆 세로줄로 한 칸씩 건너뛰며 이어 꽂으면 원하는 값이 됩니다.</p>
+
+  <figure>
+    <div class="svg-scroll">
+    <svg viewBox="0 0 660 195" role="img" aria-label="10킬로옴 저항 5개를 옆 세로줄로 이어 꽂아 50킬로옴을 만드는 그림">
+      <g stroke="var(--ink)" stroke-width="1.8" fill="none" stroke-linecap="round">
+        <line x1="44" y1="95" x2="90" y2="95"/>
+        <line x1="150" y1="95" x2="180" y2="95"/>
+        <line x1="240" y1="95" x2="270" y2="95"/>
+        <line x1="330" y1="95" x2="360" y2="95"/>
+        <line x1="420" y1="95" x2="450" y2="95"/>
+        <line x1="510" y1="95" x2="576" y2="95"/>
+      </g>
+      <g fill="var(--surface)" stroke="var(--ink)" stroke-width="1.8">
+        <rect x="90" y="80" width="60" height="30" rx="3"/>
+        <rect x="180" y="80" width="60" height="30" rx="3"/>
+        <rect x="270" y="80" width="60" height="30" rx="3"/>
+        <rect x="360" y="80" width="60" height="30" rx="3"/>
+        <rect x="450" y="80" width="60" height="30" rx="3"/>
+      </g>
+      <g fill="var(--ink)">
+        <circle cx="90" cy="95" r="4"/><circle cx="150" cy="95" r="4"/>
+        <circle cx="180" cy="95" r="4"/><circle cx="240" cy="95" r="4"/>
+        <circle cx="270" cy="95" r="4"/><circle cx="330" cy="95" r="4"/>
+        <circle cx="360" cy="95" r="4"/><circle cx="420" cy="95" r="4"/>
+        <circle cx="450" cy="95" r="4"/><circle cx="510" cy="95" r="4"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="12" fill="var(--ink)" text-anchor="middle">
+        <text x="120" y="100">10k</text><text x="210" y="100">10k</text><text x="300" y="100">10k</text>
+        <text x="390" y="100">10k</text><text x="480" y="100">10k</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--muted)" text-anchor="middle">
+        <text x="90" y="132">2</text><text x="165" y="132">3</text><text x="255" y="132">4</text>
+        <text x="345" y="132">5</text><text x="435" y="132">6</text><text x="510" y="132">7</text>
+      </g>
+      <text x="300" y="151" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="var(--muted)">브레드보드 세로줄 번호</text>
+      <path d="M90 58 L90 48 L510 48 L510 58" stroke="var(--accent)" stroke-width="2" fill="none"/>
+      <text x="300" y="38" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="14" font-weight="600" fill="var(--accent)">합쳐서 50 kΩ</text>
+      <text x="38" y="99" text-anchor="end" font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="var(--ink)">시작</text>
+      <text x="584" y="99" font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="var(--ink)">끝</text>
+      <text x="300" y="180" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="var(--muted)">저항 하나의 두 다리는 서로 다른 세로줄에 꽂아야 한다. 같은 줄에 꽂으면 단락된다.</text>
+    </svg>
+    </div>
+    <figcaption>같은 방식으로 10개를 이어 꽂으면 100 kΩ이 됩니다. 저항은 방향이 없으니 어느 쪽을 먼저 꽂아도 됩니다.</figcaption>
+  </figure>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>만들 값</th><th>조합</th><th>쓰는 곳</th><th class="mono">오차</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">50 kΩ</td><td class="mono">10kΩ ×5 직렬</td><td>회로 A 바이어스 (양쪽에 하나씩)</td><td class="mono">약 ±2%</td></tr>
+        <tr><td class="mono">100 kΩ</td><td class="mono">10kΩ ×10 직렬</td><td>회로 B 기준저항</td><td class="mono">약 ±1.6%</td></tr>
+        <tr><td class="mono">2.2 kΩ</td><td class="mono">1k + 1k + 220</td><td>부하 스윕 중간점</td><td class="mono">약 ±3%</td></tr>
+        <tr><td class="mono">3.3 kΩ</td><td class="mono">1k ×3 + 330</td><td>예상 꼭짓점 부근</td><td class="mono">약 ±2.5%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>저항 여러 개를 직렬로 이으면 각각의 ±5% 오차가 서로 상쇄되어 체인 전체 오차는 절반 이하로 줄어듭니다. 멀티미터가 없어도 이 정도면 쓸 만합니다.</p>
+</section>
+
+<section id="a">
+  <h2><span class="num">02</span>회로 A 배선 — 바이어스 + 부하저항</h2>
+  <p class="sec-note">10 kΩ 저항 10개를 전부 바이어스에 씁니다. 부하는 가변저항과 220/330/1k로 해결합니다.</p>
+
+  <figure>
+    <div class="svg-scroll">
+    <svg viewBox="0 0 700 320" role="img" aria-label="50킬로옴 바이어스 분압기와 부하저항이 A0 노드에 연결된 회로도">
+      <g stroke="var(--ink)" stroke-width="1.8" fill="none" stroke-linecap="round">
+        <line x1="92" y1="50" x2="640" y2="50"/>
+        <line x1="92" y1="280" x2="640" y2="280"/>
+        <line x1="150" y1="165" x2="600" y2="165"/>
+        <line x1="150" y1="165" x2="150" y2="210"/>
+        <line x1="150" y1="232" x2="150" y2="280"/>
+        <line x1="320" y1="50" x2="320" y2="95"/>
+        <line x1="320" y1="145" x2="320" y2="195"/>
+        <line x1="320" y1="245" x2="320" y2="280"/>
+        <line x1="470" y1="165" x2="470" y2="195"/>
+        <line x1="470" y1="245" x2="470" y2="280"/>
+      </g>
+      <rect x="128" y="210" width="44" height="14" fill="var(--accent-soft)" stroke="var(--ink)" stroke-width="1.8"/>
+      <rect x="128" y="224" width="44" height="8" fill="var(--amber)" stroke="var(--ink)" stroke-width="1.8"/>
+      <rect x="308" y="95" width="24" height="50" rx="2" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.8"/>
+      <rect x="308" y="195" width="24" height="50" rx="2" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.8"/>
+      <rect x="458" y="195" width="24" height="50" rx="2" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.4"/>
+      <rect x="600" y="150" width="54" height="30" rx="5" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.8"/>
+      <g fill="var(--ink)">
+        <circle cx="150" cy="165" r="4"/><circle cx="320" cy="165" r="4"/>
+        <circle cx="470" cy="165" r="4"/><circle cx="320" cy="50" r="4"/>
+        <circle cx="150" cy="280" r="4"/><circle cx="320" cy="280" r="4"/><circle cx="470" cy="280" r="4"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--muted)">
+        <text x="84" y="46" text-anchor="end">+5V</text>
+        <text x="84" y="285" text-anchor="end">GND</text>
+      </g>
+      <g font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="var(--ink)">
+        <text x="344" y="114">R1 = 10kΩ ×5</text>
+        <text x="344" y="131" font-size="11.5" fill="var(--muted)">= 50 kΩ</text>
+        <text x="344" y="214">R2 = 10kΩ ×5</text>
+        <text x="344" y="231" font-size="11.5" fill="var(--muted)">= 50 kΩ</text>
+        <text x="496" y="214" fill="var(--accent)" font-weight="600">R_load</text>
+        <text x="496" y="231" font-size="11.5" fill="var(--muted)">가변저항 · 220 · 330 · 1k</text>
+        <text x="120" y="223" text-anchor="end">PZT 디스크</text>
+      </g>
+      <text x="627" y="170" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="var(--accent)">A0</text>
+      <text x="243" y="156" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="var(--accent)">노드 = 7번 줄</text>
+      <text x="150" y="303" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="var(--muted)">(−) 검정선</text>
+    </svg>
+    </div>
+    <figcaption>교류 신호 입장에서 R1과 R2는 병렬이므로, 부하저항을 빼놓아도 <b>25 kΩ</b>이 이미 걸려 있습니다. 그 조건이 곧 스윕의 최댓값 지점입니다.</figcaption>
+  </figure>
+
+  <h3>꽂는 자리표</h3>
+  <p>브레드보드는 가운데 홈을 기준으로 위아래가 나뉘고, <b>같은 세로줄 5칸은 서로 연결</b>되어 있습니다. 아래 "7번 줄"은 그 세로줄의 빈 칸 아무 데나 꽂으라는 뜻입니다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>꽂을 것</th><th>한쪽</th><th>다른 쪽</th></tr></thead>
+      <tbody>
+        <tr><td>점퍼 (빨강)</td><td>아두이노 <span class="mono">5V</span></td><td><span class="mono">+</span> 레일</td></tr>
+        <tr><td>점퍼 (검정)</td><td>아두이노 <span class="mono">GND</span></td><td><span class="mono">−</span> 레일</td></tr>
+        <tr><td>점퍼</td><td><span class="mono">+</span> 레일</td><td class="mono">2번 줄</td></tr>
+        <tr><td>10 kΩ ①</td><td class="mono">2번 줄</td><td class="mono">3번 줄</td></tr>
+        <tr><td>10 kΩ ②</td><td class="mono">3번 줄</td><td class="mono">4번 줄</td></tr>
+        <tr><td>10 kΩ ③</td><td class="mono">4번 줄</td><td class="mono">5번 줄</td></tr>
+        <tr><td>10 kΩ ④</td><td class="mono">5번 줄</td><td class="mono">6번 줄</td></tr>
+        <tr class="node"><td>10 kΩ ⑤</td><td class="mono">6번 줄</td><td class="mono">7번 줄 ← 노드</td></tr>
+        <tr class="node"><td>10 kΩ ⑥</td><td class="mono">7번 줄 ← 노드</td><td class="mono">8번 줄</td></tr>
+        <tr><td>10 kΩ ⑦</td><td class="mono">8번 줄</td><td class="mono">9번 줄</td></tr>
+        <tr><td>10 kΩ ⑧</td><td class="mono">9번 줄</td><td class="mono">10번 줄</td></tr>
+        <tr><td>10 kΩ ⑨</td><td class="mono">10번 줄</td><td class="mono">11번 줄</td></tr>
+        <tr><td>10 kΩ ⑩</td><td class="mono">11번 줄</td><td class="mono">12번 줄</td></tr>
+        <tr><td>점퍼</td><td class="mono">12번 줄</td><td><span class="mono">−</span> 레일</td></tr>
+        <tr class="node"><td>점퍼</td><td class="mono">7번 줄</td><td>아두이노 <span class="mono">A0</span></td></tr>
+        <tr class="node"><td>압전소자 빨강선</td><td class="mono">7번 줄</td><td>—</td></tr>
+        <tr><td>압전소자 검정선</td><td><span class="mono">−</span> 레일</td><td>—</td></tr>
+        <tr class="node"><td>부하저항 R_load</td><td class="mono">7번 줄</td><td><span class="mono">−</span> 레일</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call warn">
+    <span class="tag">꽂자마자 확인할 것</span>
+    전원을 넣고 시리얼에 <code class="inl">s</code>를 쳤을 때 <b>baseline이 512 부근</b>이면 두 저항 체인의 균형이 맞다는 뜻입니다. 멀티미터 없이 할 수 있는 유일한 검증이니 꼭 하세요. 한쪽으로 치우치면 그만큼 두 체인의 저항이 다르다는 뜻이고, 9 근처면 바이어스가 아예 안 걸린 것입니다.
+  </div>
+
+  <h3>부하 스윕 순서</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th class="mono">R_load</th><th>만드는 법</th><th class="mono">실효 부하 R_eff</th></tr></thead>
+      <tbody>
+        <tr><td>빼놓음</td><td>부하저항 자리를 비움</td><td class="mono">25 kΩ</td></tr>
+        <tr><td class="mono">10 kΩ</td><td>가변저항 최대</td><td class="mono">7.1 kΩ</td></tr>
+        <tr><td class="mono">3.3 kΩ</td><td>가변저항 중간 또는 1k×3 + 330</td><td class="mono">2.9 kΩ</td></tr>
+        <tr><td class="mono">1 kΩ</td><td>고정저항 1개</td><td class="mono">0.96 kΩ</td></tr>
+        <tr><td class="mono">330 Ω</td><td>고정저항 1개</td><td class="mono">326 Ω</td></tr>
+        <tr><td class="mono">220 Ω</td><td>고정저항 1개</td><td class="mono">218 Ω</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>조건을 바꿀 때마다 시리얼에 <code class="inl">L3300</code> 처럼 입력해야 CSV에 기록됩니다. 스케치가 R_eff를 자동 계산해 출력하니 위 표와 맞는지 눈으로 확인하세요.</p>
+</section>
+
+<section id="pot">
+  <h2><span class="num">03</span>멀티미터 없이 가변저항 값 읽기</h2>
+  <p class="sec-note">가변저항에는 눈금이 없습니다. 아두이노를 임시 저항계로 써서 지금 몇 옴인지 알아냅니다.</p>
+
+  <figure>
+    <div class="svg-scroll">
+    <svg viewBox="0 0 640 215" role="img" aria-label="가변저항 세 핀을 5V, A1, GND에 연결해 저항값을 읽는 임시 배선도">
+      <g stroke="var(--ink)" stroke-width="1.8" fill="none" stroke-linecap="round">
+        <line x1="150" y1="60" x2="250" y2="60"/>
+        <line x1="150" y1="160" x2="250" y2="160"/>
+        <line x1="150" y1="110" x2="286" y2="110"/>
+      </g>
+      <rect x="250" y="45" width="34" height="130" rx="5" fill="var(--surface2)" stroke="var(--ink)" stroke-width="1.8"/>
+      <polygon points="300,101 300,119 285,110" fill="var(--accent)" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/>
+      <g fill="var(--ink)"><circle cx="150" cy="60" r="4"/><circle cx="150" cy="110" r="4"/><circle cx="150" cy="160" r="4"/></g>
+      <g font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" text-anchor="end">
+        <text x="140" y="65" fill="var(--ink)">5V</text>
+        <text x="140" y="115" fill="var(--accent)">A1</text>
+        <text x="140" y="165" fill="var(--ink)">GND</text>
+      </g>
+      <g font-family="IBM Plex Sans KR, sans-serif" font-size="12.5" fill="var(--muted)">
+        <text x="310" y="52">왼쪽 핀</text>
+        <text x="310" y="106" fill="var(--accent)" font-weight="600">가운데 핀 (와이퍼)</text>
+        <text x="310" y="170">오른쪽 핀</text>
+        <text x="310" y="126" font-size="11.5">가운데–오른쪽 사이가 R_load가 된다</text>
+      </g>
+      <text x="320" y="205" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="var(--muted)">R_load = (A1 읽은 값 ÷ 1023) × 10 kΩ</text>
+    </svg>
+    </div>
+    <figcaption>측정할 때만 이렇게 꽂습니다. 값을 적은 뒤 손잡이를 건드리지 말고 5V 점퍼만 뽑아, 가운데 핀을 압전 노드로 옮기면 그 값이 그대로 부하저항이 됩니다.</figcaption>
+  </figure>
+
+  <ol class="steps">
+    <li><code class="inl">pot_measure.ino</code>를 올리고 위 그림대로 꽂습니다.</li>
+    <li>손잡이를 원하는 위치로 돌리고, 시리얼에 찍힌 <code class="inl">R_ohm</code>을 노트에 적습니다.</li>
+    <li><b>손잡이를 건드리지 말고</b> 5V 점퍼만 뽑습니다.</li>
+    <li>가운데 핀을 7번 줄(노드)로 옮깁니다. 오른쪽 핀은 GND 레일에 그대로 둡니다.</li>
+    <li>회로 A 스케치를 다시 올리고 <code class="inl">L</code> 명령으로 적어둔 값을 기록합니다.</li>
+  </ol>
+  <p>가변저항의 공칭 10 kΩ 자체가 ±20% 정도 틀릴 수 있습니다. 고정저항(±5%)으로 잡은 점들이 더 믿을 만하니, 가변저항은 곡선의 모양을 채우는 용도로 쓰고 결론은 고정저항 점들로 내리세요.</p>
+</section>
+
+<section id="b">
+  <h2><span class="num">04</span>회로 B 배선 — C<sub>p</sub> 측정</h2>
+  <p class="sec-note">회로 A를 다 쓰고 나서 저항을 뽑아 다시 배열합니다. 10 kΩ 10개가 전부 하나의 체인이 됩니다.</p>
+
+  <figure>
+    <div class="svg-scroll">
+    <svg viewBox="0 0 700 240" role="img" aria-label="D2에서 100킬로옴 체인을 거쳐 압전소자로 연결되고 그 접점을 A0로 읽는 회로도">
+      <g stroke="var(--ink)" stroke-width="1.8" fill="none" stroke-linecap="round">
+        <line x1="96" y1="85" x2="150" y2="85"/>
+        <line x1="210" y1="85" x2="470" y2="85"/>
+        <line x1="330" y1="85" x2="330" y2="120"/>
+        <line x1="330" y1="142" x2="330" y2="190"/>
+        <line x1="250" y1="190" x2="410" y2="190"/>
+      </g>
+      <rect x="44" y="70" width="52" height="30" rx="5" fill="var(--surface2)" stroke="var(--ink)" stroke-width="1.8"/>
+      <rect x="150" y="72" width="60" height="26" rx="2" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.4"/>
+      <rect x="308" y="120" width="44" height="14" fill="var(--accent-soft)" stroke="var(--ink)" stroke-width="1.8"/>
+      <rect x="308" y="134" width="44" height="8" fill="var(--amber)" stroke="var(--ink)" stroke-width="1.8"/>
+      <rect x="470" y="70" width="52" height="30" rx="5" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.8"/>
+      <circle cx="330" cy="85" r="4" fill="var(--ink)"/>
+      <text x="70" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="var(--ink)">D2</text>
+      <text x="496" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="var(--accent)">A0</text>
+      <text x="180" y="58" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="13" font-weight="600" fill="var(--accent)">10kΩ ×10 = 100 kΩ</text>
+      <text x="298" y="135" text-anchor="end" font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="var(--ink)">PZT</text>
+      <text x="242" y="195" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--muted)">GND</text>
+      <text x="380" y="103" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="var(--accent)">노드 = 12번 줄</text>
+      <text x="330" y="222" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="var(--muted)">압전소자를 그냥 커패시터로 취급해 충전시킨다 · tau = 100 kΩ × C_p ≈ 1.5 ms</text>
+    </svg>
+    </div>
+    <figcaption>5V는 쓰지 않습니다. D2 핀이 직접 전원 역할을 합니다. 바이어스 저항과 부하저항은 <b>모두 뽑아야</b> 합니다 — 남아 있으면 체인과 병렬로 붙어 C<sub>p</sub>가 작게 나옵니다.</figcaption>
+  </figure>
+
+  <h3>꽂는 자리표</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>꽂을 것</th><th>한쪽</th><th>다른 쪽</th></tr></thead>
+      <tbody>
+        <tr><td>점퍼 (검정)</td><td>아두이노 <span class="mono">GND</span></td><td><span class="mono">−</span> 레일</td></tr>
+        <tr><td>점퍼</td><td>아두이노 <span class="mono">D2</span></td><td class="mono">2번 줄</td></tr>
+        <tr><td>10 kΩ ①~⑩</td><td class="mono">2번 줄에서 시작</td><td class="mono">한 줄씩 옮겨 12번 줄까지</td></tr>
+        <tr class="node"><td>점퍼</td><td class="mono">12번 줄 ← 노드</td><td>아두이노 <span class="mono">A0</span></td></tr>
+        <tr class="node"><td>압전소자 빨강선</td><td class="mono">12번 줄</td><td>—</td></tr>
+        <tr><td>압전소자 검정선</td><td><span class="mono">−</span> 레일</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>시리얼에 <code class="inl">m</code>을 치면 방전부터 기록까지 알아서 합니다. 스케치가 그 자리에서 τ와 C<sub>p</sub>를 추정해 출력하니, 값이 10~30 nF 범위에 들어오는지 바로 확인하세요. 3회 반복해 CSV로 저장합니다.</p>
+</section>
+
+<section id="c">
+  <h2><span class="num">05</span>회로 C — 오늘은 못 합니다</h2>
+  <p class="sec-note">다이오드와 커패시터가 키트에 없습니다. 대신 데이터로 상한값을 계산하는 길이 있습니다.</p>
+
+  <div class="call stop">
+    <span class="tag">대체가 안 되는 이유</span>
+    LED도 다이오드지만 순방향 강하가 약 1.8 V라, 압전 출력 1.1 V로는 아예 도통하지 않습니다. 부저·릴레이·RTC 모듈에 부품이 붙어 있어도 납땜되어 있어 꺼내 쓸 수 없습니다. <b>정류·축전은 부품 없이는 물리적으로 불가능합니다.</b>
+  </div>
+
+  <h3>구할 부품 (합쳐서 500원 안팎)</h3>
+  <ul class="plain">
+    <li><b>다이오드</b> — 1N4148 또는 1N5819(쇼트키). 쇼트키가 손실이 절반 이하라 훨씬 유리합니다.</li>
+    <li><b>세라믹 커패시터</b> — 103(10 nF) 또는 104(100 nF). 전해 100 µF는 쓰면 안 됩니다.</li>
+    <li>과학실이나 기술실 부품함에 거의 항상 있습니다. 먼저 선생님께 여쭤보세요.</li>
+  </ul>
+
+  <div class="call key">
+    <span class="tag">부품 없이 오늘 할 수 있는 것</span>
+    회로 A의 파형에서 <b>양(+) 반주기 구간만 골라 적분</b>하면, 손실이 전혀 없는 이상적 반파 정류로 회수 가능한 에너지의 <b>상한값</b>이 나옵니다. 나중에 다이오드를 구해 실제로 측정한 값과 비교하면 그 차이가 곧 정류 손실입니다. 오늘은 상한값만 계산해 두고, 보고서에는 "정류 손실 측정은 부품 확보 후 다음 차시"로 적으면 됩니다.
+  </div>
+</section>
+
+<section id="code">
+  <h2><span class="num">06</span>코드에서 바꾼 값</h2>
+  <p class="sec-note">보낸 스케치 파일에는 이미 반영되어 있습니다. 직접 고칠 경우를 위해 적어 둡니다.</p>
+  <pre><span class="c">// piezo_A_load.ino</span>
+<span class="c">// 이전:</span> const long  R_BIAS = 1000000L;   <span class="c">// 1 MΩ</span>
+<span class="k">const long  R_BIAS = 50000L;</span>      <span class="c">// 10kΩ x 5 직렬</span>
+
+<span class="c">// piezo_B_cp.ino</span>
+<span class="c">// 이전:</span> const float R_REF = 1000000.0;   <span class="c">// 1 MΩ</span>
+<span class="c">// 이전:</span> uint16_t sampleUs = 100;
+<span class="k">const float R_REF = 100000.0;</span>     <span class="c">// 10kΩ x 10 직렬</span>
+<span class="k">uint16_t sampleUs = 20;</span>           <span class="c">// tau가 1.5 ms로 짧아져 더 촘촘히 샘플링</span></pre>
+  <p><code class="inl">arduino/v2_bench/analyze_load_v2.py</code> 상단의 <code class="inl">R_BIAS_PAR</code>도 <code class="inl">500_000.0</code>에서 <code class="inl">50_000.0</code>으로, <code class="inl">R_REF</code>도 <code class="inl">100_000.0</code>으로 바꿔야 합니다.</p>
+
+  <h3>시작 전 체크</h3>
+  <label class="check"><input type="checkbox" data-k="c1"><span>10 kΩ 저항 10개를 다 찾았다 (색띠: 갈–검–주–금)</span></label>
+  <label class="check"><input type="checkbox" data-k="c2"><span>회로 A 배선 후 baseline이 512 부근으로 나왔다</span></label>
+  <label class="check"><input type="checkbox" data-k="c3"><span>가변저항 값을 <code class="inl">pot_measure.ino</code>로 읽어 적어 두었다</span></label>
+  <label class="check"><input type="checkbox" data-k="c4"><span>조건을 바꿀 때마다 <code class="inl">L</code> 명령을 쳤다</span></label>
+  <label class="check"><input type="checkbox" data-k="c5"><span>회로 B로 넘어가기 전 바이어스 저항을 전부 뽑았다</span></label>
+  <label class="check"><input type="checkbox" data-k="c6"><span>다이오드·커패시터를 어디서 구할지 선생님께 여쭤봤다</span></label>
+</section>
+
+<footer>
+  압전 에너지 하베스팅 탐구 · 스타터 키트 배선도 · 2026-09-18 · 저장소 <code class="inl">piezo_hafs_108</code>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var KEY = "piezo-wiring-checks-v1";
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { saved = {}; }
+
+  var boxes = document.querySelectorAll('.check input[type="checkbox"]');
+  Array.prototype.forEach.call(boxes, function (b) {
+    var k = b.getAttribute("data-k");
+    if (saved[k]) b.checked = true;
+    b.addEventListener("change", function () {
+      saved[k] = b.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) { /* 저장 불가 환경 */ }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
