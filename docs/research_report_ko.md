@@ -1,4 +1,7 @@
-# piezo_hafs_108
+# piezo_hafs_108 — 전체 연구 기록 (구 README)
+
+> **이 문서는 2026-11-02까지의 전체 연구 기록(구 README)입니다. 2026-11-13 사실 확인으로 정정된 부분은 ⚠️정정 표시.**
+> 정정은 원래 문장을 조용히 고쳐 쓰지 않고, 그 자리에 **⚠️정정(2026-11-13)** 을 붙여 무엇이 왜 바뀌었는지 적었다. 처음 보는 사람을 위한 안내는 저장소 첫 화면의 새 README에 있다.
 
 **압전 타일을 밟으면 전기가 얼마나 나올까?**
 압전 디스크의 첫 실측(4차시)과, 그 결과에서 출발한 압전 소재 설계(5차시) 기록
@@ -8,21 +11,22 @@ HAFS 유리프 압전 타일 연구 · 측정 2026-09-11 / 소재 설계 2026-09
 <p align="center">
   <a href="https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html"><img alt="Analyzer v2 — live demo" src="https://img.shields.io/badge/%E2%96%B6%20Analyzer%20v2-live%20demo-ffb000?style=for-the-badge"></a>
   <a href="https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html"><img alt="Simulator v6 — live demo" src="https://img.shields.io/badge/%E2%96%B6%20Simulator%20v6-live%20demo-c05621?style=for-the-badge"></a>
-  <a href="docs/00_piezo_basics.md"><img alt="Piezo basics" src="https://img.shields.io/badge/%F0%9F%93%96%20Piezo%20basics-read-555?style=for-the-badge"></a>
+  <a href="00_piezo_basics.md"><img alt="Piezo basics" src="https://img.shields.io/badge/%F0%9F%93%96%20Piezo%20basics-read-555?style=for-the-badge"></a>
 </p>
 
 ## ▶ 바로 실행해 보기 — 설치 없이 브라우저에서
 
 | [**압전 데이터 분석기 v2**](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) | [**압전체 비교 시뮬레이터 v6**](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html) |
 |:---:|:---:|
-| [![분석기 v2 화면 — 손으로 네 번 누른 실측 파형](figures/demo_analyzer.png)](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) | [![시뮬레이터 v6 화면 — PZT 결정구조](figures/demo_simulator.png)](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html) |
-| 아두이노 CSV를 그대로 올리면 누름마다 에너지를 계산하고, 장소별로 비교하고, **우리 학교에서 쓸 만한지 판정**한다 | PZT · BaTiO₃ · PVDF · ZnO · 수정의 결정구조를 3D로 보고, 눌렀을 때 분극과 전기 출력이 어떻게 변하는지 비교한다 (해석 주의점 [§7](#7-소재-설계--5차시-화학구조-제안)) |
+| [![분석기 v2 화면 — 손으로 네 번 누른 실측 파형](../figures/demo_analyzer.png)](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) | [![시뮬레이터 v6 화면 — PZT 결정구조](../figures/demo_simulator.png)](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html) |
+| 아두이노 CSV를 그대로 올리면 누름마다 에너지를 계산하고, 장소별로 비교하고, **우리 학교에서 쓸 만한지 판정**한다 | PZT · BaTiO₃ · PVDF · ZnO · 수정의 결정구조를 3D로 보고, 눌렀을 때 분극과 전기 출력이 어떻게 변하는지 비교한다 (해석 주의점 [§7](#7-소재-설계--5차시-화학구조-제안); ⚠️정정(2026-11-13): 출력 숫자는 실제 V·mW·mJ가 아닌 **상대값**이고, 소재 순위는 d₃₃만 반영한다) |
 | **[▶ 분석기 열기](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html)** | **[▶ 시뮬레이터 열기](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html)** |
 
-> 압전이 처음이라면 → **[압전 기초론](docs/00_piezo_basics.md)** — 누르면 왜 전기가 나오고, 왜 조금밖에 안 나오나
+> 압전이 처음이라면 → **[압전 기초론](00_piezo_basics.md)** — 누르면 왜 전기가 나오고, 왜 조금밖에 안 나오나
 
 > **English summary** — A high-school research repo on floor tiles that harvest energy from footsteps.
-> We measured a 27 mm PZT disc directly with an Arduino (ADC registers driven by hand, 62 kHz sampling, open circuit).
+> We measured a 27 mm PZT disc directly with an Arduino (ADC registers driven by hand, 62 kHz sampling, open circuit;
+> ⚠️ correction 2026-11-13: the 1 MHz ADC clock is above the datasheet's 50–200 kHz for full 10-bit resolution, so effective resolution is ~8 bits, ±20 mV).
 > A hard tap peaks at **1.13 V** and rings at **3.33 kHz**; a hand press is a single **~0.1 s pulse of 1.1–1.3 V** — a
 > quasi-static input, three orders of magnitude below resonance. With no resonance gain available, the figure of merit
 > for choosing a material is the product **d·g = d²/(ε₀εr)**, not d₃₃ alone, so we designed a composition that lowers
@@ -32,9 +36,9 @@ HAFS 유리프 압전 타일 연구 · 측정 2026-09-11 / 소재 설계 2026-09
 > why, including our own earlier mistakes. Two browser tools live in `sim/` (live demos above): a material simulator and
 > a data analyzer whose v2 reads our Arduino CSVs directly, computes ½·C_p·V² per press and gives a school-feasibility verdict.
 > §8 is a practical guide to installing sensors in a Korean high school. §9 compares our numbers with the 2006–2009
-> Tokyo/Shibuya station trials and commercial tiles: a ceramic barely moves under a foot, so a footstep does very little
+> Tokyo Station / Shibuya (Hachikō square) trials and commercial tiles (⚠️ corrected 2026-11-13: the Shibuya trial was at Hachikō square, not in a station, and was a temporary 2008 trial): a ceramic barely moves under a foot, so a footstep does very little
 > work on it — piezo floors are weak power sources but good self-powered footstep sensors. The Korean text below is the
-> full research record; [`docs/00_piezo_basics.md`](docs/00_piezo_basics.md) is a plain-language primer.
+> full research record; [`docs/00_piezo_basics.md`](00_piezo_basics.md) is a plain-language primer.
 
 > **읽는 법** — 본문은 수치와 근거만 적는다. **처음 보는 사람을 위해** 상자(▶)를 펼치면
 > 그 자리에 나온 개념을 고등학생 눈높이에서 설명한다. 이미 아는 내용이면 건너뛰면 된다.
@@ -49,7 +53,7 @@ HAFS 유리프 압전 타일 연구 · 측정 2026-09-11 / 소재 설계 2026-09
 - **정정** — 다시 분석해 8개 항목을 바로잡았다 (4차시 철회 4 + 5차시 재검토 4) → [§2-6](#2-6-다시-분석해서-바로잡은-것)
 - **설계** — 준정적 입력에서 소재를 고르는 기준은 d₃₃ 하나가 아니라 **d·g**다. εr를 낮추는 방향으로 조성을 설계했다 → [§7](#7-소재-설계--5차시-화학구조-제안)
 - **제안** — **(Pb₀.₉₆Sm₀.₀₄)[(Zr₀.₅₂Ti₀.₄₈)₀.₈₈(Zn₁/₃Nb₂/₃)₀.₁₀Mn₀.₀₂]O₃**, [001] 배향 · 전하 합 0.00 · 허용인자 t = 0.984 → [§7](#7-소재-설계--5차시-화학구조-제안)
-- **비교** — 도쿄역·시부야 실험과 상용 타일은 한 걸음에 약 1–4 J, 우리 디스크는 약 15 nJ. 근본 원인은 세라믹이 거의 안 꺼져 **받는 일이 작다**는 것 → [§9](#9-시부야상용-사례와-비교--이-탐구의-의의)
+- **비교** — 도쿄역·시부야 실험과 상용 타일은 약 0.1–4 J(1인 통과 또는 걸음당), 우리 디스크는 약 15 nJ(⚠️정정(2026-11-13): 이전 판 "한 걸음에 약 1–4 J"은 §9 표의 도쿄역 1차 약 0.1 J/1인 통과와 맞지 않았다). 근본 원인은 세라믹이 거의 안 꺼져 **받는 일이 작다**는 것 → [§9](#9-시부야상용-사례와-비교--이-탐구의-의의)
 - **예비 판정** — 학교 전력원으로는 비현실적, **전원 없는 걸음 감지 센서**로는 현실적. 현장 측정으로 확정한다 → [§8](#8-학교-설치-가이드--한국-고등학교에서-현실적으로), [§9](#9-시부야상용-사례와-비교--이-탐구의-의의)
 - **다음** — C_p 실측 → P–R 곡선 → 상용 소자 3종 d·g 비교 → [§4](#4-다음-차시-계획)
 
@@ -67,8 +71,8 @@ flowchart LR
 
 | 단계 | 내용 | 상태 |
 |:---:|---|---|
-| 1 | PZT 압전 소자가 어떻게 작동하는지 이해 | ✅ [압전 기초론](docs/00_piezo_basics.md) |
-| 1.5 | 원리·화학구조를 보여 주는 시뮬레이터, 측정 분석기 제작 | ✅ [시뮬레이터 v6](sim/pzt_simulator_v6.html) · [분석기 v2](sim/PiezoAnalyzer_v2.html) · [`structures/`](structures) |
+| 1 | PZT 압전 소자가 어떻게 작동하는지 이해 | ✅ [압전 기초론](00_piezo_basics.md) |
+| 1.5 | 원리·화학구조를 보여 주는 시뮬레이터, 측정 분석기 제작 | ✅ [시뮬레이터 v6](../sim/pzt_simulator_v6.html) · [분석기 v2](../sim/PiezoAnalyzer_v2.html) · [`structures/`](../structures) |
 | 2 | 실제 소자 + 아두이노 우노로 측정 | ✅ 4차시 — §1–§3 |
 | 3 | 학교 안(급식실·매점 앞)에 센서 설치 | ⏳ 준비 중 — [§8 설치 가이드](#8-학교-설치-가이드--한국-고등학교에서-현실적으로) |
 | 4 | 현장에서 출력 측정 | ⬜ |
@@ -79,18 +83,18 @@ flowchart LR
 
 | 경로 | 내용 |
 |---|---|
-| [`piezo_capture_simple.ino`](piezo_capture_simple.ino) | 아두이노 측정 스케치 — 트리거 모드(62 kHz) / 연속 모드(1 kHz) |
-| [`data/piezo_capture_data-1.csv`](data/piezo_capture_data-1.csv) | 측정 원자료 |
-| [`analyze_v2.py`](analyze_v2.py) | 측정 분석 (현재판) — 요약 출력 + `figures/` 그림 4장 |
-| [`analyze_v1.py`](analyze_v1.py) | 측정 분석 4차시판 — 철회한 계산이 들어 있어 기록용으로만 둔다 |
-| [`docs/05_material_design.md`](docs/05_material_design.md) | 5차시 소재 설계 전문 — 용어 정의, 다섯 레버, 검증, 한계, 참고문헌 |
-| [`docs/commercial_dg_table.csv`](docs/commercial_dg_table.csv) | 문헌 소재 11종 d·g 원자료 |
-| [`calc/verify_composition.py`](calc/verify_composition.py) | 소재 설계의 모든 수치 재현 (표준 라이브러리만 사용) |
-| [`structures/`](structures) | 결정구조 파일(CIF) — 기준 PZT와 제안 조성 |
-| [`sim/pzt_simulator_v6.html`](sim/pzt_simulator_v6.html) | 압전체 비교 시뮬레이터 — **[▶ 데모](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html)**. 결과 해석 주의점은 §7 참조 |
-| [`sim/PiezoAnalyzer_v2.html`](sim/PiezoAnalyzer_v2.html) | 압전 데이터 분석기 (현재판) — **[▶ 데모](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html)**. 아두이노 CSV 직접 읽기(파일 하나 = 장소 하나), 에너지 계산 3방식(개방전압 ½·C_p·V² / 부하저항 ∫P dt / 커패시터 ½·C·ΔV²), 파형·이벤트 표, 장소별 히트맵, **학교 판정** 탭. 주소 끝에 `?test=1`을 붙이면 실측 CSV로 계산을 검증한다(18개, `analyze_v2.py`와 같은 값) |
-| [`sim/PiezoAnalyzer.html`](sim/PiezoAnalyzer.html) | 분석기 v1 — 기록용. 개방전압 데이터에도 가상의 10 kΩ로 P = V²/R을 계산해 에너지를 잘못 낸다(v2에서 고침) |
-| [`docs/00_piezo_basics.md`](docs/00_piezo_basics.md) | 압전 기초론 — 원리, d·g, 소자 = 커패시터, 왜 압전 바닥은 약한가, 쓰임 |
+| [`piezo_capture_simple.ino`](../piezo_capture_simple.ino) | 아두이노 측정 스케치 — 트리거 모드(62 kHz) / 연속 모드(1 kHz) |
+| [`data/piezo_capture_data-1.csv`](../data/piezo_capture_data-1.csv) | 측정 원자료 |
+| [`analyze_v2.py`](../analyze_v2.py) | 측정 분석 (현재판) — 요약 출력 + `figures/` 그림 4장 |
+| [`analyze_v1.py`](../analyze_v1.py) | 측정 분석 4차시판 — 철회한 계산이 들어 있어 기록용으로만 둔다 |
+| [`docs/05_material_design.md`](05_material_design.md) | 5차시 소재 설계 전문 — 용어 정의, 다섯 레버, 검증, 한계, 참고문헌 |
+| [`docs/commercial_dg_table.csv`](commercial_dg_table.csv) | 문헌 소재 11종 d·g 원자료 |
+| [`calc/verify_composition.py`](../calc/verify_composition.py) | 소재 설계의 모든 수치 재현 (표준 라이브러리만 사용) |
+| [`structures/`](../structures) | 결정구조 파일(CIF) — 기준 PZT와 제안 조성 |
+| [`sim/pzt_simulator_v6.html`](../sim/pzt_simulator_v6.html) | 압전체 비교 시뮬레이터 — **[▶ 데모](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html)**. 결과 해석 주의점은 §7 참조. ⚠️정정(2026-11-13): 화면의 V·mW·mJ는 실제 단위가 아닌 상대값이고(실측은 누름 한 번 약 15 nJ), 소재 순위는 d₃₃만 반영해 d·g를 무시한다 — 시뮬레이터 상단에 안내 배너를 달았다 |
+| [`sim/PiezoAnalyzer_v2.html`](../sim/PiezoAnalyzer_v2.html) | 압전 데이터 분석기 (현재판) — **[▶ 데모](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html)**. 아두이노 CSV 직접 읽기(파일 하나 = 장소 하나), 에너지 계산 3방식(개방전압 ½·C_p·V² / 부하저항 ∫P dt / 커패시터 ½·C·ΔV²), 파형·이벤트 표, 장소별 히트맵, **학교 판정** 탭. 주소 끝에 `?test=1`을 붙이면 실측 CSV로 계산을 검증한다(18개, `analyze_v2.py`와 같은 값) |
+| [`sim/PiezoAnalyzer.html`](../sim/PiezoAnalyzer.html) | 분석기 v1 — 기록용. 개방전압 데이터에도 가상의 10 kΩ로 P = V²/R을 계산해 에너지를 잘못 낸다(v2에서 고침) |
+| [`docs/00_piezo_basics.md`](00_piezo_basics.md) | 압전 기초론 — 원리, d·g, 소자 = 커패시터, 왜 압전 바닥은 약한가, 쓰임 |
 
 ---
 
@@ -106,7 +110,7 @@ flowchart LR
 | 소자 | PZT 압전 디스크 27 mm, 황동판 위 세라믹 (Piezo Shock Tap Sensor 모듈에서 원판만 분리) |
 | 측정 장비 | Arduino Uno, ADC 레지스터 직접 제어 |
 | 회로 | 압전소자 (+) → A0, (−) → GND **(부하저항·분압기 없음, 직결)** |
-| 트리거 모드 | 62,469 Hz (샘플 간격 16.0 µs, 스케치가 부팅 시 자가 측정) · 기준선에서 ADC 30칸(0.147 V) 넘게 흔들리면 앞 120 + 뒤 480 = 600샘플(9.6 ms) 저장 |
+| 트리거 모드 | 62,469 Hz (샘플 간격 16.0 µs, 스케치가 부팅 시 자가 측정) · 기준선에서 ADC 30칸(0.147 V) 넘게 흔들리면 앞 120 + 뒤 480 = 600샘플(9.6 ms) 저장 · ⚠️정정(2026-11-13): 분주비 16 → ADC 클럭 1 MHz로, 데이터시트가 10비트 분해능을 보장하는 50–200 kHz를 넘는다. 유효 분해능은 약 8비트, 전압에 ±20 mV(약 ±4칸) 수준의 불확도가 더해진다 |
 | 연속 모드 | 1,000 Hz로 계속 기록 · 2.17초(2,171샘플) |
 | 기준선 | ADC 9 (= 0.044 V) |
 | 수집량 | 트리거 이벤트 2건(event 13, 14) + 연속 모드 2.17초 |
@@ -129,7 +133,7 @@ flowchart LR
 
 </details>
 
-측정 코드: [`piezo_capture_simple.ino`](piezo_capture_simple.ino) · 분석 코드: [`analyze_v2.py`](analyze_v2.py) · 원자료: [`data/piezo_capture_data-1.csv`](data/piezo_capture_data-1.csv)
+측정 코드: [`piezo_capture_simple.ino`](../piezo_capture_simple.ino) · 분석 코드: [`analyze_v2.py`](../analyze_v2.py) · 원자료: [`data/piezo_capture_data-1.csv`](../data/piezo_capture_data-1.csv)
 
 ---
 
@@ -157,10 +161,10 @@ event 13은 약하게 눌린 경우다. 파형이 울림 없이 천천히 오르
 
 ### 2-2. 공진 주파수 — 측정계 검증
 
-![트리거 파형](figures/fig1_waveform.png)
+![트리거 파형](../figures/fig1_waveform.png)
 *그림 1. 트리거 파형. 왼쪽 event 13(약한 가압), 오른쪽 event 14(타격). 빨간 점선이 ADC가 읽을 수 있는 하한이다.*
 
-![주파수 스펙트럼](figures/fig2_spectrum.png)
+![주파수 스펙트럼](../figures/fig2_spectrum.png)
 *그림 2. FFT 스펙트럼. event 14(주황)만 3.33 kHz에 봉우리가 있다. 회색 구간은 측정창 길이 때문에 생기는 성분이라 분석에서 뺐다.*
 
 event 14는 트리거 직후부터 약 0.3 ms 간격으로 봉우리가 되풀이된다 — 디스크가 제 고유진동수로 울리고 있다.
@@ -222,7 +226,7 @@ event 14는 트리거 직후부터 약 0.3 ms 간격으로 봉우리가 되풀�
 > ※ **추정 힘 F 열을 뺀 이유** — 이 디스크는 황동판에 세라믹을 붙인 유니모프 벤더로 굽힘 모드(d₃₁ + 기계적 증폭)로
 > 동작하므로 d₃₃ = 400 pC/N 대입이 부적절하다. 또한 측정한 V는 타격 후 울림의 피크이지
 > 가한 힘에 대응하는 정적 전하가 아니므로, 링잉 진폭에서 힘을 역산하는 것은
-> 원리적으로 성립하지 않는다. 자세한 내용은 [`docs/05_material_design.md`](docs/05_material_design.md) §0 참조.
+> 원리적으로 성립하지 않는다. 자세한 내용은 [`docs/05_material_design.md`](05_material_design.md) §0 참조.
 
 **C_p가 이 표 전체를 좌우한다. 다음 차시 최우선 과제는 C_p 실측이다.**
 참고로 같은 크기 디스크의 데이터시트 정전용량은 20 nF ± 30 %(Murata 7BB-27-4)로 표의 가정 범위 안에 있지만, 우리 디스크의 값은 직접 재야 한다.
@@ -232,10 +236,10 @@ event 14는 트리거 직후부터 약 0.3 ms 간격으로 봉우리가 되풀�
 
 ### 2-5. 재현성 — 손으로 누른 펄스
 
-![연속모드](figures/fig3_continuous.png)
+![연속모드](../figures/fig3_continuous.png)
 *그림 3. 연속 모드(1 kHz) 2.17초. 폭 약 0.1초의 큰 펄스 4개와 그 뒤의 짧은 흔들림이 보인다.*
 
-![재현성](figures/fig4_repeatability.png)
+![재현성](../figures/fig4_repeatability.png)
 *그림 4. 0.15 V를 넘은 구간 11개. 주황 = 30 ms 이상 이어진 누름, 회색 = 짧은 흔들림·접촉. 막대 위 숫자는 0.15 V를 넘은 시간.*
 
 연속 모드 2.17초 동안 0.15 V를 넘은 구간은 11개였다. 그림 3에서 보듯 성격이 둘로 갈린다.
@@ -250,8 +254,10 @@ event 14는 트리거 직후부터 약 0.3 ms 간격으로 봉우리가 되풀�
 | 지표 (누름 4회) | 값 |
 |---|---|
 | 평균 피크 전압 | 1.232 V |
-| 표준편차 | 0.084 V |
+| 표준편차 (모표준편차, ddof = 0) | 0.084 V |
 | **변동계수 CV** | **6.9 %** |
+
+⚠️정정(2026-11-13): 위 표준편차는 n으로 나눈 **모표준편차**(numpy `std`, ddof = 0)다. 표본이 4개뿐이므로 보통 쓰는 **표본표준편차**(n − 1로 나눔)로 계산하면 0.097 V, **CV 7.9 %** 다. 결론(누름 4회가 서로 비슷하다)은 같다. `analyze_v2.py`는 이제 두 값을 함께 출력하고(표본표준편차 0.097 V, CV 7.9 %), 분석기 v2와 그 18개 자가 테스트는 모표준편차 6.9 %를 그대로 쓴다.
 
 4차시 판은 11개 구간을 모두 "타격"으로 세어 CV 75.1 %, "세기가 8배까지 벌어졌다"고 적었다. 게다가 봉우리를 찾는 80 ms 창이 겹쳐 같은 봉우리를 두 번 센 경우도 있었다(4차시 그림의 3·4번, 6·7번 막대).
 **그 산포는 손 세기의 차이가 아니라 셈법의 문제였다.**
@@ -271,7 +277,7 @@ event 14는 트리거 직후부터 약 0.3 ms 간격으로 봉우리가 되풀�
 
 ### 2-6. 다시 분석해서 바로잡은 것
 
-**1–4번**은 4차시 연구일지에서 철회한 것이고, **5–8번**은 5차시에 원자료와 계산을 다시 검토하며 찾은 것이다. 4차시 판 원문은 커밋 기록과 [`analyze_v1.py`](analyze_v1.py)에 그대로 남아 있다.
+**1–4번**은 4차시 연구일지에서 철회한 것이고, **5–8번**은 5차시에 원자료와 계산을 다시 검토하며 찾은 것이다. 4차시 판 원문은 커밋 기록과 [`analyze_v1.py`](../analyze_v1.py)에 그대로 남아 있다.
 
 | # | 항목 | 4차시 판 | 지금 | 이유 |
 |--:|---|---|---|---|
@@ -281,7 +287,7 @@ event 14는 트리거 직후부터 약 0.3 ms 간격으로 봉우리가 되풀�
 | 4 | 추정 힘 F (d₃₃ = 400 pC/N) | 28–85 N | 삭제 | 굽힘(d₃₁) 모드 소자, 링잉 피크는 정적 전하가 아님 (§2-4) |
 | 5 | event 14 τ · Q | 0.655 ms / 6.9 | 정하지 않음 | 피팅이 약 한 주기뿐, 지수 감쇠 모양이 아님, 음 반주기 잘림 (§2-2) |
 | 6 | "문헌상 공진 3~4 kHz" | 측정값이 범위 안 | 데이터시트 4.6 ± 0.5 kHz보다 약 1 kHz 낮음 | 출처 확인 결과 (§2-2) |
-| 7 | 재현성 | 11회, CV 75.1 % | 누름 4회, CV 6.9 % | 짧은 흔들림을 타격으로 셈 + 봉우리 이중 계수 (§2-5) |
+| 7 | 재현성 | 11회, CV 75.1 % | 누름 4회, CV 6.9 % (모표준편차; 표본표준편차로는 7.9 % — ⚠️정정(2026-11-13)) | 짧은 흔들림을 타격으로 셈 + 봉우리 이중 계수 (§2-5) |
 | 8 | 타일 개수 | 급식실 58장 / 매점 22장 | 전면 포설 581장 / 220장 | 30 × 30 cm = 900 cm² = 0.09 m²인데 0.9 m²로 나눴다 (§1) |
 
 ---
@@ -357,13 +363,13 @@ python calc/verify_composition.py    # 소재 설계 수치 검증 (추가 설�
 ```
 
 `analyze_v2.py`는 `data/`의 CSV를 읽어 `figures/`에 그래프 4장을 만들고 요약을 출력한다.
-주요 출력: event 14 공진 3,332 Hz(봉우리 간격 3,287 Hz), 연속 모드 누름 4회 평균 1.232 V · CV 6.9 %.
+주요 출력: event 14 공진 3,332 Hz(봉우리 간격 3,287 Hz), 연속 모드 누름 4회 평균 1.232 V · CV 6.9 %(모표준편차 기준, §2-5).
 
-[`analyze_v1.py`](analyze_v1.py)는 4차시판이다. 철회한 계산(추정 힘, R_opt, τ·Q)이 들어 있어 기록용으로만 둔다. 실행하면 `figures/`를 4차시 그림으로 덮어쓴다.
+[`analyze_v1.py`](../analyze_v1.py)는 4차시판이다. 철회한 계산(추정 힘, R_opt, τ·Q)이 들어 있어 기록용으로만 둔다. 실행하면 `figures/`를 4차시 그림으로 덮어쓴다.
 
 ### 측정 다시 하기
 
-1. 회로를 §1대로 연결하고 [`piezo_capture_simple.ino`](piezo_capture_simple.ino)를 Arduino Uno에 올린다.
+1. 회로를 §1대로 연결하고 [`piezo_capture_simple.ino`](../piezo_capture_simple.ino)를 Arduino Uno에 올린다.
 2. 시리얼 모니터를 **500000 baud**로 연다. 부팅하면 샘플 간격과 기준선을 스스로 재서 `#` 줄로 출력한다.
 3. 기본은 트리거 모드다. 시리얼로 `c`를 보내면 연속 모드와 번갈아 바뀌고, `r`은 기준선 재측정, `s`는 설정 출력이다.
 4. 출력을 CSV로 저장해 `data/`에 넣는다.
@@ -388,7 +394,7 @@ python calc/verify_composition.py    # 소재 설계 수치 검증 (추가 설�
 |---|---|---|
 | 아두이노 측정 코드 작성 | ADC 레지스터 직접 제어, 원형 버퍼 트리거 구조 | 컴파일 오류(함수 선언 순서) 확인·수정. 분압기 없는 직결 회로에 맞게 전압 변환식과 출력 열을 단순화 |
 | 분석 코드 작성 | FFT 공진 검출, 지수 감쇠 피팅 | FFT 저주파 피크(104 Hz)가 측정창 길이(9.59 ms)에서 생긴 허상임을 확인하고 500 Hz 미만 제외 |
-| 결과 해석 | 공진-걸음 주파수 불일치 해석 | 27 mm 디스크 문헌 공진값(3~4 kHz)과 측정값 3,332 Hz 대조 확인 |
+| 결과 해석 | 공진-걸음 주파수 불일치 해석 | ⚠️정정(2026-11-13): 데이터시트(Murata 7BB-27-4) 4.6 ± 0.5 kHz와 대조 → 측정값 3,332 Hz가 약 1 kHz 낮음(§2-6 #6). 이전 판은 "문헌 공진값(3~4 kHz)과 대조 확인"이라고 적었다 |
 | 회로 검토 | LED 점등의 전원 출처 지적 | 스케치에서 `digitalWrite(LED_PIN, HIGH)` 확인 → 발전 증거가 아님을 확정 |
 | 소재 조성 설계 | d·g 기준(Priya 2010), MPB 단사정(Noheda 1999), Sm–Mn 자기보상, TGG 조직화 | 전하 중성을 직접 계산해 `x_Sm = (4−v_Mn)·x_Mn` 일반식 유도. NASA 물성표가 OCR 오류로 내부 모순이 있음을 확인하고 단일 출처(US 7,686,974)로 표를 재구성 |
 | 주장의 정량 검증 | 순위상관 계산 아이디어 | 문헌 11종의 Spearman ρ(d33, g33) = −0.955를 직접 계산. 레버 04(산소 공공 활용)와 검증 1(공공 제거)이 상충한다는 것을 발견해 문서에 명시 |
@@ -423,7 +429,7 @@ U = ½ (d · g) σ² V        U: 한 번 누를 때 저장되는 에너지 [J]
 
 ### d와 g는 맞교환한다
 
-US 7,686,974 FIG. 13의 **문헌 소재 11종**(상용 10종 + 발명자의 UTA 연구 조성 1종)으로 확인했다. 대표 세 줄만 옮긴다 — 전체는 [`docs/commercial_dg_table.csv`](docs/commercial_dg_table.csv).
+US 7,686,974 FIG. 13의 **문헌 소재 11종**(상용 10종 + 발명자의 UTA 연구 조성 1종)으로 확인했다. 대표 세 줄만 옮긴다 — 전체는 [`docs/commercial_dg_table.csv`](commercial_dg_table.csv).
 
 | 소재 | 종류 | d₃₃ (pC/N) | g₃₃ (10⁻³ m²/C) | d·g (10⁻¹⁵ m²/N) | d₃₃ 순위 | d·g 순위 |
 |---|---|--:|--:|--:|--:|--:|
@@ -466,9 +472,9 @@ Pearson    r (d33, d·g)    +0.399        +0.814
 | 레버 | 무엇을 | 왜 | 근거 |
 |---|---|---|---|
 | 01 기반 | Zr : Ti = 52 : 48 (MPB) 유지 | 상경계에서 분극 방향이 연속으로 회전해 압전 응답이 최대 | Noheda 1999 |
-| 02 B자리 | Zr/Ti의 10 %를 Zn₁/₃Nb₂/₃로 치환 | 릴랙서 성분으로 εr를 크게 낮춤 → g 확보 (근거 조성: d₃₃는 고성능 PZT의 절반, εr는 약 1/6) | Islam & Priya 2006 |
+| 02 B자리 | Zr/Ti의 10 %를 Zn₁/₃Nb₂/₃로 치환 | 0.9PZT–0.1PZN + 0.7 wt% MnCO₃ 조성(문헌 실측)에서 εr ≈ 592 → g 확보 (d₃₃는 고성능 PZT의 절반, εr는 약 1/6). εr 저하는 주로 **Mn 첨가 효과**(특허 FIG. 5). ⚠️정정(2026-11-13): 이전 판 "릴랙서 성분으로 εr를 크게 낮춤"은 근거 없음 — PZN 릴랙서는 보통 εr를 올린다 | Islam & Priya 2006 |
 | 03 A자리 | Pb의 4 %를 Sm³⁺로 치환 | 국소 구조 불균질성으로 d 상승. ε가 폭증하기 전까지만 | Li 2018, Yan 2016 |
-| 04 B자리 | Mn²⁺ 2 % | 결함 쌍극자로 도메인벽 고정 → εr·손실 억제, 반복 하중 내구성, Sm 전하 보상 | Yue 2025 |
+| 04 B자리 | Mn²⁺ 2 % | 결함 쌍극자로 도메인벽 고정 → εr·손실 억제, Sm 전하 보상. 반복 하중 내구성은 **우리 가설**(`docs/05` §6 검증 3) | Yue 2025 (Mn 도핑 **PbTiO₃**의 결함 쌍극자) — ⚠️정정(2026-11-13): Yue 2025는 PZT가 아니라 PbTiO₃를 다루고 피로 시험은 하지 않았다. Mn³⁺ 우세일 때 효과 최대, 쌍극자에 산소 공공 필요 |
 | 05 미세구조 | [001] 배향 조직화 (TGG) | 이 방향에서 d가 최대이면서 εr가 최소 | Yan 2013 |
 
 > ※ **시뮬레이터 결과를 조성 근거로 쓰지 않은 이유** — 저장소의 [시뮬레이터](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html)는 Zr:Ti = 1:1(x = 0.50)에서 전압이 가장 높게 나온다.
@@ -486,7 +492,7 @@ Pearson    r (d33, d·g)    +0.399        +0.814
 - **조성식 읽기** — 소괄호 ( )가 A자리, 대괄호 [ ]가 B자리다. A자리는 Pb 96 % + Sm 4 %, B자리는 (Zr 52 : Ti 48) 88 % + (Zn 1/3 · Nb 2/3) 10 % + Mn 2 %. 아래 첨자는 그 자리를 차지하는 비율이다.
 - **전하 중성** — 결정 전체의 (+)와 (−)가 같아야 한다. Pb²⁺ 자리에 Sm³⁺가 들어가면 +1이 남고, Ti⁴⁺ 자리에 Mn²⁺가 들어가면 −2가 모자란다. Sm 0.04 × (+1) = +0.04, Mn 0.02 × (−2) = −0.04로 정확히 상쇄되도록 비율을 맞췄다. 일반식 `x_Sm = (4 − v_Mn) · x_Mn`.
 - **허용인자 t** — A와 B 이온의 크기가 맞아야 페로브스카이트 틀이 유지된다. `t = (rA + rO) / [√2 · (rB + rO)]`, 0.9 < t < 1이면 안정. 필요조건일 뿐이라 실제로 만들었을 때 다른 상이 섞이는지는 X선 회절로 확인해야 한다.
-- **결정 구조 수치** — 기준 PZT(Noheda 2000 실측)에서 B 양이온은 산소 평면보다 0.299 Å 위에 있고, 위아래 B–O 결합이 1.848 Å / 2.292 Å로 0.444 Å 차이 난다. 이 비대칭이 쌓인 것이 자발분극이다.
+- **결정 구조 수치** — 기준 PZT(Noheda 2000 Table I Model I 실측)에서 B 양이온은 산소 평면보다 0.303 Å 위에 있고, 위아래 B–O 결합이 1.845 Å / 2.295 Å로 0.450 Å 차이 난다(⚠️정정(2026-11-13): 이전 판 0.299 / 1.848 / 2.292 / 0.444 Å는 Model I·II 좌표를 섞은 값 — `docs/05` §3). 이 비대칭이 쌓인 것이 자발분극이다.
 
 </details>
 
@@ -494,11 +500,11 @@ Pearson    r (d33, d·g)    +0.399        +0.814
 
 | 파일 | 내용 |
 |---|---|
-| [`docs/05_material_design.md`](docs/05_material_design.md) | 설계 근거 전문 — 용어 정의, 다섯 레버, 검증, 한계 |
-| [`docs/commercial_dg_table.csv`](docs/commercial_dg_table.csv) | 문헌 소재 11종 d·g 비교 원자료 |
-| [`calc/verify_composition.py`](calc/verify_composition.py) | 전하 중성 · 허용인자 · 결합 기하 · 순위상관 재현 스크립트 |
-| [`structures/PZT_52_48_P4mm.cif`](structures/PZT_52_48_P4mm.cif) | 기준 구조 (Noheda 2000 Rietveld 실측 좌표) |
-| [`structures/HAFS108_proposed_P4mm.cif`](structures/HAFS108_proposed_P4mm.cif) | 제안 조성 (점유율만 변경 — 측정된 구조가 아니다) |
+| [`docs/05_material_design.md`](05_material_design.md) | 설계 근거 전문 — 용어 정의, 다섯 레버, 검증, 한계 |
+| [`docs/commercial_dg_table.csv`](commercial_dg_table.csv) | 문헌 소재 11종 d·g 비교 원자료 |
+| [`calc/verify_composition.py`](../calc/verify_composition.py) | 전하 중성 · 허용인자 · 결합 기하 · 순위상관 재현 스크립트 |
+| [`structures/PZT_52_48_P4mm.cif`](../structures/PZT_52_48_P4mm.cif) | 기준 구조 (Noheda 2000 Rietveld 실측 좌표, Table I Model I로 통일 — ⚠️정정(2026-11-13)) |
+| [`structures/HAFS108_proposed_P4mm.cif`](../structures/HAFS108_proposed_P4mm.cif) | 제안 조성 (점유율만 변경 — 측정된 구조가 아니다) |
 
 CIF 파일은 [VESTA](https://jp-minerals.org/vesta/) 등 결정구조 뷰어에서 바로 열린다.
 
@@ -536,7 +542,7 @@ C_p 측정은 이미 다음 차시 최우선 과제이므로 추가 장비가 �
 
 ```
 제목   급식실 앞 압전 발판 발전량 측정 (유리프 압전 타일 연구)
-담당   (학생 이름) 외 (인원)명 / 지도: ○○○ 선생님
+담당   (학생 이름) 외 (인원)명 / 지도: (선생님 이름)
 목적   실제 통행에서 압전 소자가 전기를 얼마나 만드는지 재서,
        학교에서 쓸 만한지(발전 또는 걸음 감지 센서) 판단한다
 장소   급식실 입구 배식 줄 (또는 매점 출입문 앞)
@@ -563,7 +569,7 @@ C_p 측정은 이미 다음 차시 최우선 과제이므로 추가 장비가 �
 ```
 
 - **디스크가 휠 공간을 꼭 만든다.** 딱딱한 판에 평평하게 놓으면 거의 안 휘어서 출력이 작다.
-  압전 바닥의 에너지는 "얼마나 꺼지나"로 정해진다 — [기초론 §8](docs/00_piezo_basics.md#8-에너지의-천장--왜-압전-바닥은-약한가).
+  압전 바닥의 에너지는 "얼마나 꺼지나"로 정해진다 — [기초론 §8](00_piezo_basics.md#8-에너지의-천장--왜-압전-바닥은-약한가).
 - 처음에는 **가운데 디스크 하나만 측정**한다. 실험실 값(§2)과 바로 비교할 수 있다. 여러 개를 병렬로 묶으면 안 눌린 디스크가 부하가 되어 전압이 낮아진다.
 - 전체 높이 1.5 cm 이하. 가장자리는 경사 고무로 턱을 없애고 노란 테이프로 표시한다.
 
@@ -571,18 +577,25 @@ C_p 측정은 이미 다음 차시 최우선 과제이므로 추가 장비가 �
 
 | | A안 · 첫날 (지금 장비 그대로) | B안 · 정식 (모은 에너지를 잰다) |
 |---|---|---|
-| 회로 | 디스크 → 아두이노 A0 직결, [`piezo_capture_simple.ino`](piezo_capture_simple.ino) 연속 모드 | 디스크 → **쇼트키 다이오드 브리지 정류** → **1 µF 필름·세라믹 커패시터** → A0 |
+| 회로 | 디스크 → 아두이노 A0 직결, [`piezo_capture_simple.ino`](../piezo_capture_simple.ino) 연속 모드 | 디스크 → **쇼트키 다이오드 브리지 정류** → **1 µF 필름·세라믹 커패시터** → A0 |
 | 기록 | 노트북 시리얼 → CSV | A0를 1초에 10번 읽어 시간·전압 CSV (스케치 수정 필요) |
 | 분석기 모드 | 개방전압 ½·C_p·V² (자동) | 커패시터 ½·C·(V₂² − V₁²) — 매핑할 때 '커패시터 전압' 선택 |
 | 장점 | 바로 할 수 있다 | (−) 반주기까지 포함한 **실제로 모은 에너지**. §3의 한계 (1)(2)를 함께 해결 |
-| 주의 | 0 V 아래가 잘린다 (§3-1) | 아래 표 참고 |
+| 주의 | 0 V 아래가 잘린다 (§3-1). **발로 밟기 전에 아래 보호 회로를 꼭 단다** | 아래 표 참고 |
+
+⚠️정정(2026-11-13) — **A안 보호 회로 (발 측정 전 필수).** 손 누름은 1.1–1.3 V였지만 발은 같은 디스크에 대략 10–30배의 힘을 주므로 개방전압이 수십 V까지 오를 수 있다. 디스크를 A0에 그대로 물리면 ATmega 핀의 절대 최대 정격(−0.5 V ~ VCC + 0.5 V)을 넘어 내부 클램프 다이오드로 전류가 흐르고 핀이 상할 수 있다. 이전 판은 이 경고 없이 A안을 발 측정(§8-4 2–5주)에 썼다. 다음을 단다:
+- 디스크(+)와 A0 사이에 **직렬 1 MΩ**(최소 100 kΩ)
+- A0–5 V, A0–GND에 **클램프 다이오드**(쇼트키 BAT85, 없으면 1N4148 두 개)
+- A0–GND에 **10 nF**
+
+이렇게 하면 읽는 값은 개방전압이 아니라 **부하가 걸린 전압**이다(그대로 "개방전압"이라고 보고하지 않는다).
 
 B안 부품 고르는 이유:
 
-- **커패시터는 1 µF.** 누름 한 번의 전하는 약 22 nC(§2-4)라서 1 µF에서는 약 22 mV 오른다. 아두이노 한 칸(4.9 mV)보다 커서 보인다.
+- **커패시터는 1 µF.** 누름 한 번의 전하는 약 22 nC(§2-4)라서 1 µF에서는 **약 10–20 mV**(다이오드 강하 후, 상한 22 mV) 오른다. 아두이노 한 칸(4.9 mV)보다 커서 보인다. ⚠️정정(2026-11-13): 이전 판은 "약 22 mV"라고 적었다. 22 nC는 개방 상태의 전체 전하이고, 브리지를 지나면 다이오드 두 개의 강하(쇼트키 각 약 0.15–0.3 V)를 넘는 몫만 옮겨 가므로 손 누름 한 번에 약 10–16 mV가 현실적이다.
   100 µF면 0.2 mV라 보이지 않는다. 전해 커패시터는 누설이 커서 쓰지 않는다.
 - **다이오드는 쇼트키.** 일반 다이오드는 하나에 0.6–0.7 V를 먹어서, 1 V 남짓한 우리 신호는 거의 다 사라진다.
-- **5.1 V 제너 다이오드**를 커패시터에 병렬로 단다. 발로 세게 밟아 5 V를 넘으면 아두이노 핀이 상한다.
+- **5.1 V 제너 다이오드**를 커패시터에 병렬로 단다. 발로 세게 밟아 5 V를 넘으면 아두이노 핀이 상한다. ⚠️정정(2026-11-13): 1N4733A 같은 5.1 V 제너는 1 V에서도 최대 **10 µA**까지 샐 수 있어(데이터시트 I_R) 1 µF를 약 10 mV/ms 속도로 비울 수 있다. 누설이 작은 **BAT85 쇼트키를 5 V 레일로** 다는 클램프가 낫고, 제너를 쓴다면 이 누설을 결과에 적는다.
 - **방전 버튼**(저항 + 버튼)으로 측정 시작 때마다 커패시터를 0 V로 비운다.
 - 아두이노 입력으로도 조금씩 새어 전압이 서서히 내려갈 수 있다. 분석기는 **오른 구간만** 센다.
 
@@ -609,7 +622,7 @@ B안 부품 고르는 이유:
 - 바닥이 젖거나(급식실 청소 직후) 발판이 들뜨면 바로 중단한다.
 - PZT는 납을 포함한다. 깨진 디스크는 맨손으로 만지지 않고 따로 버린다.
 - 학생 사진·영상은 찍지 않는다. 사람 수만 센다.
-- "압전 발전 연구 중 · 밟아도 됩니다 · 담당: ○○○ 선생님" 안내판을 세운다.
+- "압전 발전 연구 중 · 밟아도 됩니다 · 담당: (지도 선생님 이름)" 안내판을 세운다.
 
 ---
 
@@ -622,7 +635,7 @@ B안 부품 고르는 이유:
 | 사례 | 방식 | 한 걸음(1인)당 | 우리 대비 | 출처 |
 |---|---|---|---|---|
 | **우리 디스크** (27 mm, 손 누름 평균 1.232 V) | 압전 | ½ × 20 nF × 1.232² ≈ **15 nJ** | 1 | §2-5 |
-| PZT 캔틸레버 24개 타일 (43 cm, 연구용) | 압전 | **3.49 mJ** | 약 2 × 10⁵ | Sensors and Actuators A (2017) |
+| PZT 캔틸레버 24개 타일 (43 cm, 연구용) | 압전 | **3.49 mJ** (⚠️원문 수치 미확인) | 약 2 × 10⁵ | Sensors and Actuators A 279 (2018) — ⚠️정정(2026-11-13): 연도 2017 → 2018 |
 | JR동일본 도쿄역 1차 (2006, 개찰구 6 m²) | 압전 (교세라) | 약 **0.1 J** / 1인 통과 | 약 7 × 10⁶ | 위키백과(일) |
 | JR동일본 도쿄역 2차 (2008.1, 약 90 m²) | 압전 | 약 **1 J** / 1인 통과 | 약 7 × 10⁷ | 위키백과(일) |
 | JR동일본 도쿄역 3차 (2008.12–2009.2) | 압전 | 목표 10 J, 결과 약 4 J* | 약 3 × 10⁸ | 위키백과(일) |
@@ -648,13 +661,15 @@ B안 부품 고르는 이유:
 
 | | 꺼지는 거리 | 체중 600 N이 해 주는 일 (어림) |
 |---|---|---|
-| 상용 타일 (전자기식) | 약 5–10 mm | 약 3 J |
+| 상용 타일 (전자기식) | 약 5–10 mm (⚠️출처 미확인 추정) | 약 1.5–3 J (½·F·x) |
 | 압전 세라믹 1 cm 기둥, 깨지기 직전까지 | 약 8 µm | 약 2.5 mJ |
 | 압전 세라믹 1 mm 판 | 약 0.1 µm | 약 0.03 mJ |
 
+⚠️정정(2026-11-13): 상용 타일 줄은 이전 판에서 "약 5–10 mm, 약 3 J"이었다. 5–10 mm 꺼짐을 밝힌 Pavegen 자료는 찾지 못했다(보도는 걸음당 2–4 J 또는 3–5 J만 언급). 천천히 누르는 ½·F·x로 계산하면 1.5–3 J이다.
+
 세라믹은 돌처럼 단단해서 체중을 실어도 마이크로미터만 줄어든다. **받는 일 자체가 작으니** 변환을 아무리 잘해도 한 걸음에 mJ이 천장이다.
-연구용 압전 타일의 3.49 mJ이 이 천장과 맞는다. J 단위를 내는 상용 타일이 **압전이 아니라 전자기식**(바닥이 mm 단위로 꺼지며 발전기를 돌림)인 이유도 이것이다.
-자세한 계산은 [기초론 §8](docs/00_piezo_basics.md#8-에너지의-천장--왜-압전-바닥은-약한가).
+연구용 압전 타일의 3.49 mJ(원문 수치 미확인)이 이 천장과 맞는다. J 단위를 내는 상용 타일이 **압전이 아니라 전자기식**(바닥이 mm 단위로 꺼지며 발전기를 돌림)인 이유도 이것이다.
+자세한 계산은 [기초론 §8](00_piezo_basics.md#8-에너지의-천장--왜-압전-바닥은-약한가).
 
 우리 15 nJ이 그 천장보다도 훨씬 작은 것은 **손으로** 눌렀고(에너지는 힘의 제곱에 비례), 디스크 **하나**이며, 휠 공간 없이 눌렀기 때문이다. 발로 밟은 값은 아직 없다 — 4단계에서 잰다.
 
@@ -664,7 +679,7 @@ B안 부품 고르는 이유:
 
 1. **"얼마나, 왜 부족한가"를 우리 측정으로 보였다.** 많은 학교 탐구가 "LED가 켜졌다"로 끝나지만, 우리는 그 LED가 USB 전원이었다는 것부터 잡아냈다(§3-3). 부족한 양을 자릿수로 재고, 원인을 물리(받는 일 = 힘 × 거리)로 설명하는 것은 그 자체로 결과다.
 2. **6단계의 방향이 분명해졌다.** 소재 개선(§7, d·g)은 몇 배를 바꾼다. 10⁸배의 격차를 줄이는 것은 **구조**다 — 디스크가 더 휘게(벤더·캔틸레버), 느린 발걸음을 빠른 진동으로 바꿔 공진을 쓰게(주파수 상향 변환). 소재와 구조를 같이 봐야 한다는 결론은 시부야 사례만 봐서는 나오지 않는다.
-3. **현실적인 쓰임을 찾았다 — 전원 없는 걸음 감지 센서.** 13 nJ은 발전으로는 작아도 "지금 누가 밟았다"는 신호로는 충분하다. 급식실·매점 앞 **혼잡 시간대**를 재는 센서는 학교에 실제로 쓸모가 있고, 분석기의 장소별 히트맵이 그 용도다.
+3. **현실적인 쓰임을 찾았다 — 전원 없는 걸음 감지 센서.** 손 누름 한 번의 약 15 nJ(⚠️정정(2026-11-13): 이전 판 "13 nJ"은 두드림 event 14 값으로, 위 표의 손 누름 평균 15 nJ과 달랐다)은 발전으로는 작아도 "지금 누가 밟았다"는 신호로는 충분하다. 급식실·매점 앞 **혼잡 시간대**를 재는 센서는 학교에 실제로 쓸모가 있고, 분석기의 장소별 히트맵이 그 용도다.
 4. **누구나 다시 할 수 있다.** 측정 스케치, 원자료, 분석 코드, 분석기·시뮬레이터가 모두 이 저장소에 있다.
 
 > **예비 결론 (5단계 전)** — 압전 바닥은 학교 **전력원**으로는 비현실적이고, **걸음 감지 센서·교육용 시연**으로는 현실적이다.
@@ -678,7 +693,7 @@ B안 부품 고르는 이유:
 - 日経クロステック (2008-12-03) 東京駅 発電床 実証実験 — [xtech.nikkei.com](https://xtech.nikkei.com/dm/article/NEWS/20081203/162331/)
 - Pavegen, How it works / FAQ — 전자기 유도, 걸음당 2–4 J — [pavegen.com/how-it-works](https://www.pavegen.com/how-it-works), [pavegen.com/faq](https://www.pavegen.com/faq)
 - TechCrunch (2015-05-25) — Pavegen 전자기 유도 방식 — [techcrunch.com](https://techcrunch.com/2015/05/25/pavegen-kicks-off-crowdcube-campaign-to-power-up-its-kinetic-flooring-business)
-- "Fabrication and evaluation of energy harvesting floor using piezoelectric frequency up-converting mechanism", *Sensors and Actuators A* (2017) — PZT 캔틸레버 24개, 3.49 mJ/걸음 — [sciencedirect.com](https://www.sciencedirect.com/science/article/abs/pii/S0924424717320095)
+- Panthongsy *et al.*, "Fabrication and evaluation of energy harvesting floor using piezoelectric frequency up-converting mechanism", *Sensors and Actuators A* **279**, 321–330 (2018) — PZT 캔틸레버 24개, 3.49 mJ/걸음 (⚠️정정(2026-11-13): 연도 2017 → 2018, 3.49 mJ는 원문에서 아직 확인 못 함) — [sciencedirect.com](https://www.sciencedirect.com/science/article/abs/pii/S0924424717320095)
 - UBC APSC 261 학생 보고서 — Pavegen 투자 회수 기간 — [sustain.ubc.ca (PDF)](https://sustain.ubc.ca/sites/sustain.ubc.ca/files/seedslibrary/APSC261_2A_NewSUBAtrium_Pavegn_Group06_Merged%20Document.pdf)
 - 상용 타일 가격 보도 — Redbrick, Reset, Construction Management (보도마다 크게 다름) — [redbrick.me](https://redbrick.me/?p=386375), [reset.org](https://en.reset.org/pavegen-generate-clean-electricity-while-taking-stroll-02272018), [constructionmanagement.co.uk](https://constructionmanagement.co.uk/pavegen-pri1ce-dro4p-energy-gen8erating-smart/)
 
@@ -689,9 +704,9 @@ B안 부품 고르는 이유:
 ## 참고 자료
 
 - Murata, 7BB-27-4 압전 진동판 제품 정보 (27 mm, 공진 4.6 ± 0.5 kHz, 정전용량 20 nF ± 30 %) — [murata.com](https://www.murata.com/en-us/products/productdetail?partno=7BB-27-4)
-- R. A. Islam, S. Priya, US Patent 7,686,974 B2, "High energy density piezoelectric ceramic materials," FIG. 13 — [Google Patents](https://patents.google.com/patent/US7686974B2/en)
+- S. Priya, US Patent 7,686,974 B2, "High energy density piezoelectric ceramic materials" (Univ. of Texas, 2010), FIG. 13 (⚠️정정(2026-11-13): 발명자는 S. Priya 단독 — 이전 판 "R. A. Islam, S. Priya"는 오기) — [Google Patents](https://patents.google.com/patent/US7686974B2/en)
 - S. Priya, "Criterion for material selection in design of bulk piezoelectric energy harvesters," *IEEE TUFFC* **57**, 2610 (2010)
-- B. Noheda *et al.*, *Phys. Rev. B* **61**, 8687 (2000) — CIF 원자 좌표의 출처
+- B. Noheda *et al.*, *Phys. Rev. B* **61**, 8687 (2000) — CIF 원자 좌표의 출처 (Table I, Model I)
 - Y. Yan *et al.*, *Appl. Phys. Lett.* **102**, 042903 (2013) — [001] 조직화 PMN–PZT, d·g = 59,000 × 10⁻¹⁵ m²/N
 
-소재 설계의 나머지 문헌(12편)은 [`docs/05_material_design.md`](docs/05_material_design.md) §7에 있다.
+소재 설계의 나머지 문헌(12편)은 [`docs/05_material_design.md`](05_material_design.md) §7에 있다.

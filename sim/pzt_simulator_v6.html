@@ -81,6 +81,23 @@
     backdrop-filter: blur(6px);
     max-width: 280px;
   }
+  /* 2026-11-13 사실 확인: 해석 주의 배너 (상단 가운데, 닫기 가능) */
+  #fact-notice {
+    position: absolute; top: 66px; left: 16px; right: 16px;
+    margin: 0 auto; max-width: 560px;
+    z-index: 1002; word-break: keep-all; overflow-wrap: break-word;
+    padding: 8px 30px 8px 12px;
+    background: #fff4d6; border: 1.5px solid #c05621; border-radius: 4px;
+    color: #2b2620; font-size: 11.5px; line-height: 1.45;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  #fact-notice .close {
+    position: absolute; top: 4px; right: 6px; border: 0; background: none;
+    font-size: 15px; cursor: pointer; color: #8a3a14;
+  }
+  #fact-notice b { color: #8a3a14; }
+  #fact-notice .en { color: rgba(43,38,32,0.72); font-size: 10.5px; margin-top: 4px; }
+  #fact-notice ul { margin: 4px 0 0; padding-left: 16px; }
   #header h1 {
     margin: 0 0 4px 0;
     font-size: 16px; font-weight: 600;
@@ -370,6 +387,17 @@
     <p id="header-desc">5종 압전체의 결정 구조와 발전 출력을 비교합니다. 격자 확장 옵션으로 타일 배열을 모사할 수 있습니다.</p>
   </div>
 
+  <div id="fact-notice" role="note">
+      <button class="close" type="button" aria-label="닫기 / close" onclick="this.parentElement.style.display='none'">✕</button>
+      <b>⚠️ 해석 주의 (2026-11-13 사실 확인)</b>
+      <ul>
+        <li>V · mW · mJ 숫자는 <b>상대값(임의 단위)</b>이지 실제 전압·전력·에너지가 아니다. 실측은 27 mm 디스크 손 누름 한 번에 <b>약 15 nJ</b>.</li>
+        <li>소재 순위는 <b>d₃₃만</b> 반영한다. 에너지 수확은 d·g로 비교해야 하며, PVDF는 d·g가 PZT와 비슷해 화면처럼 수십 배 나쁘지 않다.</li>
+        <li>PZT의 최대 출력(x = 0.50)은 코드에 <b>넣어 둔 가정</b>(그림용)이다. 실제 MPB는 Zr:Ti ≈ 52:48.</li>
+      </ul>
+      <div class="en">Note: outputs are arbitrary/relative units, not real volts/mW/mJ (measured ≈ 15 nJ per hand press). Ranking by d₃₃ alone ignores d·g (PVDF is not ~40× worse for harvesting). The MPB peak at x = 0.50 is hard-coded for illustration.</div>
+  </div>
+
   <div id="right-stack">
     <div class="panel" id="material-panel">
       <h3 id="mp-title">재료 상태 <span class="lit-val" id="mp-lit"></span></h3>
@@ -384,7 +412,7 @@
     </div>
 
     <div class="panel" id="power-panel">
-      <h3>전기 출력</h3>
+      <h3>전기 출력 <span style="font-size:11px;color:var(--accent);">상대값 · 실제 단위 아님 (a.u.)</span></h3>
       <!-- v6: 캔버스 내부 해상도도 확장 (180→300) -->
       <canvas id="vt-canvas" width="540" height="300"></canvas>
       <div class="row"><span class="label">V(t) 현재</span><span class="value value-power" id="rd-voltage">0.00 V</span></div>
@@ -470,7 +498,7 @@
       },
       PVDF: {
         name: 'PVDF (β)', formula: '(C₂H₂F₂)ₙ', system: '폴리머 (사방 Cm2m)',
-        d33Lit: 'd₃₃ ≈ 25 pC/N', relativeStrength: 0.15,
+        d33Lit: '|d₃₃| ≈ 33 pC/N (부호 −)', relativeStrength: 0.15,
         hasComposition: false,
         polarDir: () => new THREE.Vector3(0, 1, 0),
         getPiezo: () => 0.6, showRows: [],
@@ -484,7 +512,8 @@
       },
       Quartz: {
         name: 'α-Quartz', formula: 'SiO₂', system: '삼방 (P3₂21)',
-        d33Lit: 'd₃₃ ≈ 2.3 pC/N', relativeStrength: 0.03,
+        // 2026-11-13 정정: α-quartz(점군 32)는 대칭상 d33 = 0. 2.3 pC/N은 d11.
+        d33Lit: 'd₁₁ ≈ 2.3 pC/N (d₃₃ = 0, 대칭상)', relativeStrength: 0.03,
         hasComposition: false,
         polarDir: () => new THREE.Vector3(-1, 0, 0),
         getPiezo: () => 0.45, showRows: [],

@@ -172,7 +172,9 @@ def main():
           f"(폭 {width[press].min()}–{width[press].max()} ms), 짧은 구간 {(~press).sum()}개 "
           f"(폭 {width[~press].min()}–{width[~press].max()} ms, 피크 {peaks[~press].min():.3f}–{peaks[~press].max():.3f} V)")
     print(f"누름만: 피크 {', '.join(f'{p:.3f}' for p in pp)} V  평균 {pp.mean():.3f} V  "
-          f"표준편차 {pp.std():.3f} V  CV {pp.std()/pp.mean()*100:.1f} %")
+          f"표준편차 {pp.std():.3f} V  CV {pp.std()/pp.mean()*100:.1f} %  (모표준편차, ddof=0)")
+    # 2026-11-13: n = 4 이므로 표본표준편차(ddof=1)도 함께 출력한다 (보고서 §2-5 정정)
+    print(f"         표본표준편차(ddof=1) {pp.std(ddof=1):.3f} V  CV {pp.std(ddof=1)/pp.mean()*100:.1f} %")
     fig, ax = plt.subplots(figsize=(6.4, 3.6))
     x = np.arange(1, len(runs) + 1)
     ax.bar(x[press], peaks[press], color="#c05621", label=f"누름 (≥{PRESS_MS} ms)")

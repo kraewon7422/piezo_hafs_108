@@ -1,5 +1,6 @@
 # 압전 소재 11종(상용 10 + UTA 연구 조성 1)의 d33 - g33 - d.g 비교
-# 출처: R. A. Islam & S. Priya, US Patent 7,686,974 B2, FIG. 13
+# 출처: S. Priya, US Patent 7,686,974 B2 (Univ. of Texas, 2010), FIG. 13
+#       (2026-11-13 정정: 발명자는 S. Priya 단독. UTA 행은 Islam & Priya 2006 APL)
 #       (d.g 와 g33 이 한 문서에 함께 실려 있어 서로 일관된다)
 # d33 은 d33 = (d.g) / g33 로 역산한 값이다. 데이터시트 원본값이 아니다.
 # 단위: d33 [pC/N], g33 [1e-3 m2/C], d.g [1e-15 m2/N]

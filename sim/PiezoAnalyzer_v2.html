@@ -120,6 +120,7 @@ const BULB_PRESETS=[
 const TIME_UNITS={s:1,ms:0.001,us:0.000001,min:60};
 const PERIOD_SEC={window:null,day:86400,week:604800,month:2592000,year:31536000};
 const PERIODS=[["window","측정창"],["day","1일"],["week","1주"],["month","1개월"],["year","1년"]];
+// 2026-11-13: 아래 효율 사슬 0.80×0.90×0.82×0.95(η≈56 %)은 출처 없는 가정값이다 (편집 가능).
 const DEFAULT_EFF={rectifier:0.80,storage:0.90,converter:0.82,delivery:0.95};
 const MODES={oc:"개방전압 · E = ½·C_p·V²",load:"부하저항 · E = ∫P dt",cap:"커패시터 전압 · E = ½·C·ΔV²"};
 const DEFAULT_SETTINGS={mode:"oc",loadR:10000,timeUnit:"s",eventThreshold:0.0005,
@@ -492,7 +493,7 @@ function renderData(c){
         <p class="muted" style="margin-top:0">현장 데이터가 오기 전에 모든 기능을 시연합니다. 실측 데이터가 오면 같은 분석 엔진이 그대로 작동합니다.</p>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
           <button class="chip ${s.vPeakMax<=1.3?"on":""}" data-preset="hand">실측 기준 · 손 누름 1.1–1.3 V</button>
-          <button class="chip ${s.vPeakMin>=8?"on":""}" data-preset="foot">가정 · 발걸음 8–28 V</button>
+          <button class="chip ${s.vPeakMin>=8?"on":""}" data-preset="foot">가정(실측 아님) · 발걸음 8–28 V</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
           ${slider("s_cols","타일 열",s.cols,2,12,1)}
@@ -503,7 +504,7 @@ function renderData(c){
           ${slider("s_vmax","최대 첨두전압",s.vPeakMax,0.5,60,0.1,v1)}
         </div>
         <label class="chk"><input type="checkbox" id="s_hot" ${s.hotspot?"checked":""} style="accent-color:var(--cyan)"> 통행 핫스팟(출입구/배식대) 모사</label>
-        <p class="muted" style="margin:0 0 12px;font-size:11.5px">※ 1.1–1.3 V는 손으로 눌러 잰 값입니다(README §2-5). 발로 밟으면 더 클 수 있지만 아직 재지 않았으므로 '발걸음' 프리셋은 가정값입니다.</p>
+        <p class="muted" style="margin:0 0 12px;font-size:11.5px">※ 1.1–1.3 V는 손으로 눌러 잰 값입니다(README §2-5). 발로 밟으면 더 클 수 있지만 아직 재지 않았으므로 '발걸음 8–28 V' 프리셋은 근거 없는 <b>가상의 값</b>입니다 — 이 프리셋으로 낸 숫자를 결과로 인용하지 마세요.</p>
         <button class="btn primary" id="genBtn" style="width:100%;justify-content:center">${icon("spark","#1a1300")}합성 데이터 생성하기</button>
       </div>
     </div>
@@ -763,7 +764,7 @@ function renderSettings(c){
   c.innerHTML=`<div class="grid2">
     <div class="card">
       <div class="ctitle">${icon("gauge","var(--green)",16)}효율 체인 (측정 출력 이후 손실)</div>
-      <p class="muted" style="margin-top:0">압전 소자가 만든 전기가 전구까지 가는 동안의 손실. 각 단을 곱해 종단 효율 η을 만듭니다. 기본값은 가정값입니다.</p>
+      <p class="muted" style="margin-top:0">압전 소자가 만든 전기가 전구까지 가는 동안의 손실. 각 단을 곱해 종단 효율 η을 만듭니다. <b>기본값(정류 0.80 × 저장 0.90 × 변환 0.82 × 전달 0.95 ≈ 56 %)은 출처 없는 가정값</b>이니 직접 바꿔 보세요.</p>
       ${slider("e_rect","정류 (AC→DC)",e.rectifier,0.3,1,0.01,v=>(v*100).toFixed(0)+"%")}
       ${slider("e_stor","저장 (커패시터)",e.storage,0.3,1,0.01,v=>(v*100).toFixed(0)+"%")}
       ${slider("e_conv","DC-DC 컨버터 (LTC3588 등)",e.converter,0.3,1,0.01,v=>(v*100).toFixed(0)+"%")}

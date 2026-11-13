@@ -2,13 +2,14 @@
 """
 verify_composition.py
 HAFS 유리프 압전 타일 연구 / 5차시 화학구조 제안
+(2026-11-13 사실 확인: Sm3+ 반경 출처, Noheda Model I 좌표, d31/d33 단서 정정)
 
 제안 조성  (Pb0.96 Sm0.04)[(Zr0.52 Ti0.48)0.88 (Zn1/3 Nb2/3)0.10 Mn0.02] O3
 에 대해 다음을 계산으로 검증한다.
 
   1. 전하 중성            : 합이 0이어야 한다
   2. Goldschmidt 허용인자  : 0.9 < t < 1.0 이어야 페로브스카이트가 유지된다
-  3. 결합 기하            : Noheda(2000) 실측 원자좌표에서 B-O 결합길이와 양이온 변위
+  3. 결합 기하            : Noheda(2000) Table I Model I 실측 원자좌표에서 B-O 결합길이와 양이온 변위
   4. d33 - d.g 순위상관    : 11종 전체와 상용 10종(UTA 연구 조성 제외)을 나눠 계산
   5. 에너지 비            : 같은 응력/부피에서 조성별 U 비교
 
@@ -29,7 +30,7 @@ except Exception:
 # ---------------------------------------------------------------- 데이터
 # Shannon (1976) 유효 이온반경 [Å]
 R_O = 1.40                        # O2-, CN=6
-R_A = {"Pb2": 1.49, "Sm3": 1.24}  # CN=12  (Sm3+ CN12는 외삽값)
+R_A = {"Pb2": 1.49, "Sm3": 1.24}  # CN=12 (Shannon 1976)
 R_B = {"Zr4": 0.72, "Ti4": 0.605, "Zn2": 0.74,
        "Nb5": 0.64, "Mn2": 0.83, "Mn3": 0.645}   # CN=6
 
@@ -37,11 +38,14 @@ R_B = {"Zr4": 0.72, "Ti4": 0.605, "Zn2": 0.74,
 X_SM, X_PZ, X_PZN, X_MN = 0.04, 0.88, 0.10, 0.02
 
 # Noheda et al., Phys. Rev. B 61, 8687 (2000)
-# PbZr0.52Ti0.48O3, 공간군 P4mm, 325 K, Rietveld 정밀화
+# PbZr0.52Ti0.48O3, 공간군 P4mm, 325 K, Rietveld 정밀화, Table I Model I
+# (2026-11-13 정정: 이전 판은 Model II의 Z_B 0.4509 / Z_O2 0.3786을 Model I의
+#  Pb 자리와 섞어 썼다. Model I로 통일 — structures/*.cif 와 같은 값)
 LAT_A, LAT_C = 4.0460, 4.1394                # [Å]
-Z_B, Z_O1, Z_O2 = 0.4509, -0.1027, 0.3786    # 분율좌표
+Z_B, Z_O1, Z_O2 = 0.4517, -0.1027, 0.3785    # 분율좌표
 
-# US 7,686,974 B2, FIG.13 — 상용 압전 소재 10종 + 발명자의 UTA 연구 조성 1종
+# US 7,686,974 B2 (발명자 S. Priya), FIG.13 — 상용 압전 소재 10종
+# + UTA 연구 조성 1종 (Islam & Priya 2006 APL)
 # (이름, d.g [1e-15 m2/N], g33 [1e-3 m2/C], 지수 n)
 COMMERCIAL = [
     ("EDO EC-98",         11388, 15.60, 1.249),
@@ -154,13 +158,13 @@ def main():
         t = tolerance_factor(ra, rb)
         print("  제안 조성 Mn(%d+)   rA=%.4f  rB=%.4f  t=%.4f  %s"
               % (v, ra, rb, t, "안정" if 0.9 < t < 1.0 else "확인 필요"))
-    print("  주의 1: Sm3+ CN=12 반경 1.24 A는 Shannon 원표에 없어 외삽값을 사용했다.")
+    print("  주의 1: Sm3+ CN=12 반경 1.24 A는 Shannon(1976) 표값.")
     print("  주의 2: 허용인자는 필요조건이지 충분조건이 아니다. 실제 상 형성은")
     print("          XRD로 이차상(pyrochlore 등)의 유무를 확인해야 확정된다.")
 
     print()
     print(line)
-    print("3. 결합 기하   (Noheda 2000, P4mm, 325 K)")
+    print("3. 결합 기하   (Noheda 2000 Table I Model I, P4mm, 325 K)")
     print(line)
     g = geometry()
     print("  c / a                      = %.4f" % g["c_over_a"])
@@ -220,7 +224,9 @@ def main():
     print()
     print("  참고: 위 d.g 는 모두 33 모드 값이다. 굽힘으로 동작하는 27 mm 디스크에")
     print("        실제로 걸리는 계수는 d31 * g31 이므로 절대값은 훨씬 작다.")
-    print("        소재 사이의 '비'를 비교하는 용도로만 사용할 것.")
+    print("        d31/d33 비는 소재마다 다르다 (PZT 계열 약 -0.4, 변성 PbTiO3")
+    print("        계열은 훨씬 작음). 굽힘 소자의 순위는 d31 * g31 로 따로 확인해야")
+    print("        하며, 33 모드 비교는 참고용이다.")
     print()
 
 
