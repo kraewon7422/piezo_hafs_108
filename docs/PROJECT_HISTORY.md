@@ -5,8 +5,9 @@
 AI가 틀린 내용은 [AI 사실 확인](AI_FACT_CHECK.md)에 따로 모았다.
 
 *English summary:* how the project evolved month by month — from a vague "energy floor" idea, through a simulator and an
-analyzer, the first real measurement (Sept 11), the material design (Sept 18), the midterm report (Oct), to the 20-disc
-tile design (Nov 13). Each row says which AI model was used, because older models made more factual mistakes.
+analyzer, the first real measurement (Sept 11), the material design (Sept 18), the midterm report (Oct), the 20-disc
+tile design (Nov 13), to the built tile and its first measurements (Nov 21, median 5.6 µJ per stepping pulse).
+Each row says which AI model was used, because older models made more factual mistakes.
 
 ---
 
@@ -56,16 +57,23 @@ flowchart LR
 4. **정류 방식이 세 번 바뀌었다.** 9/18에는 손 두드림 1.13 V로는 브리지(다이오드 2개)를 통과하지 못하니 반파 정류가 낫다고 봤다.
    11/13 타일 설계에서는 발로 밟으면 수십 V가 나올 것으로 보고 디스크마다 브리지 정류로 돌아갔다.
    **발 전압은 아직 측정하지 않은 가정**이므로, 타일을 만들면 가장 먼저 확인할 값이다.
+   → **11/21 측정**: 1.1 MΩ 측정 부하를 단 상태에서 밟기 펄스의 행 전압은 중앙값 4.7 V, 최대 9.52 V였다(개방전압은 미측정). [`tile_5x4/`](../tile_5x4/)
 5. **바이어스 회로 → 정류 회로.** 9/11 측정의 음(−) 반주기 잘림을 고치려고 2.5 V 바이어스를 계획했지만,
    11/13 타일 설계에서는 정류 후 전압을 재는 방식으로 바꿨다.
+
+## 11/19–11/22 — 5 × 4 타일 제작과 측정
+
+- 11/19 부품 도착 → 부품 기준 조립 매뉴얼 작성(E모드·47 µF 저장은 부품이 없어 빼고, 펄스별 측정만). 11/22 매뉴얼 수치 5곳 수정
+- 11/21 측정 6회: 손가락으로 디스크를 하나씩 누른 작동 테스트 3회, 실제 밟기 3회 (실험자 기록). 기준선이 오염된 1회를 빼고 5회를 [`tile_5x4/`](../tile_5x4/)에 올림
+- 결과(펄스당, 1.1 MΩ 측정 저항에 전달된 에너지): 밟기 191펄스 중앙값 5.6 µJ, 손가락 140펄스 중앙값 0.26 µJ. 걸음 수는 세지 않아 걸음당 값은 없음
+- 5월 계획의 "0.22 F로 100걸음 안에 LED" 가설은 디스크 20개로도 성립하지 않음을 확인 — [`tile_5x4/docs/plan_2026-05/`](../tile_5x4/docs/plan_2026-05/)
+- 발표용 실시간 GUI(가로 화면)와 젯슨 오린 나노 버전(카메라 사람 수 비교, 하드웨어 미검증)을 만듦
 
 ## 아직 측정하지 않은 것
 
 - 부하저항을 달았을 때의 전력 (P–R 곡선), 정전용량 C_p 실측, 정류·축전 후 실제로 모이는 에너지
-- 발로 밟았을 때의 전압 (타일 정류 설계의 전제)
-- 5 × 4 타일의 현장 측정
-
-9/18 회로와 11/13 타일은 설계만 되어 있고, 9/11 이후의 측정 데이터는 아직 없다.
+- 밟을 때의 개방전압, 걸음 수를 함께 센 측정(걸음당 에너지)
+- 5 × 4 타일의 급식실 현장 측정
 
 ## 연구일지 번호
 

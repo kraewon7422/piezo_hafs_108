@@ -31,8 +31,10 @@ found out why it is so little, and designed a better material on paper.**
    (the product **d·g**, explained below, not the commonly quoted **d₃₃**) and designed a new ceramic composition
    on paper, checked with chemistry rules.
 7. **Conclusion so far:** piezo floors are **not a practical power source** for a school, but they are a good
-   **self-powered step sensor** (it can count footsteps without any battery). Next step: a 5 × 4 tile of 20 discs,
-   designed and ready to build.
+   **self-powered step sensor** (it can count footsteps without any battery).
+8. **Nov 2026 — the 20-disc tile is built and measured.** Stepping on the 5 × 4 tile gave a median of **5.6 µJ per pulse**
+   (191 pulses, energy into the 1.1 MΩ measuring resistor) and at most 9.3 µW on average while someone was stepping.
+   Lighting a 20 mW LED for one second would take about 36 minutes of stepping. Details: [`tile_5x4/`](tile_5x4/).
 
 ---
 
@@ -46,6 +48,7 @@ found out why it is so little, and designed a better material on paper.**
 | **compare piezo materials** | [Material Simulator v6](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html) | PZT, BaTiO₃, PVDF, ZnO, quartz side by side *(illustration only — its numbers are relative, not real watts)* |
 | **build the circuits** | [`arduino/`](arduino/) | every Arduino sketch we wrote, with a plain-language run guide |
 | **build the 20-disc floor tile** | [5×4 tile guide](https://kraewon7422.github.io/piezo_hafs_108/sim/array5x4_guide_v2.html) | wiring, protection box, cross-section, parts list |
+| **see the built tile and its data** | [`tile_5x4/`](tile_5x4/) | photos, Nov 21 recordings, results per pulse, real-time GUI, Jetson port, fixed assembly manual |
 | **read the full research record** | [`docs/research_report_ko.md`](docs/research_report_ko.md) (Korean) | every number, every source, every correction |
 | **read our lab logs / report** | [`docs/logs/`](docs/logs/) | session logs and the midterm report |
 | **see the whole story in order** | [`docs/PROJECT_HISTORY.md`](docs/PROJECT_HISTORY.md) | March → November, what we tried, what changed and why |
@@ -62,6 +65,7 @@ figures/                   ← graphs made by analyze_v2.py
 arduino/                   ← all later sketches: load tests, capacitance test, 5×4 tile (with run guide)
 sim/                       ← browser tools: analyzer, simulator, 3D crystal, bench & wiring guides
   old/                     ← earlier versions kept on purpose (v1 → v5 …)
+tile_5x4/                  ← Nov 2026: the built 20-disc tile — code actually run, recordings, GUI, photos, analysis
 calc/verify_composition.py ← checks our proposed material obeys charge and size rules
 structures/*.cif           ← crystal-structure files (open in VESTA or any CIF viewer)
 docs/                      ← explanations, full report, logs, history, fact-check
@@ -140,8 +144,10 @@ Full guide: [`arduino/README.md`](arduino/README.md).
 
 ## Honesty notes
 
-- **What is measured vs. estimated.** Only the September 11 open-circuit recording is real measured data. The load
-  tests, capacitance test, energy-storage test and the 5×4 tile are designed but **not yet run**.
+- **What is measured vs. estimated.** Real measured data: the September 11 open-circuit recording of one disc, and the
+  November 21 recordings of the 20-disc tile ([`tile_5x4/`](tile_5x4/): 2 finger-press tests + 3 stepping sessions).
+  The load-resistor sweep, capacitance test, energy-storage test and the cafeteria installation are **not yet done**.
+  The tile results are given per pulse because steps were not counted.
 - **We publish our mistakes.** Earlier we claimed several things we later withdrew (for example, a force calculation
   using the wrong piezo coefficient, and an "LED lights up" result that was actually powered by the USB cable).
   The full list is in [§2-6 of the report](docs/research_report_ko.md#2-6-다시-분석해서-바로잡은-것).
@@ -160,7 +166,8 @@ Full guide: [`arduino/README.md`](arduino/README.md).
 | 4. Material design (d·g criterion) | ✅ Sept 18 — [`docs/05`](docs/05_material_design.md) |
 | 5. Midterm report | ✅ Oct — [`docs/logs/`](docs/logs/) |
 | 6. 5×4 tile (20 discs) design + parts list | ✅ Nov 13 — [guide](https://kraewon7422.github.io/piezo_hafs_108/sim/array5x4_guide_v2.html) |
-| 7. Build the tile, measure real footsteps at the cafeteria | ⏳ next |
+| 7. Build the tile and measure stepping | ✅ Nov 21 — [`tile_5x4/`](tile_5x4/) (median 5.6 µJ per pulse) |
+| 8. Install at the cafeteria entrance, count people at the same time | ⏳ next |
 
 A 4-person student team did this project (experiment design & software / literature & 3D housing / data analysis /
 report). License: [MIT](LICENSE).
@@ -186,7 +193,10 @@ report). License: [MIT](LICENSE).
 6. **그래서 한 일:** 발걸음처럼 느린 누름에서는 흔히 쓰는 **d₃₃**가 아니라 **d·g**라는 값이 중요하다는 것을 밝히고,
    그 기준으로 새 세라믹 조성을 화학 규칙(전하 균형, 이온 크기)으로 검증하며 설계했습니다.
 7. **지금까지의 결론:** 압전 바닥은 학교 **전력원으로는 비현실적**이지만, 배터리 없이 걸음 수를 세는
-   **자가발전 센서**로는 현실적입니다. 다음 단계는 디스크 20개짜리 5 × 4 타일 — 설계와 부품 목록이 준비되어 있습니다.
+   **자가발전 센서**로는 현실적입니다.
+8. **2026년 11월 — 디스크 20개 타일을 만들어 측정했습니다.** 5 × 4 타일을 밟았을 때 펄스당 에너지 중앙값은 **5.6 µJ**
+   (191펄스, 1.1 MΩ 측정 저항에 전달된 에너지)였고, 밟는 동안 평균 전력은 가장 높은 측정에서 9.3 µW였습니다.
+   20 mW LED를 1초 켜려면 약 36분 동안 밟아야 합니다. 자세한 내용: [`tile_5x4/`](tile_5x4/)
 
 ### 무엇을 어디서 보나
 
@@ -198,6 +208,7 @@ report). License: [MIT](LICENSE).
 | 압전 소재 비교 | [소재 시뮬레이터 v6](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html) *(설명용 — 화면 수치는 상대값이며 실제 W·J가 아님)* |
 | 회로 만들어 보기 | [`arduino/`](arduino/) — 모든 스케치 + 쉬운 실행 안내 |
 | 20개짜리 타일 만들기 | [5×4 타일 가이드](https://kraewon7422.github.io/piezo_hafs_108/sim/array5x4_guide_v2.html) |
+| 만든 타일·측정 데이터·GUI·사진 | [`tile_5x4/`](tile_5x4/) |
 | 전체 연구 기록(수치·출처·정정 전부) | [연구 보고서](docs/research_report_ko.md) |
 | 연구일지·중간보고서 | [`docs/logs/`](docs/logs/) |
 | 3월부터 11월까지 흐름 | [프로젝트 연혁](docs/PROJECT_HISTORY.md) |
@@ -214,7 +225,8 @@ report). License: [MIT](LICENSE).
 
 ### 정직하게 밝혀 두는 것
 
-- **실측은 9월 11일 무부하 측정 하나뿐**입니다. 부하저항 실험, 정전용량 측정, 축전 실험, 5×4 타일은 설계만 되어 있고 아직 하지 않았습니다.
+- **실측 데이터**는 9월 11일 디스크 1개 무부하 측정과 11월 21일 디스크 20개 타일 측정([`tile_5x4/`](tile_5x4/): 손가락 작동 테스트 2개 + 밟기 3개)입니다.
+  부하저항 실험, 정전용량 측정, 축전 실험, 급식실 설치는 아직 하지 않았습니다. 걸음 수를 세지 않았으므로 타일 결과는 펄스당 값으로만 씁니다.
 - **틀린 것을 숨기지 않습니다.** 철회한 주장(잘못된 계수로 힘을 역산한 것, USB 전원으로 켜진 LED를 발전 증거로 본 것 등)은
   [보고서 §2-6](docs/research_report_ko.md#2-6-다시-분석해서-바로잡은-것)에 모두 있습니다.
 - **AI 활용.** 2026년 3–11월 Claude(여러 모델 버전)를 튜터·코딩 도우미로 썼습니다. 2026-11-13에 프로젝트의 모든 AI 대화를
