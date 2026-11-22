@@ -3,3 +3,6 @@ __pycache__/
 .DS_Store
 CONTINUE.md
 .work/
+
+# local model weights (downloaded automatically by ultralytics)
+*.pt
