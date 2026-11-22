@@ -1,0 +1,13 @@
+각 CSV 열의 뜻과 단위
+공통: pc_time = 노트북 시각(년-월-일T시:분:초.밀리초), t_ms = 우노가 켜진 뒤 흐른 시간(ms)
+
+meta.csv     version 코드 버전 / VREF 우노 5V 전압(V) / R1·R2 분압 저항(Ω) / sample_us 샘플 간격(µs) / th_on_V·th_off_V 펄스 시작·끝 문턱(V, 행 전압 기준)
+baseline.csv mean1~4_V 아무도 안 밟았을 때 행별 평균 전압 / max1~4_V 같은 때 최대 전압 (V)
+raw.csv      a1~a4 = 1~4행 ADC 값(0~1023). 행 전압(V) = a × VREF ÷ 1023 × (R1 + R2) ÷ R2  (기본값이면 a × 0.0538)
+pulses.csv   pulse_no 펄스 번호 / t_start_ms 시작 시각 / dur_ms 지속 시간 / gap_ms 앞 펄스 끝에서 이 펄스 시작까지(첫 펄스는 0)
+             rows_hit 문턱을 넘은 행 수 / order 행이 처음 넘은 순서(예: 12 = 1행 다음 2행, 0 = 없음)
+             r1~r4_peak_V 행별 최대 전압(V) / r?_t_first_ms 펄스 시작부터 그 행이 문턱을 넘기까지(ms, -1 = 안 넘음)
+             r?_t_peak_ms 펄스 시작부터 그 행 최대값까지(ms) / r?_above_ms 문턱 위에 있던 시간(ms)
+             r?_E_uJ 1.1 MΩ 부하에 전달된 에너지(µJ) = Σ V²/R × Δt / r?_Q_nC 부하로 흐른 전하(nC) = Σ V/R × Δt
+             r?_clip 1이면 측정 한계(약 54 V)를 넘어 값이 잘림
+status.csv   pulses 지금까지 펄스 수 / dropped_samples 밀려서 놓친 샘플 수 / idle_max1~4_V 최근 10초 동안 안 밟았을 때 최대 전압

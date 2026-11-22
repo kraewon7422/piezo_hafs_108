@@ -1,0 +1,2 @@
+﻿pass_no,t_start_ms,t_end_ms,n_pulses,E_total_uJ,E_odd_uJ(디딤 추정),E_even_uJ(뗌 추정),Q_total_nC,peak_max_V,rows_touched,direction,first_order,clipped
+1,15285,61207,29,427.9713,220.9609,207.0104,173891.37,8.06,1234,1,1234,0
