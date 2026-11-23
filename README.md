@@ -11,6 +11,7 @@ better material on paper, then built a 20-disc floor tile and measured it at our
 <p align="center">
   <a href="https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html"><img alt="Analyzer — live demo" src="https://img.shields.io/badge/%E2%96%B6%20Data%20Analyzer-open%20in%20browser-ffb000?style=for-the-badge"></a>
   <a href="https://kraewon7422.github.io/piezo_hafs_108/sim/hafs108-crystal.html"><img alt="3D crystal — live demo" src="https://img.shields.io/badge/%E2%96%B6%203D%20Crystal-open%20in%20browser-256B7C?style=for-the-badge"></a>
+  <a href="https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v7.html"><img alt="Material simulator — live demo" src="https://img.shields.io/badge/%E2%96%B6%20Material%20Simulator%20v7-open%20in%20browser-c05621?style=for-the-badge"></a>
 </p>
 
 > 🇰🇷 한국어 설명은 [아래](#한국어)에 있습니다.
@@ -76,6 +77,7 @@ More detail, graphs and caveats: **[`tile_5x4/`](tile_5x4/)** for the tile, [`do
 | **read the material design** | [`docs/05_material_design.md`](docs/05_material_design.md) (Korean), [`calc/`](calc/), [`structures/`](structures/) |
 | **play with the Sept 11 data in a browser** | [Data Analyzer v2](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) |
 | **rotate the crystal in 3D** | [crystal page](https://kraewon7422.github.io/piezo_hafs_108/sim/hafs108-crystal.html) |
+| **compare piezo materials** | [Material Simulator v7](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v7.html) — crystal structures of PZT, BaTiO₃, PVDF, ZnO and quartz, plus V, I and energy in real units when the same 20 mm piece is pressed with 600 N. It ranks materials by d·g. Its numbers compare materials. They do not predict our tile, whose discs bend. |
 | **every Arduino sketch** | [`arduino/`](arduino/) (single disc, bench circuits) and [`tile_5x4/piezo_main/`](tile_5x4/piezo_main/) (the tile code actually run) |
 | **build the tile** | [build diagrams](tile_5x4/README.md#build-diagrams) and the [assembly manual](tile_5x4/docs/assembly_manual_5x4_v2.html) (stoppers in the manual were not installed) |
 | **the whole story, March → November** | [`docs/PROJECT_HISTORY.md`](docs/PROJECT_HISTORY.md) |
@@ -89,7 +91,7 @@ analyze_v2.py              ← Sept 11 recording → numbers + figures/
 data/                      ← Sept 11 raw recording (CSV)
 figures/                   ← Sept 11 graphs
 arduino/                   ← later sketches: bench circuits A/B/C (designed, not run), first 5×4 draft
-sim/                       ← browser tools: data analyzer, 3D crystal, illustrative material simulator, bench & wiring guides
+sim/                       ← browser tools: data analyzer, 3D crystal, material simulator v7, bench & wiring guides
 calc/, structures/         ← material-design check script and crystal files (CIF)
 tile_5x4/                  ← the 20-disc tile: code actually run, recordings, analysis, GUI, Jetson port, photos, manual
 docs/                      ← basics, material design, history, logs, AI fact-check
@@ -120,7 +122,7 @@ A fresh clone reproduces `tile_5x4/analysis/results.md` exactly.
 - **We publish our mistakes.** Withdrawn claims are listed in the erratum boxes of [`docs/logs/`](docs/logs/) and in [`docs/AI_FACT_CHECK.md`](docs/AI_FACT_CHECK.md). Examples:
   - a force calculation that used the wrong coefficient
   - an "LED lit up" result that was really powered by USB
-  - simulator numbers that were relative, not real units
+  - simulator numbers that were relative, not real units (v6; v7 computes real units)
 - **AI use.** We used Claude as a tutor and coding assistant (March–November 2026). On 2026-11-13 every AI chat of the project was re-checked against primary sources.
 
 A 4-person student team did this project. License: [MIT](LICENSE).
@@ -169,6 +171,7 @@ A 4-person student team did this project. License: [MIT](LICENSE).
 | 압전을 처음부터 이해하기 | [압전 기초론](docs/00_piezo_basics.md) |
 | 소재 설계 | [`docs/05_material_design.md`](docs/05_material_design.md) |
 | 9월 측정 데이터를 브라우저에서 보기 | [데이터 분석기 v2](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) |
+| 압전 소재 비교 | [소재 시뮬레이터 v7](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v7.html) — PZT·BaTiO₃·PVDF·ZnO·수정의 결정 구조. 같은 크기(지름 20 mm) 조각을 600 N으로 눌렀을 때의 전압·전류·에너지를 실제 단위로 계산하고, 소재 순위를 d·g로 매깁니다. 우리 디스크는 휘면서 발전하므로 타일 예측값이 아니라 소재끼리의 비교입니다. |
 | 아두이노 코드 | [`arduino/`](arduino/), 발판에 실제로 쓴 코드는 [`tile_5x4/piezo_main/`](tile_5x4/piezo_main/) |
 | 발판 만드는 방법 | [제작 다이어그램](tile_5x4/README.md#build-diagrams), [조립 매뉴얼](tile_5x4/docs/assembly_manual_5x4_v2.html) (매뉴얼의 스토퍼는 실제로 달지 않음) |
 | 3월부터 11월까지의 흐름 | [프로젝트 연혁](docs/PROJECT_HISTORY.md) |
