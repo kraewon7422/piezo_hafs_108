@@ -14,8 +14,8 @@
 
 **차시 번호 주의:** 학교의 "4차시 계획서"는 7월(질문·가설 설정)이었고, 이 저장소와 일지는 9월 11일 측정을 "4차시", 9월 18일을 "5차시"로 부른다.
 
-**9월 11일 이후 측정 데이터는 없다.** 9월 18일 회로 A/B/C와 11월 13일 타일은 설계·코드까지만 진행됐다(`arduino/README.md` 참고).
+**측정 데이터는 두 묶음이다.** 9월 11일 디스크 한 개 측정(`data/`)과, 11월 21일 예비 측정·11월 23일 급식실 실측을 한 5×4 타일 측정(`tile_5x4/piezo_main/`)이다. 9월 18일 회로 A/B/C는 설계·코드까지만 진행했다(`arduino/README.md` 참고). 11월 13일 일지 뒤의 제작·측정 기록은 일지 대신 `tile_5x4/README.md`에 정리했다.
 
 ---
 
-English: research logs and reports in Korean, scrubbed of names and student IDs. Each file starts with an erratum box listing later corrections. Log #3 was not preserved. No measurements exist after 2026-09-11.
+English: research logs and reports in Korean, scrubbed of names and student IDs. Each file starts with an erratum box listing later corrections. Log #3 was not preserved. Measurements: the single disc on 2026-09-11 (`data/`) and the 5×4 tile on 2026-11-21 and 2026-11-23 (`tile_5x4/`).

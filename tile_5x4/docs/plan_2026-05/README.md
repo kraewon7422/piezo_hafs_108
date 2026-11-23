@@ -12,7 +12,7 @@ They are kept unchanged (document author metadata removed) so the project histor
 | expected output "tens of µJ to a few mJ per step" | largest single stepping pulse 32 µJ, median 5.6 µJ; no pulse reached 1 mJ. (Per-step energy was not measured — steps were not counted.) | **mJ range not reached** |
 | measure the stored energy E = ½·C·V² on a capacitor | the built circuit has no storage capacitor; energy is measured per pulse on a resistor (the plan's "E mode" was dropped for lack of parts) | **method changed** |
 | prototype: 8 discs in parallel | built with 20 discs, one bridge per disc, 4 row outputs | **design changed** |
-| commercial PaveGen = "d31 bimorph + mechanical amplification" | PaveGen describes its tile as electromagnetic induction, 2–4 J per step (sources in `docs/research_report_ko.md` §9) | **wrong mechanism** |
+| commercial PaveGen = "d31 bimorph + mechanical amplification" | PaveGen describes its tile as electromagnetic induction, 2–4 J per step (source: pavegen.com "How it works") | **wrong mechanism** |
 
 The 0.22 F / LED claim was already marked impossible on 2026-11-13 from the single-disc data ([`docs/AI_FACT_CHECK.md`](../../../docs/AI_FACT_CHECK.md));
 the tile measurement now confirms it with 20 discs.
@@ -32,4 +32,4 @@ the tile measurement now confirms it with 20 discs.
 | 예상 출력 "보당 수십 µJ ~ 수 mJ" | 가장 큰 펄스 32 µJ, 중앙값 5.6 µJ, 1 mJ에 닿은 펄스 없음(걸음 수는 안 셈) | **mJ 범위 미도달** |
 | 커패시터 저장 에너지 ½·C·V²로 측정 | 만든 회로에는 저장 커패시터가 없음 — 저항에서 펄스마다 측정 | **방법 변경** |
 | 디스크 8개 병렬 | 디스크 20개, 디스크마다 브리지, 출력 4행 | **설계 변경** |
-| 상용 PaveGen = "d31 바이모프 + 기계적 증폭" | PaveGen 자료는 전자기 유도, 걸음당 2–4 J (출처: `docs/research_report_ko.md` §9) | **방식 틀림** |
+| 상용 PaveGen = "d31 바이모프 + 기계적 증폭" | PaveGen 자료는 전자기 유도, 걸음당 2–4 J (출처: pavegen.com "How it works") | **방식 틀림** |

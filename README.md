@@ -1,253 +1,188 @@
 # piezo_hafs_108 — Can stepping on a floor tile make electricity?
 
-**A high-school research project that measured how much electricity a piezo disc makes when you press it,
-found out why it is so little, and designed a better material on paper.**
+**A high-school research project.** We measured one piezo disc, worked out why it gives so little energy, designed a
+better material on paper, then built a 20-disc floor tile and measured it at our school's cafeteria entrance during lunch.
+
+<p align="center">
+  <img src="tile_5x4/photos/07_hand_press_and_logger.gif" width="49%" alt="pressing the 20-disc tile while the logger records">
+  <img src="tile_5x4/piezo_gui/walkthrough/screen_A_live.gif" width="49%" alt="real-time GUI replaying a stepping session">
+</p>
 
 <p align="center">
   <a href="https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html"><img alt="Analyzer — live demo" src="https://img.shields.io/badge/%E2%96%B6%20Data%20Analyzer-open%20in%20browser-ffb000?style=for-the-badge"></a>
   <a href="https://kraewon7422.github.io/piezo_hafs_108/sim/hafs108-crystal.html"><img alt="3D crystal — live demo" src="https://img.shields.io/badge/%E2%96%B6%203D%20Crystal-open%20in%20browser-256B7C?style=for-the-badge"></a>
-  <a href="https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html"><img alt="Simulator — live demo" src="https://img.shields.io/badge/%E2%96%B6%20Material%20Simulator-open%20in%20browser-c05621?style=for-the-badge"></a>
 </p>
 
-> 🇰🇷 한국어 설명은 [아래](#한국어--처음-보는-사람을-위한-설명)에 있습니다.
+> 🇰🇷 한국어 설명은 [아래](#한국어)에 있습니다.
 
 ---
 
-## The 60-second version
+## The story in eight steps
 
-1. **Some crystals make electricity when you squeeze them.** This is called the *piezoelectric effect*
-   ("piezo" is Greek for *press*). The little round buzzer inside a greeting card or a toy is one of these.
-2. **Idea:** put piezo discs under the floor where hundreds of students walk every day (the cafeteria entrance)
-   and collect the electricity.
-3. **We measured it.** We connected one 27 mm piezo disc to an Arduino (a small programmable circuit board) and
-   recorded the voltage 62,000 times per second while pressing and tapping it.
-4. **Result:** one press gives a pulse of about **1.2 volts lasting about 0.1 seconds**. The energy in it is only
-   about **15 nanojoules** (0.000000015 J). To keep one small LED (20 mW) lit for one second you would need about
-   **a million presses**.
-5. **Why so little?** A ceramic disc barely bends (micrometres). Energy is *force × distance*, and when the distance is
-   tiny, the energy is tiny — no matter how hard you step. Commercial "energy floors" get far more energy because the
-   floor actually sinks a few millimetres.
-6. **What we did with that:** we worked out which material property really matters for slow presses like footsteps
-   (the product **d·g**, explained below, not the commonly quoted **d₃₃**) and designed a new ceramic composition
-   on paper, checked with chemistry rules.
-7. **Conclusion so far:** piezo floors are **not a practical power source** for a school, but they are a good
-   **self-powered step sensor** (it can count footsteps without any battery).
-8. **Nov 2026 — the 20-disc tile is built and measured.** Stepping on the 5 × 4 tile gave a median of **5.6 µJ per pulse**
-   (191 pulses, energy into the 1.1 MΩ measuring resistor) and at most 9.3 µW on average while someone was stepping.
-   Lighting a 20 mW LED for one second would take about 36 minutes of stepping. Details: [`tile_5x4/`](tile_5x4/).
+1. **The idea.** Some crystals make a voltage when squeezed (the *piezoelectric effect*). Hundreds of students pass the
+   cafeteria entrance at the same time every day. Could piezo discs under that floor make useful electricity?
+2. **One disc (Sept 11).**
+   - We wired a 27 mm piezo disc straight to an Arduino (A0 and GND) and recorded it 62,000 times per second.
+   - A hand press gave a pulse of **about 1.2 V lasting about 0.1 s**, holding only **about 15 nJ** (½·C·V², C ≈ 20 nF).
+   - A hard tap made the disc ring at about 3.3 kHz.
+3. **Why so little, and what matters.** A press lasts tens of milliseconds, hundreds of times slower than the disc's ring.
+   - So resonance does not help a footstep. The disc just stores the charge the force makes.
+   - Stored energy grows with **d × g** (charge per newton × voltage per unit charge) and with the square of the stress in the ceramic.
+4. **Material on paper (Sept 18).** Ranking 11 published materials by d·g instead of d₃₃ changed the order.
+   - We proposed a modified PZT composition that lowers the permittivity while keeping d.
+   - We checked it for charge balance and the tolerance factor. It was **not made**, because it needs a ~1,200 °C furnace and lead handling.
+5. **A 20-disc tile (Nov 13–19).** 4 rows × 5 discs.
+   - One bridge rectifier per disc turns both the press and the release pulse into the same polarity.
+   - The 5 discs of a row are in parallel, so the row has one voltage and the currents of discs pressed together add up.
+   - Each row goes into its own protection and measuring circuit on a breadboard.
+   - The design's stoppers were **not installed**.
+6. **Preliminary sessions (Nov 21).** Stepping in place gave a median of **5.6 µJ per pulse** (191 pulses). The highest row voltage was 9.52 V with the 1.1 MΩ measuring load, not the "tens of volts" the design had assumed.
+7. **At the cafeteria entrance (Nov 23, lunch, ~4 min).**
+   - People walked across the tile while one of us counted them by hand: **50**. The tile counted **51** (totals within 2 %).
+   - One crossing delivered a **median of 6.5 µJ** (mean 10.4 µJ) to the measuring resistor. The highest row voltage was 16.4 V.
+8. **Conclusion.** Even before any storage losses, one IoT radio transmission (assumed 100 µJ) needs 10–15 crossings, and lighting a 20 mW LED for one second needs 1,900–3,100.
+   - A piezo floor like ours is **not a practical power source** for a school.
+   - It does reliably produce a signal for every person who walks across, so it **may work as a people counter**. A self-powered version has not been built.
+
+---
+
+## Key results
+
+| measurement | value | in plain words |
+|---|---|---|
+| one disc, hand press (Sept 11) | **1.1–1.3 V, ≈ 0.1 s, ≈ 15 nJ** | open circuit, ½·C·V² of one disc |
+| one disc, ringing after a hard tap | ≈ 3.3 kHz (1.13 V peak) | its resonance; a footstep is far slower |
+| tile, stepping in place (Nov 21) | **median 5.6 µJ per pulse** (191 pulses) | energy into the 1.1 MΩ measuring resistor; steps not counted |
+| tile, cafeteria entrance (Nov 23) | **median 6.5 µJ, mean 10.4 µJ per crossing** (51 crossings) | one crossing ≈ press + release ≈ one step |
+| tile, people counted | **51 by the tile vs 50 by hand** | totals only; not matched one by one |
+| tile, highest row voltage | 9.52 V (Nov 21), **16.4 V** (Nov 23) | with the 1.1 MΩ load; open-circuit voltage not measured |
+| what it can power (upper bound) | 10–15 crossings per IoT transmission, 1,900–3,100 per LED-second | before rectifier/storage losses |
+
+More detail, graphs and caveats: **[`tile_5x4/`](tile_5x4/)** for the tile, [`docs/00_piezo_basics.md`](docs/00_piezo_basics.md) (Korean) for the single disc.
+
+| | |
+|---|---|
+| ![one crossing at the cafeteria](tile_5x4/figures/tile_fig5_cafeteria_crossing.png) | ![all 51 crossings](tile_5x4/figures/tile_fig6_cafeteria_crossings.png) |
 
 ---
 
 ## What is in this repository?
 
-| If you want to… | Open this | What you'll see |
-|---|---|---|
-| **understand piezo from zero** | [`docs/00_piezo_basics.md`](docs/00_piezo_basics.md) (Korean) | why pressing makes electricity, and why only a little |
-| **play with our real data** | [Data Analyzer v2](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) | our measured waveform, energy per press, "is it useful for a school?" verdict |
-| **see the crystal in 3D** | [HAFS-108 crystal page](https://kraewon7422.github.io/piezo_hafs_108/sim/hafs108-crystal.html) | rotate the atoms of PZT and of our proposed material, see why it is polar |
-| **compare piezo materials** | [Material Simulator v6](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html) | PZT, BaTiO₃, PVDF, ZnO, quartz side by side *(illustration only — its numbers are relative, not real watts)* |
-| **build the circuits** | [`arduino/`](arduino/) | every Arduino sketch we wrote, with a plain-language run guide |
-| **build the 20-disc floor tile** | [5×4 tile guide](https://kraewon7422.github.io/piezo_hafs_108/sim/array5x4_guide_v2.html) | wiring, protection box, cross-section, parts list |
-| **see the built tile and its data** | [`tile_5x4/`](tile_5x4/) | photos, Nov 21 recordings, results per pulse, real-time GUI, Jetson port, fixed assembly manual |
-| **understand the GUI code** | [GUI code walkthrough](tile_5x4/piezo_gui/CODE_WALKTHROUGH.md) (Korean) | how each screen turns the Arduino's serial lines into numbers, with screen-recording captures |
-| **read the full research record** | [`docs/research_report_ko.md`](docs/research_report_ko.md) (Korean) | every number, every source, every correction |
-| **read our lab logs / report** | [`docs/logs/`](docs/logs/) | session logs and the midterm report |
-| **see the whole story in order** | [`docs/PROJECT_HISTORY.md`](docs/PROJECT_HISTORY.md) | March → November, what we tried, what changed and why |
-| **check what the AI got wrong** | [`docs/AI_FACT_CHECK.md`](docs/AI_FACT_CHECK.md) | claims from AI chats that we verified, corrected or withdrew |
-
-### Folder map
+| if you want to… | open this |
+|---|---|
+| **see the built tile, its data and results** | [`tile_5x4/`](tile_5x4/) — photos, all recordings, results, analysis script |
+| **understand the presentation GUI's code** | [GUI code walkthrough](tile_5x4/piezo_gui/CODE_WALKTHROUGH.md) (Korean) — how each screen turns serial lines into numbers |
+| **understand piezo from zero** | [`docs/00_piezo_basics.md`](docs/00_piezo_basics.md) (Korean) |
+| **read the material design** | [`docs/05_material_design.md`](docs/05_material_design.md) (Korean), [`calc/`](calc/), [`structures/`](structures/) |
+| **play with the Sept 11 data in a browser** | [Data Analyzer v2](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) |
+| **rotate the crystal in 3D** | [crystal page](https://kraewon7422.github.io/piezo_hafs_108/sim/hafs108-crystal.html) |
+| **every Arduino sketch** | [`arduino/`](arduino/) (single disc, bench circuits) and [`tile_5x4/piezo_main/`](tile_5x4/piezo_main/) (the tile code actually run) |
+| **build the tile** | [assembly manual](tile_5x4/docs/assembly_manual_5x4_v2.html) (stoppers in the manual were not installed) |
+| **the whole story, March → November** | [`docs/PROJECT_HISTORY.md`](docs/PROJECT_HISTORY.md) |
+| **lab logs and the midterm report** | [`docs/logs/`](docs/logs/) — each file starts with an erratum box |
+| **what the AI got wrong and how we checked** | [`docs/AI_FACT_CHECK.md`](docs/AI_FACT_CHECK.md) |
 
 ```
-README.md                  ← you are here
-piezo_capture_simple.ino   ← the Arduino sketch that recorded our real data (Sept 11)
-analyze_v1.py, analyze_v2.py ← turn that recording into the numbers and graphs below
-data/                      ← the raw measurement (CSV file, 3,380 rows)
-figures/                   ← graphs made by analyze_v2.py
-arduino/                   ← all later sketches: load tests, capacitance test, 5×4 tile (with run guide)
-sim/                       ← browser tools: analyzer, simulator, 3D crystal, bench & wiring guides
-  old/                     ← earlier versions kept on purpose (v1 → v5 …)
-tile_5x4/                  ← Nov 2026: the built 20-disc tile — code actually run, recordings, GUI, photos, analysis
-calc/verify_composition.py ← checks our proposed material obeys charge and size rules
-structures/*.cif           ← crystal-structure files (open in VESTA or any CIF viewer)
-docs/                      ← explanations, full report, logs, history, fact-check
+README.md
+piezo_capture_simple.ino   ← sketch that recorded the single disc (Sept 11)
+analyze_v2.py              ← Sept 11 recording → numbers + figures/
+data/                      ← Sept 11 raw recording (CSV)
+figures/                   ← Sept 11 graphs
+arduino/                   ← later sketches: bench circuits A/B/C (designed, not run), first 5×4 draft
+sim/                       ← browser tools: data analyzer, 3D crystal, illustrative material simulator, bench & wiring guides
+calc/, structures/         ← material-design check script and crystal files (CIF)
+tile_5x4/                  ← the 20-disc tile: code actually run, recordings, analysis, GUI, Jetson port, photos, manual
+docs/                      ← basics, material design, history, logs, AI fact-check
 ```
 
----
+## Reproduce
 
-## The key results, explained
-
-| Measurement | Value | What it means in plain words |
-|---|---|---|
-| Hard tap, peak voltage | **1.13 V** | a bit less than one AA battery, but only for a split second |
-| Ringing after a tap | **≈ 3.3 kHz** | the disc vibrates like a tiny bell, 3,300 times a second — this is its *resonance* |
-| Hand press | **1.1–1.3 V, ≈ 0.1 s** | one smooth bump; a press is hundreds of times slower than the ringing, so the "bell" effect doesn't help |
-| Energy per press | **≈ 15 nJ** | calculated as ½·C·V² with the disc's capacitance (≈ 20 nF from the datasheet) |
-| Repeatability (4 presses) | spread ≈ 7–8 % | hand pressing is fairly consistent; a drop-weight jig would be better |
-| **20-disc tile, stepping (Nov 21)** | **median 5.6 µJ per pulse** (191 pulses) | energy into the 1.1 MΩ measuring resistor; steps were not counted, so this is per pulse, not per step — [`tile_5x4/`](tile_5x4/) |
-| Tile, highest row voltage while stepping | **9.52 V** (with the 1.1 MΩ load) | far below the "tens of volts" the tile design had assumed; open-circuit voltage not measured |
-
-<details>
-<summary><b>Why does the reading cut off below 0 V?</b> (a limitation we found)</summary>
-
-An Arduino can only read voltages between 0 and 5 V. A piezo makes both positive and negative voltage, so the
-negative half was cut off (29 % of the samples sat at zero). The fix is a "bias" circuit that lifts the signal to
-the middle of the range — that circuit is in [`arduino/`](arduino/) but has not been run yet.
-</details>
-
-<details>
-<summary><b>Why can't you just say how many watts it makes?</b></summary>
-
-Power needs a *load* (something that uses the electricity, like a resistor). We measured the disc with nothing
-connected (open circuit), so we know the voltage and can estimate the stored energy, but not the delivered power.
-Load-resistor tests are designed (circuit A in `arduino/v2_bench/`) and are the next measurement.
-</details>
-
-### Why d·g and not d₃₃? (the idea behind the material design)
-
-Two numbers describe a piezo material:
-
-- **d** — how much electric *charge* you get per newton of force.
-- **g** — how much *voltage* that charge makes. g = d ÷ (how much the material "soaks up" charge, its permittivity εᵣ).
-
-The energy stored in one press is charge × voltage, so it grows with **d × g**. Most articles rank materials by
-d₃₃ alone, but materials with a big d usually also have a big εᵣ, which kills g. In a published table of 11 materials
-(10 commercial ceramics + 1 lab-made composition), the highest-d₃₃ material was only 5th in d·g, and the d·g winner
-(the lab composition, which deliberately lowers εᵣ) was 9th in d₃₃. Among the commercial ones alone, d₃₃ and d·g do
-move together, so the point is not "d₃₃ is useless" but "lowering εᵣ is a second, separate lever".
-So our proposed composition tries to **lower εᵣ while keeping d**:
-
-**(Pb₀.₉₆Sm₀.₀₄)[(Zr₀.₅₂Ti₀.₄₈)₀.₈₈(Zn₁/₃Nb₂/₃)₀.₁₀Mn₀.₀₂]O₃** — charges add up to exactly zero and the
-"tolerance factor" (a size rule for this crystal type) is t = 0.984, inside the stable range.
-This is a **paper design**: we cannot make it at school (it needs a furnace at ~1,200 °C and lead handling), and the
-expected improvement is an estimate between two published results, not a measurement. Details and every source:
-[`docs/05_material_design.md`](docs/05_material_design.md).
-
----
-
-## Try it yourself (no installation)
-
-**Data Analyzer** — open the [live page](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html),
-press **실측 데이터 가져오기** (load measured data) and you'll see our real presses, the energy of each, and a
-school-feasibility verdict. You can change the assumptions (number of students, electricity price) in the settings tab.
-
-**Reproduce our numbers on your computer** (needs Python 3 with `numpy` and `matplotlib`):
+Python 3 with `numpy`, `matplotlib` (and `pygame`, `pyserial` for the GUI):
 
 ```bash
-python analyze_v2.py                 # reads data/piezo_capture_data-1.csv → prints results, saves figures/
-python calc/verify_composition.py    # checks the proposed material (charge balance, tolerance factor, rankings)
+python analyze_v2.py                         # single disc, Sept 11
+python calc/verify_composition.py            # proposed material: charge balance, tolerance factor, rankings
+cd tile_5x4/analysis && python tile_results.py   # every tile number and figure (Nov 21 + Nov 23)
+cd tile_5x4/piezo_gui && python piezo_gui_v1.py --replay ../piezo_main/piezo_20261123_134435/raw_serial.txt
 ```
 
-**Repeat the measurement** — you need an Arduino Uno, a 27 mm piezo disc and two wires (disc red → A0, black → GND).
-Upload `piezo_capture_simple.ino`, open the Serial Monitor at 500000 baud, tap the disc, and save the output as CSV.
-⚠️ Only press or tap it **by hand** in this direct setup — a full footstep can push the disc to tens of volts and
-damage the Arduino pin. For foot tests use the protected circuits in `arduino/`.
-Full guide: [`arduino/README.md`](arduino/README.md).
-
----
+A fresh clone reproduces `tile_5x4/analysis/results.md` exactly.
 
 ## Honesty notes
 
-- **What is measured vs. estimated.** Real measured data: the September 11 open-circuit recording of one disc, and the
-  November 21 recordings of the 20-disc tile ([`tile_5x4/`](tile_5x4/): 2 finger-press tests + 3 stepping sessions).
-  The load-resistor sweep, capacitance test, energy-storage test and the cafeteria installation are **not yet done**.
-  The tile results are given per pulse because steps were not counted.
-- **We publish our mistakes.** Earlier we claimed several things we later withdrew (for example, a force calculation
-  using the wrong piezo coefficient, and an "LED lights up" result that was actually powered by the USB cable).
-  The full list is in [§2-6 of the report](docs/research_report_ko.md#2-6-다시-분석해서-바로잡은-것).
-- **AI use.** We used Claude (several model versions, March–November 2026) as a tutor and coding assistant.
-  On 2026-11-13 every AI chat of the project was re-checked against primary sources; what was wrong, where it had
-  leaked into this repo, and how it was fixed is listed in [`docs/AI_FACT_CHECK.md`](docs/AI_FACT_CHECK.md).
-  Corrections inside documents are marked **⚠️정정(2026-11-13)**.
+- **Measured vs assumed.**
+  - Measured: the single disc (Sept 11), the tile sessions (Nov 21), and the cafeteria session (Nov 23).
+  - Assumed: everything about a full day, a whole entrance, an IoT transmission or a commercial tile. These are labelled as assumptions where they appear.
+  - Not measured: open-circuit voltage, the force on each disc, the best load resistance, and energy actually stored in a capacitor.
+- **Limits of the cafeteria test.**
+  - It is one ~4-minute session with one person counting.
+  - Crossings were not time-matched one by one, and walking direction was not recorded by hand.
+- **We publish our mistakes.** Withdrawn claims are listed in the erratum boxes of [`docs/logs/`](docs/logs/) and in [`docs/AI_FACT_CHECK.md`](docs/AI_FACT_CHECK.md). Examples:
+  - a force calculation that used the wrong coefficient
+  - an "LED lit up" result that was really powered by USB
+  - simulator numbers that were relative, not real units
+- **AI use.** We used Claude as a tutor and coding assistant (March–November 2026). On 2026-11-13 every AI chat of the project was re-checked against primary sources.
 
-## Status & next steps
-
-| Step | Status |
-|---|---|
-| 1. Understand how PZT works | ✅ [basics](docs/00_piezo_basics.md) |
-| 2. Simulator + data analyzer | ✅ [`sim/`](sim/) |
-| 3. First real measurement (one disc) | ✅ Sept 11 — [`data/`](data/) |
-| 4. Material design (d·g criterion) | ✅ Sept 18 — [`docs/05`](docs/05_material_design.md) |
-| 5. Midterm report | ✅ Oct — [`docs/logs/`](docs/logs/) |
-| 6. 5×4 tile (20 discs) design + parts list | ✅ Nov 13 — [guide](https://kraewon7422.github.io/piezo_hafs_108/sim/array5x4_guide_v2.html) |
-| 7. Build the tile and measure stepping | ✅ Nov 21 — [`tile_5x4/`](tile_5x4/) (median 5.6 µJ per pulse) |
-| 8. Install at the cafeteria entrance, count people at the same time | ⏳ next |
-
-A 4-person student team did this project (experiment design & software / literature & 3D housing / data analysis /
-report). License: [MIT](LICENSE).
+A 4-person student team did this project. License: [MIT](LICENSE).
 
 ---
 
-## 한국어 — 처음 보는 사람을 위한 설명
+## 한국어
 
-**압전 타일을 밟으면 전기가 얼마나 나올까?** — 고등학교 탐구 프로젝트입니다. 압전 디스크를 실제로 눌러 전압을 재고,
-왜 전기가 조금밖에 안 나오는지 밝히고, 그 결과를 바탕으로 더 나은 압전 소재를 설계했습니다.
+**압전 발판을 밟으면 전기가 얼마나 나올까?** 고등학교 탐구 프로젝트입니다.
+- 압전 디스크 한 개를 재서 전기가 왜 조금밖에 안 나오는지 알아보고, 소재를 종이 위에서 설계했습니다.
+- 디스크 20개로 발판을 만들어 **점심시간 급식실 입구에서 실제로 측정**했습니다.
 
-### 1분 요약
+### 탐구의 흐름
 
-1. **어떤 결정은 누르면 전기가 나옵니다.** 이것을 *압전 효과*라고 합니다(그리스어 piezo = 누르다).
-   축하 카드나 장난감 속 동그란 부저가 바로 압전 소자입니다.
-2. **아이디어:** 학생 수백 명이 매일 지나가는 급식실 입구 바닥에 압전 소자를 깔아 전기를 모으자.
-3. **직접 쟀습니다.** 지름 27 mm 압전 디스크 하나를 아두이노(작은 프로그래밍 회로 기판)에 연결하고,
-   두드리고 누르는 동안 전압을 1초에 62,000번 기록했습니다.
-4. **결과:** 한 번 누르면 **약 1.2 V짜리 펄스가 약 0.1초** 나옵니다. 그 안의 에너지는 **약 15 nJ**
-   (0.000000015 J)뿐입니다. 작은 LED(20 mW) 하나를 1초 켜려면 **약 100만 번** 눌러야 합니다.
-5. **왜 이렇게 적나?** 세라믹 디스크는 거의 휘지 않습니다(마이크로미터 수준). 에너지 = 힘 × 움직인 거리이므로,
-   아무리 세게 밟아도 거리가 작으면 에너지도 작습니다. 상용 발전 바닥은 바닥 자체가 몇 mm 꺼지기 때문에 훨씬 많이 얻습니다.
-6. **그래서 한 일:** 발걸음처럼 느린 누름에서는 흔히 쓰는 **d₃₃**가 아니라 **d·g**라는 값이 중요하다는 것을 밝히고,
-   그 기준으로 새 세라믹 조성을 화학 규칙(전하 균형, 이온 크기)으로 검증하며 설계했습니다.
-7. **지금까지의 결론:** 압전 바닥은 학교 **전력원으로는 비현실적**이지만, 배터리 없이 걸음 수를 세는
-   **자가발전 센서**로는 현실적입니다.
-8. **2026년 11월 — 디스크 20개 타일을 만들어 측정했습니다.** 5 × 4 타일을 밟았을 때 펄스당 에너지 중앙값은 **5.6 µJ**
-   (191펄스, 1.1 MΩ 측정 저항에 전달된 에너지)였고, 밟는 동안 평균 전력은 가장 높은 측정에서 9.3 µW였습니다.
-   20 mW LED를 1초 켜려면 약 36분 동안 밟아야 합니다. 자세한 내용: [`tile_5x4/`](tile_5x4/)
+1. **아이디어**: 같은 시간에 수백 명이 지나가는 급식실 입구 바닥에 압전 소자를 깔면 쓸 만한 전기가 나올까?
+2. **디스크 한 개 (9월 11일)**
+   - 27 mm 디스크를 아두이노 A0·GND에 바로 연결하고 1초에 62,000번 기록했습니다.
+   - 손으로 누르면 **약 1.2 V, 0.1초** 펄스가 나왔고 에너지는 **약 15 nJ**이었습니다.
+3. **왜 적은가**: 누르는 시간이 디스크의 울림(약 3.3 kHz)보다 수백 배 느려 공진을 쓸 수 없습니다.
+   - 이때 저장되는 에너지는 **d × g**와 세라믹이 받는 응력의 제곱에 따라 정해집니다.
+4. **소재 설계 (9월 18일)**
+   - 문헌 소재 11종을 d₃₃ 대신 d·g로 비교하자 순위가 바뀌었습니다.
+   - 유전율을 낮추는 PZT 조성을 제안하고 전하 균형·허용인자로 검증했습니다.
+   - 학교에서 만들 수는 없어 **종이 위 설계**에 머뭅니다.
+5. **5×4 발판 (11월 13~19일)**
+   - **디스크마다 브리지 정류기**를 달아 누를 때와 뗄 때의 전압을 모두 같은 방향(직류)으로 바꿨습니다.
+   - **행마다 5개를 병렬**로 묶었습니다. 행 전압은 하나로 같아지고, 동시에 눌린 디스크들의 전류는 더해집니다(증폭이 아니라 합).
+   - 행마다 빵판의 보호·측정 회로에 연결했습니다.
+   - **스토퍼는 달지 않았습니다.**
+6. **예비 측정 (11월 21일)**
+   - 제자리에서 밟았을 때 펄스당 에너지 중앙값은 **5.6 µJ**(191펄스)였습니다.
+   - 측정 회로를 연결한 상태의 최대 행 전압은 9.52 V로, 설계에서 가정한 수십 V에 못 미쳤습니다.
+7. **급식실 실측 (11월 23일 점심, 약 4분)**
+   - 손으로 센 통과 **50회**, 발판이 센 통과 **51회**로 총수 차이는 2 %였습니다.
+   - 통과 1회 에너지는 **중앙값 6.5 µJ**, 평균 10.4 µJ, 최대 행 전압은 16.4 V였습니다.
+8. **결론**: 손실을 빼기 전 값으로도 IoT 무선 전송 1회(100 µJ 가정)에 10~15걸음, 20 mW LED 1초에 1,900~3,100걸음이 필요합니다.
+   - 학교 **전력원으로는 비현실적**입니다.
+   - 지나가는 사람마다 신호가 분명히 생기므로, **통행량 센서**로 쓸 가능성이 있습니다(전원 없이 동작하는 센서는 아직 만들지 않음).
 
 ### 무엇을 어디서 보나
 
-| 하고 싶은 것 | 여기를 여세요 |
+| 하고 싶은 것 | 여기 |
 |---|---|
+| 만든 발판, 측정 원자료, 결과, 분석 스크립트, 사진 | [`tile_5x4/`](tile_5x4/) |
+| 발표용 GUI가 숫자를 계산하는 방법 | [GUI 코드 해석](tile_5x4/piezo_gui/CODE_WALKTHROUGH.md) |
 | 압전을 처음부터 이해하기 | [압전 기초론](docs/00_piezo_basics.md) |
-| 실제 측정 데이터 만져 보기 | [데이터 분석기 v2](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) → **실측 데이터 가져오기** |
-| 결정 구조를 3D로 돌려 보기 | [HAFS-108 결정 페이지](https://kraewon7422.github.io/piezo_hafs_108/sim/hafs108-crystal.html) |
-| 압전 소재 비교 | [소재 시뮬레이터 v6](https://kraewon7422.github.io/piezo_hafs_108/sim/pzt_simulator_v6.html) *(설명용 — 화면 수치는 상대값이며 실제 W·J가 아님)* |
-| 회로 만들어 보기 | [`arduino/`](arduino/) — 모든 스케치 + 쉬운 실행 안내 |
-| 20개짜리 타일 만들기 | [5×4 타일 가이드](https://kraewon7422.github.io/piezo_hafs_108/sim/array5x4_guide_v2.html) |
-| 만든 타일·측정 데이터·GUI·사진 | [`tile_5x4/`](tile_5x4/) |
-| GUI가 숫자를 계산하는 방법 | [GUI 코드 해석](tile_5x4/piezo_gui/CODE_WALKTHROUGH.md) |
-| 전체 연구 기록(수치·출처·정정 전부) | [연구 보고서](docs/research_report_ko.md) |
-| 연구일지·중간보고서 | [`docs/logs/`](docs/logs/) |
-| 3월부터 11월까지 흐름 | [프로젝트 연혁](docs/PROJECT_HISTORY.md) |
-| AI가 틀린 것과 고친 것 | [AI 사실 확인](docs/AI_FACT_CHECK.md) |
-
-### 핵심 결과 한눈에
-
-| 측정 | 값 | 쉬운 말로 |
-|---|---|---|
-| 세게 두드렸을 때 최대 전압 | **1.13 V** | 건전지 하나보다 조금 낮지만, 아주 잠깐만 |
-| 두드린 뒤 울림 | **약 3.3 kHz** | 작은 종처럼 1초에 3,300번 떨림 = *공진* |
-| 손으로 누름 | **1.1–1.3 V, 약 0.1초** | 매끈한 봉우리 하나. 누름은 울림보다 수백 배 느려서 '종' 효과를 못 씀 |
-| 누름 1회 에너지 | **약 15 nJ** | ½·C·V² (C ≈ 20 nF, 데이터시트값) |
-| **디스크 20개 타일 밟기 (11/21)** | **펄스당 중앙값 5.6 µJ** (191펄스) | 1.1 MΩ 측정 저항에 전달된 에너지. 걸음 수를 세지 않아 걸음당이 아닌 펄스당 값 — [`tile_5x4/`](tile_5x4/) |
-| 밟을 때 가장 높은 행 전압 | **9.52 V** (1.1 MΩ 부하 연결) | 타일 설계가 가정한 "수십 V"보다 훨씬 낮음. 개방전압은 재지 않음 |
+| 소재 설계 | [`docs/05_material_design.md`](docs/05_material_design.md) |
+| 9월 측정 데이터를 브라우저에서 보기 | [데이터 분석기 v2](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) |
+| 아두이노 코드 | [`arduino/`](arduino/), 발판에 실제로 쓴 코드는 [`tile_5x4/piezo_main/`](tile_5x4/piezo_main/) |
+| 발판 조립 매뉴얼 | [조립 매뉴얼](tile_5x4/docs/assembly_manual_5x4_v2.html) (매뉴얼의 스토퍼는 실제로 달지 않음) |
+| 3월부터 11월까지의 흐름 | [프로젝트 연혁](docs/PROJECT_HISTORY.md) |
+| 연구 일지·중간보고서 (맨 위에 정오표) | [`docs/logs/`](docs/logs/) |
+| AI가 틀린 것과 확인한 방법 | [AI 사실 확인](docs/AI_FACT_CHECK.md) |
 
 ### 정직하게 밝혀 두는 것
 
-- **실측 데이터**는 9월 11일 디스크 1개 무부하 측정과 11월 21일 디스크 20개 타일 측정([`tile_5x4/`](tile_5x4/): 손가락 작동 테스트 2개 + 밟기 3개)입니다.
-  부하저항 실험, 정전용량 측정, 축전 실험, 급식실 설치는 아직 하지 않았습니다. 걸음 수를 세지 않았으므로 타일 결과는 펄스당 값으로만 씁니다.
-- **틀린 것을 숨기지 않습니다.** 철회한 주장(잘못된 계수로 힘을 역산한 것, USB 전원으로 켜진 LED를 발전 증거로 본 것 등)은
-  [보고서 §2-6](docs/research_report_ko.md#2-6-다시-분석해서-바로잡은-것)에 모두 있습니다.
-- **AI 활용.** 2026년 3–11월 Claude(여러 모델 버전)를 튜터·코딩 도우미로 썼습니다. 2026-11-13에 프로젝트의 모든 AI 대화를
-  원 출처와 대조해 다시 확인했고, 틀린 내용과 고친 위치를 [AI 사실 확인](docs/AI_FACT_CHECK.md)에 정리했습니다.
-  문서 안의 정정은 **⚠️정정(2026-11-13)**으로 표시했습니다.
+- **실측과 가정의 구분**
+  - 실측: 9월 11일 디스크 1개, 11월 21일 예비 측정, 11월 23일 급식실 측정
+  - 가정: 하루 전체·입구 전체·IoT 전송·상용 타일과의 비교는 모두 가정이며, 나오는 곳마다 가정이라고 적었습니다.
+  - 아직 재지 않은 것: 개방 전압, 디스크에 실린 힘, 최적 부하, 커패시터에 실제로 모이는 에너지
+- **급식실 측정의 한계**: 약 4분 한 번, 한 명이 손으로 셌고, 한 번씩 시각을 맞춰 대조하지 않았습니다. 걷는 방향도 손으로 기록하지 않았습니다.
+- **틀린 것을 숨기지 않습니다.** 철회한 주장(잘못된 계수로 힘을 역산한 것, USB 전원으로 켜진 LED를 발전 증거로 본 것, 시뮬레이터의 상대값 등)은 각 일지의 정오표와 [AI 사실 확인](docs/AI_FACT_CHECK.md)에 있습니다.
+- ⚠️ 디스크를 아두이노에 바로 연결한 상태에서는 **손으로만** 누르세요. 측정 저항을 단 상태에서도 밟을 때 16 V가 넘게 나왔으므로, 발 실험은 반드시 보호 회로를 거쳐야 합니다.
 
-### 직접 재현하기
-
-```bash
-python analyze_v2.py                 # data/의 실측 CSV → 결과 출력, figures/ 그래프 저장
-python calc/verify_composition.py    # 제안 조성의 전하 균형·허용인자·순위 검증
-```
-
-측정을 다시 하려면 아두이노 우노, 27 mm 압전 디스크, 전선 2개면 됩니다(빨강 → A0, 검정 → GND).
-⚠️ 이렇게 직접 연결한 상태에서는 **손으로만** 누르세요. 발로 밟으면 수십 V가 나와 아두이노 핀이 망가질 수 있습니다(발 실험은 `arduino/`의 보호 회로 사용).
-자세한 방법은 [`arduino/README.md`](arduino/README.md)에 있습니다.
-
-4명의 학생 팀이 진행했습니다(실험 설계·소프트웨어 / 선행 조사·3D 하우징 / 데이터 분석 / 보고서). 라이선스: [MIT](LICENSE).
+4명의 학생 팀이 진행했습니다. 라이선스: [MIT](LICENSE).
