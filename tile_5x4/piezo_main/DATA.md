@@ -1,4 +1,4 @@
-# Measurement sessions — 5×4 tile, 2026-11-21
+# Measurement sessions — 5×4 tile, 2026-11-21 (preliminary) and 2026-11-23 (cafeteria)
 
 Recorded with `piezo_main.ino` v3.1 + `logger.py` v3.1 (this folder). One folder per run, named `piezo_YYYYMMDD_HHMMSS`
 (laptop clock when the logger started). What each run was is **the experimenter's record**; it was not inferred from the data.
@@ -11,6 +11,7 @@ Recorded with `piezo_main.ino` v3.1 + `logger.py` v3.1 (this folder). One folder
 | `piezo_20261121_202319` | stepping on the tile | ✅ | 2.5 min | 95.9 % | 346 | 0 | clean |
 | `piezo_20261121_203520` | stepping on the tile (activity in the first ~2 min, then idle) | ✅ | 16.5 min | 99.3 % | 310 | 0 | clean |
 | `piezo_20261121_205200` | stepping on the tile | ✅ | 1.7 min | 96.2 % | 122 | 0 | clean |
+| `piezo_20261123_134435` | **cafeteria entrance at lunch** — people walked across the tile; 50 crossings counted by hand at the same time | ✅ | 3.8 min | 96.6 % | 407 | 4 | clean |
 
 - *Raw-sample completeness* = R lines received ÷ (recording time × 500 per s). Missing samples happen mostly while the
   Arduino is sending a long pulse-summary line (see the "sampling and serial speed" row of the assembly manual review).
@@ -34,14 +35,17 @@ Recorded with `piezo_main.ino` v3.1 + `logger.py` v3.1 (this folder). One folder
 `raw.csv` (2-ms ADC values) is **not uploaded** to save space — it is exactly the R lines of `raw_serial.txt` and can be
 rebuilt: `python logger.py --replay piezo_20261121_205200/raw_serial.txt` (writes a new folder with all CSV files).
 
+- `134435/summary.txt` line "직접 센 인원 50명 대비 통과 수 오차: +2.0%" compares the hand count (50) with the 51 crossings found by `analyze.py`. Totals only — crossings were not time-matched one by one.
+
 Row voltage = ADC value × VREF ÷ 1023 × (R1 + R2) ÷ R2 = ADC × 0.0538 V with the values in `meta.csv`.
 
 ---
 
-# 측정 기록 — 5×4 타일, 2026-11-21
+# 측정 기록 — 5×4 타일, 2026-11-21(예비 측정)·2026-11-23(급식실)
 
 각 측정이 무엇이었는지는 **실험자 기록**입니다(데이터로 짐작한 것이 아님).
-손가락 작동 테스트 3개(19:28, 19:29, 20:12), 실제 밟기 3개(20:23, 20:35, 20:52).
+11-21: 손가락 작동 테스트 3개(19:28, 19:29, 20:12), 실제 밟기 3개(20:23, 20:35, 20:52).
+11-23: 점심시간 급식실 입구에서 사람들이 발판을 밟고 지나간 측정 1개(13:44부터 약 4분). 같은 시간 동안 통과를 손으로 세어 50회를 기록했고, 발판이 센 통과는 51회(총수 차이 +2 %)입니다.
 
 - **올리지 않은 측정**: `192928` — 시작 2초 잡음 기준선을 재는 동안 1행이 눌려(1.02 V) 이후 모든 에너지 값에서 빼는 기준이 틀어졌고, 깨진 줄 13개, 43분 대부분이 빈 시간
 - **`192827/summary.txt`의 "직접 센 인원 10명 대비 −50 %"**: 분석할 때 10을 입력했기 때문에 생긴 줄입니다. 손가락 테스트였으므로 사람 수 비교는 해당되지 않습니다

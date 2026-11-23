@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-5×4 tile measurements (2026-11-21) — reproduce every number and figure in tile_5x4/README.md
+5×4 tile measurements — reproduce every number and figure in tile_5x4/README.md
+  2026-11-21  preliminary sessions (finger-press tests, stepping)
+  2026-11-23  cafeteria entrance at lunch, 50 hand-counted crossings
 
   python tile_results.py        (needs: numpy, matplotlib)
 
@@ -173,4 +175,87 @@ fig.suptitle("Per session — grey: finger-press tests, orange: stepping")
 fig.tight_layout()
 fig.savefig(os.path.join(FIG, "tile_fig4_per_session.png"))
 plt.close(fig)
+# ── 2026-11-23 cafeteria entrance (people walking across the tile during lunch)
+CAF = "piezo_20261123_134435"
+cd = os.path.join(MAIN, CAF)
+PS, PU = rows(os.path.join(cd, "passes.csv")), rows(os.path.join(cd, "pulses.csv"))
+HAND = 50  # crossings counted by hand during the recording
+Ep = np.array([f(r["E_total_uJ"]) for r in PS])
+npul = np.array([int(f(r["n_pulses"])) for r in PS])
+dirs = [int(f(r["direction"])) for r in PS]
+pk = np.array([max(f(r[f"r{i}_peak_V"]) for i in range(1, 5)) for r in PU])
+nr = np.array([int(f(r["rows_hit"])) for r in PU])
+Erow = [sum(f(r[f"r{i}_E_uJ"]) for r in PU) for i in range(1, 5)]
+def two_pulse_halves():
+    first, second = [], []
+    for r in PS:
+        if int(f(r["n_pulses"])) == 2:
+            ps = [u for u in PU if f(r["t_start_ms"]) <= f(u["t_start_ms"]) <= f(r["t_end_ms"])]
+            first.append(sum(f(ps[0][f"r{i}_E_uJ"]) for i in range(1, 5)))
+            second.append(sum(f(ps[1][f"r{i}_E_uJ"]) for i in range(1, 5)))
+    return np.array(first), np.array(second)
+
+
+span = (f(PS[-1]["t_end_ms"]) - f(PS[0]["t_start_ms"])) / 60000
+C = ["", "## 2026-11-23 — cafeteria entrance, lunch time (session `20261123_134435`)", "",
+     "The tile lay in the cafeteria entrance passage while people walked across it (13:44, about 4 min).",
+     "Crossings were counted by hand at the same time. Pulses less than 1 s apart are grouped into one crossing (`analyze.py`).", "",
+     "| quantity | value |", "|---|---|",
+     f"| crossings: counted by hand / counted by the tile | {HAND} / {len(PS)} (totals differ by {(len(PS)-HAND)/HAND*100:+.1f} %) |",
+     f"| pulses (per crossing) | {len(PU)} ({len(PU)/len(PS):.2f}) |",
+     f"| pulses per crossing: 1 / 2 / 3 or more | {(npul==1).sum()} / {(npul==2).sum()} / {(npul>=3).sum()} |",
+     f"| energy per crossing µJ: median / mean / IQR / max | {np.median(Ep):.2f} / {Ep.mean():.2f} / {np.percentile(Ep,25):.1f}–{np.percentile(Ep,75):.1f} / {Ep.max():.1f} |",
+     "| in two-pulse crossings: 1st (press?) / 2nd (release?) pulse energy µJ, median | " + " / ".join(f"{np.median(v):.2f}" for v in two_pulse_halves()) + " |",
+     f"| peak row voltage per pulse V: median / max | {np.median(pk):.2f} / {pk.max():.2f} |",
+     f"| pulses with ≥3 rows above 1 V | {(nr>=3).mean()*100:.0f} % |",
+     "| energy share rows 1/2/3/4 | " + " / ".join(f"{e/sum(Erow)*100:.0f} %" for e in Erow) + " |",
+     f"| direction from row order (1→4 / 4→1 / unknown) | {dirs.count(1)} / {dirs.count(-1)} / {dirs.count(0)} |",
+     f"| crossings per minute (first to last crossing) | {len(PS)/span:.1f} |",
+     f"| clipped pulses | {sum(1 for r in PU if any(f(r[f'r{i}_clip']) for i in range(1, 5)))} |",
+     "",
+     "Caveats: 50 vs 51 is a match of totals only. Crossings were not time-matched one by one, so a merged",
+     "crossing and a split crossing could cancel. Walking direction was not recorded by hand, so the direction split is unverified.",
+     "Four of the first six crossings (40–73 µJ) are long groups of 3–8 pulses lasting 4–11 s that probably hold more than",
+     "one step, which pulls the mean above the median."]
+open(os.path.join(HERE, "results.md"), "a", encoding="utf-8").write("\n".join(C) + "\n")
+print("\n".join(C))
+
+# Fig T5: one typical crossing (energy closest to the median)
+Rc = raw_samples(cd)
+mc = rows(os.path.join(cd, "meta.csv"))[-1]
+kc = f(mc["VREF"]) / 1023 * (f(mc["R1"]) + f(mc["R2"])) / f(mc["R2"])
+ib = int(np.argmin(abs(Ep - np.median(Ep))))
+a, b = f(PS[ib]["t_start_ms"]), f(PS[ib]["t_end_ms"])
+w = (Rc[:, 0] > a - 400) & (Rc[:, 0] < b + 600)
+fig, ax = plt.subplots(figsize=(9, 3.8))
+for j in range(4):
+    ax.plot((Rc[w, 0] - a) / 1000, Rc[w, j + 1] * kc, color=COL[j], lw=1.2, label=f"row {j+1}")
+ax.axhline(1.0, color="gray", ls="--", lw=0.8)
+ax.set_xlabel("time from start of crossing [s]")
+ax.set_ylabel("row voltage [V]")
+ax.set_title(f"One person crossing the tile (cafeteria, crossing #{ib+1}: {npul[ib]} pulses, {Ep[ib]:.1f} µJ ≈ median)")
+ax.legend(ncol=4, fontsize=8)
+fig.tight_layout()
+fig.savefig(os.path.join(FIG, "tile_fig5_cafeteria_crossing.png"))
+plt.close(fig)
+
+# Fig T6: energy of every crossing over time + histogram
+tm = np.array([(f(r["t_start_ms"]) - f(PS[0]["t_start_ms"])) / 60000 for r in PS])
+fig, ax = plt.subplots(1, 2, figsize=(10, 3.8), gridspec_kw=dict(width_ratios=[2, 1]))
+for dv, colr, lab in ((1, "#2a9fd6", "row order 1→4"), (-1, "#e8772e", "row order 4→1"), (0, "gray", "unknown")):
+    m = np.array(dirs) == dv
+    if m.any():
+        ax[0].scatter(tm[m], Ep[m], color=colr, s=22, label=lab)
+ax[0].axhline(np.median(Ep), color="k", ls=":", lw=0.8)
+ax[0].set_xlabel("minutes since first crossing")
+ax[0].set_ylabel("energy per crossing [µJ]")
+ax[0].legend(fontsize=8)
+ax[1].hist(Ep, bins=np.arange(0, 80, 4), color="#e8772e")
+ax[1].set_xlabel("energy per crossing [µJ]")
+ax[1].set_ylabel("crossings")
+fig.suptitle(f"Cafeteria entrance, 2026-11-23 — {len(PS)} crossings, median {np.median(Ep):.1f} µJ, mean {Ep.mean():.1f} µJ")
+fig.tight_layout()
+fig.savefig(os.path.join(FIG, "tile_fig6_cafeteria_crossings.png"))
+plt.close(fig)
+
 print("\nfigures written to", FIG)

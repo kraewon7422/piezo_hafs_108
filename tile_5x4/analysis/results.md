@@ -19,3 +19,27 @@ Median energy per pulse, stepping ÷ finger: **21.7×**.
 
 Not included: `piezo_20261121_192928` (finger test; a row was pressed during the 2-s noise baseline,
 13 corrupted serial lines, 43 min mostly idle).
+
+## 2026-11-23 — cafeteria entrance, lunch time (session `20261123_134435`)
+
+The tile lay in the cafeteria entrance passage while people walked across it (13:44, about 4 min).
+Crossings were counted by hand at the same time. Pulses less than 1 s apart are grouped into one crossing (`analyze.py`).
+
+| quantity | value |
+|---|---|
+| crossings: counted by hand / counted by the tile | 50 / 51 (totals differ by +2.0 %) |
+| pulses (per crossing) | 101 (1.98) |
+| pulses per crossing: 1 / 2 / 3 or more | 15 / 30 / 6 |
+| energy per crossing µJ: median / mean / IQR / max | 6.51 / 10.41 / 4.6–9.5 / 72.9 |
+| in two-pulse crossings: 1st (press?) / 2nd (release?) pulse energy µJ, median | 2.26 / 2.84 |
+| peak row voltage per pulse V: median / max | 4.19 / 16.40 |
+| pulses with ≥3 rows above 1 V | 88 % |
+| energy share rows 1/2/3/4 | 26 % / 27 % / 18 % / 29 % |
+| direction from row order (1→4 / 4→1 / unknown) | 25 / 26 / 0 |
+| crossings per minute (first to last crossing) | 14.2 |
+| clipped pulses | 0 |
+
+Caveats: 50 vs 51 is a match of totals only. Crossings were not time-matched one by one, so a merged
+crossing and a split crossing could cancel. Walking direction was not recorded by hand, so the direction split is unverified.
+Four of the first six crossings (40–73 µJ) are long groups of 3–8 pulses lasting 4–11 s that probably hold more than
+one step, which pulls the mean above the median.
