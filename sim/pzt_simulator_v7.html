@@ -84,7 +84,7 @@
   /* 2026-11-13 사실 확인: 해석 주의 배너 (상단 가운데, 닫기 가능) */
   #fact-notice {
     position: absolute; top: 66px; left: 16px; right: 16px;
-    margin: 0 auto; max-width: 560px;
+    margin: 0 auto; max-width: max(320px, min(560px, calc(100vw - 720px)));
     z-index: 1002; word-break: keep-all; overflow-wrap: break-word;
     padding: 8px 30px 8px 12px;
     background: #fff4d6; border: 1.5px solid #c05621; border-radius: 4px;
@@ -110,11 +110,11 @@
 
   .panel h3 { text-transform: none !important; letter-spacing: 0.06em !important; }
   .panel .note { font-size: 10.5px; line-height: 1.4; color: var(--ink-soft); margin-top: 6px; word-break: keep-all; }
-  .dg-row { display: grid; grid-template-columns: 62px 1fr 92px; align-items: center; gap: 6px; font-size: 11px; margin: 3px 0; }
+  .dg-row { display: grid; grid-template-columns: 62px 1fr 104px; align-items: center; gap: 6px; font-size: 11px; margin: 3px 0; }
   .dg-row .bar { height: 9px; background: rgba(120,100,70,0.18); border-radius: 2px; overflow: hidden; }
   .dg-row .bar i { display: block; height: 100%; background: var(--accent); }
   .dg-row.cur { font-weight: 700; }
-  .dg-row .v { text-align: right; font-family: 'Courier New', monospace; font-size: 10.5px; }
+  .dg-row .v { white-space: nowrap; text-align: right; font-family: 'Courier New', monospace; font-size: 10.5px; }
   #test-result { position: fixed; left: 12px; bottom: 12px; z-index: 3000; max-width: 640px; max-height: 60vh; overflow: auto;
     background: #fff; border: 2px solid #1a7a4a; padding: 8px 10px; font: 11px 'Courier New', monospace; white-space: pre-wrap; }
   #test-result.fail { border-color: #b00020; }
@@ -373,12 +373,14 @@
     background: rgba(255, 215, 165, 1.0) !important;
   }
   @media (max-width: 760px) {
-    body { overflow: auto; height: auto; }
-    #scene-container { position: relative; height: 62vh; overflow: hidden; }
+    body { overflow: auto; height: auto; display: flex; flex-direction: column; }
+    #material-tabs { order: 0; } #header { order: 1; } #scene-container { order: 2; } #pulse-controls { order: 3; }
+    #right-stack { order: 4; } #fact-notice { order: 5; } .lil-gui.root { order: 6; } #legend, #inset-cell { order: 7; }
+    #scene-container { position: relative; height: 62vh; min-height: 62vh; overflow: hidden; }
     #material-tabs { position: relative; top: 0; left: 0; transform: none; margin: 8px auto 0; width: max-content; max-width: calc(100vw - 16px); overflow-x: auto; }
     .tab { padding: 7px 10px; }
     #header { position: relative; top: auto; left: auto; max-width: none; margin: 8px; }
-    #fact-notice { position: relative; top: auto; left: auto; right: auto; margin: 8px; max-width: none; }
+    #fact-notice { position: relative; top: auto; left: auto; right: auto; margin: 8px; max-width: none !important; }
     #right-stack { position: relative; top: auto; right: auto; width: auto; max-height: none; margin: 8px; overflow: visible; }
     #legend, #inset-cell { display: none; }
     #pulse-controls { position: relative; left: auto; right: auto; bottom: auto; transform: none; margin: 8px; width: auto; }
@@ -415,9 +417,9 @@
       <ul>
         <li>모든 소재를 <b>같은 크기 조각을 두께 방향으로 누른다</b>고 놓고 계산한다. 전하 Q = d·F, 정전용량 C = ε₀ε<sub>r</sub>A/t, 부하 R이 달린 회로 C·dV/dt = d·dF/dt − V/R 을 푼다 (상수는 데이터시트 대표값).</li>
         <li>우리 타일의 27 mm 디스크는 황동판과 함께 <b>휘면서</b>(d₃₁) 발전하는 구조라, 화면 숫자는 우리 타일의 예측이 아니라 <b>소재끼리의 비교</b>다. 실측값은 '전기 출력' 칸에 따로 적었다.</li>
-        <li>PZT 조성 곡선은 정점 위치(Zr:Ti ≈ 52:48)와 정점 값(PZT-5H, 593 pC/N)만 문헌값이고 곡선 모양은 그림용 근사다. 원자가 움직이는 크기도 눈에 보이게 과장했다.</li>
+        <li>PZT 조성 곡선은 정점 위치(Zr:Ti ≈ 52:48)와 정점 값(PZT-5H, 593 pC/N)만 문헌값이고 곡선 모양은 그림용 근사다. ε<sub>r</sub>은 모든 조성에서 PZT-5H 값(3400)으로 고정했으므로 x가 0.52에서 멀어지면 C, g, d·g 값은 정확하지 않다. 원자가 움직이는 크기도 눈에 보이게 과장했다(d에 비례하지 않음).</li>
       </ul>
-      <div class="en">v7 model: the same 20 mm × 0.2 mm piece of each material is squeezed through its thickness by a 600 N footstep. Q = d·F, C = ε₀ε<sub>r</sub>A/t, and the load circuit C·dV/dt = d·dF/dt − V/R is solved in real units. Our tile's discs bend (d₃₁), so these numbers compare materials. They do not predict the tile. The PZT composition curve is illustrative apart from its peak position (52:48) and peak value (PZT-5H).</div>
+      <div class="en">v7 model: the same 20 mm × 0.2 mm piece of each material is squeezed through its thickness by a 600 N footstep. Q = d·F, C = ε₀ε<sub>r</sub>A/t, and the load circuit C·dV/dt = d·dF/dt − V/R is solved in real units. Our tile's discs bend (d₃₁), so these numbers compare materials. They do not predict the tile. The PZT composition curve is illustrative apart from its peak position (52:48) and peak value (PZT-5H), and εr is held at the PZT-5H value for every composition.</div>
   </div>
 
   <div id="right-stack">
@@ -494,7 +496,7 @@
     import GUI from 'lil-gui';
 
     const PULSE_DURATION   = 2.6;
-    const PULSE_PEAK_TIME  = 1.1;
+    const PULSE_PEAK_TIME  = 1.3;   // v7: 가운데에 두어 시작·끝의 힘이 거의 0 (전하가 남지 않음)
     const PULSE_WIDTH      = 0.42;
     const MAX_DISPLACEMENT = 0.22;
     const TRAIN_REST_TIME  = 0.7;
@@ -508,7 +510,7 @@
     const PIECE_T = 0.20e-3;             // m
     const PIECE_A = Math.PI * (PIECE_D / 2) ** 2;
     const F_PEAK  = 600;                 // N — 체중 약 60 kg (압력 크기 1.00)
-    const SLOWMO  = 4;                   // 화면은 실제보다 4배 느리게 (실제 누름 폭 ≈ 0.1 s)
+    const SLOWMO  = 4;                   // 화면은 실제보다 4배 느리게 (실제 누름: τ ≈ 0.1 s, 반치폭 ≈ 0.18 s)
     const LOAD_OPTIONS = {
       '1 kΩ': 1e3, '100 kΩ': 1e5, '1.1 MΩ (우리 측정 회로)': 1.1e6, '10 MΩ': 1e7,
       '소재에 맞춘 R (≈ τ/C)': 'match', '개방 (부하 없음)': Infinity,
@@ -571,6 +573,7 @@
       cumulativeEnergy: 0, lastPeakPower: 0, pulseCount: 0,
       currentForce: 0, currentCharge: 0, currentCurrent: 0,
       vC: 0, pulseEnergy: 0, peakV: 0, peakI: 0, loadKey: '1.1 MΩ (우리 측정 회로)',
+      tPulse: 0, pulseMag: 1.0,
       trainEnabled: false,
       gridExpand: false,
       polarDir: new THREE.Vector3(0, -1, 0),
@@ -623,7 +626,7 @@
     function piezoCoefficient(x) {
       const dist = Math.abs(x - 0.52);
       const mpbBoost = Math.exp(-Math.pow(dist / 0.07, 2));
-      return x >= 0.95 ? 0.25 : 0.6 + 0.9 * mpbBoost;
+      return x >= 0.95 ? 0 : 0.6 + 0.9 * mpbBoost;
     }
     // v7: 계산에 쓰는 d33 (pC/N). 정점 위치(0.52)와 정점 값(PZT-5H 593)만 문헌값, 모양은 근사.
     // x >= 0.95 (PbZrO3 쪽)은 반강유전체라 압전성이 거의 없으므로 0.
@@ -1338,7 +1341,7 @@
       if (v === 0) return '0 ' + unit;
       const P = [[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ'],[1e-9,'n'],[1e-12,'p'],[1e-15,'f']];
       const a = Math.abs(v);
-      const fmt = x => Math.abs(x) >= Math.pow(10, digits) ? x.toFixed(0) : x.toPrecision(digits);  // 'e+2' 표기 방지
+      const fmt = x => { const r = Number(x.toPrecision(digits)); return Math.abs(r) >= Math.pow(10, digits) ? r.toFixed(0) : x.toPrecision(digits); };  // 'e+2' 표기 방지
       for (const [f, p] of P) if (a >= f * 0.9995) return fmt(v / f) + ' ' + p + unit;
       return (v / 1e-15).toPrecision(digits) + ' f' + unit;
     }
@@ -1409,7 +1412,7 @@
       for (let i = 0; i < VT_BUFFER_SIZE; i++) {
         const realIdx = (vtIndex + i) % VT_BUFFER_SIZE;
         const xPos = (i / (VT_BUFFER_SIZE - 1)) * w;
-        const yPos = h - (vtPowerBuffer[realIdx] / pScale) * (h * 0.45);
+        const yPos = h - (vtPowerBuffer[realIdx] / pScale) * (h * 0.5);
         if (i === 0) vtCtx.moveTo(xPos, yPos); else vtCtx.lineTo(xPos, yPos);
       }
       vtCtx.stroke();
@@ -1440,7 +1443,7 @@
     // 화면 시간 t0 -> t1 동안 회로를 진행한다. sim: {V, peakV, peakI, peakP} 갱신, 구간 에너지 반환.
     function advanceCircuit(key, loadKey, mag, t0, t1, active, sim) {
       const d = matD(key), C = matC(key), R = loadR(key, loadKey);
-      const H = (t1 - t0) / SLOWMO;
+      const H = Math.max(0, t1 - t0) / SLOWMO;
       const n = Math.max(1, Math.min(2000, Math.ceil(H / 2e-5)));
       const h = H / n;
       let E = 0;
@@ -1458,6 +1461,7 @@
       return { E, R };
     }
 
+    let lastDgKey = '';
     function renderDgBars() {
       const keys = Object.keys(MATERIALS);
       const vals = keys.map(k => ({ k, dg: matD(k) * matG(k), u: uMax(k, F_PEAK) }));
@@ -1507,7 +1511,8 @@
       document.getElementById('rd-note').textContent = R === Infinity
         ? '개방: 전류가 흐르지 않아 부하에 전달되는 에너지는 0이다. 최대 전압 = g·σ·t (지금 압력에서 ' + si(matG(currentMaterial) * F_PEAK * state.pressureMag / PIECE_A * PIECE_T, 'V') + '). 힘을 빼면 전하가 되돌아가 0 V가 된다.'
         : 'RC = ' + si(RC, 's') + ', 누르는 시간 ≈ ' + si(TAU_PHYS, 's') + '. RC가 누르는 시간보다 훨씬 짧으면 전압이 거의 서지 못하고, 훨씬 길면 전류가 거의 흐르지 않는다. 둘이 비슷할 때 에너지가 가장 많이 전달된다.';
-      renderDgBars();
+      const dgKey = currentMaterial + ':' + state.x;
+      if (dgKey !== lastDgKey) { lastDgKey = dgKey; renderDgBars(); }
       document.getElementById('rd-pulsecount').textContent = state.pulseCount.toString();
     }
 
@@ -1524,7 +1529,7 @@
     function switchMaterial(matKey) {
       if (state.pulseActive) return;
       currentMaterial = matKey;
-      state.vC = 0; state.peakV = 0; state.peakI = 0; state.lastPeakPower = 0; state.pulseEnergy = 0;  // v7: 다른 소재의 남은 전압을 넘기지 않음
+      resetEnergy();  // v7: 다른 소재의 남은 전압·누적값을 넘기지 않음
       document.querySelectorAll('.tab').forEach(tab => {
         tab.classList.toggle('active', tab.getAttribute('data-mat') === matKey);
       });
@@ -1539,7 +1544,9 @@
       rebuildAll();
     }
 
+    let builtGridExpand = false;
     function rebuildAll() {
+      builtGridExpand = state.gridExpand;
       clearCrystal();
       const builders = {
         PZT: buildCrystal_PZT,
@@ -1562,12 +1569,12 @@
     const gui = new GUI({ title: '제어 패널' });
     const xCtrl = gui.add(state, 'x', 0.0, 1.0, 0.01)
                      .name('Zr fraction (x)')
-                     .onChange(() => { if (!state.pulseActive && currentMaterial === 'PZT') rebuildAll(); });
+                     .onChange(() => { if (!state.pulseActive && currentMaterial === 'PZT') { resetEnergy(); rebuildAll(); } });
 
     const presetsFolder = gui.addFolder('빠른 프리셋 (PZT)');
     const setPreset = (val) => {
       if (state.pulseActive || currentMaterial !== 'PZT') return;
-      state.x = val; xCtrl.updateDisplay(); rebuildAll();
+      state.x = val; xCtrl.updateDisplay(); resetEnergy(); rebuildAll();
     };
     presetsFolder.add({ a: () => setPreset(0.00) }, 'a').name('PbTiO₃ (x=0)');
     presetsFolder.add({ a: () => setPreset(0.30) }, 'a').name('Ti-rich (x=0.30)');
@@ -1607,12 +1614,13 @@
     function triggerPulse() {
       if (state.pulseActive) return;
       state.pulseActive = true;
-      state.pulseStartTime = performance.now() / 1000;
+      state.tPulse = 0;                       // v7: 펄스 시계는 프레임 dt를 더해 진행 (끊김 없음)
+      state.pulseMag = state.pressureMag;     // v7: 펄스 중 슬라이더를 움직여도 이번 펄스는 그대로
       state.lastPeakPower = 0;
       state.pulseEnergy = 0; state.peakV = 0; state.peakI = 0;
       pulseButton.disabled = true;
       pulseButton.textContent = '⚡ 압력 인가 중...';
-      xCtrl.disable();
+      xCtrl.disable(); loadCtrl.disable();
       document.querySelectorAll('.tab').forEach(t => t.disabled = true);
     }
     pulseButton.addEventListener('click', triggerPulse);
@@ -1651,11 +1659,13 @@
       }
 
       // v7: 회로는 펄스가 끝난 뒤에도 계속 계산한다 (커패시터 방전).
-      const tNow = state.pulseActive ? now - state.pulseStartTime : 0;
+      const tPrev = state.tPulse;
+      if (state.pulseActive) state.tPulse += dt;
+      const tNow = state.tPulse;
       const sim = { V: state.vC, peakV: state.peakV, peakI: state.peakI, peakP: state.lastPeakPower };
       const res = state.pulseActive
-        ? advanceCircuit(currentMaterial, state.loadKey, state.pressureMag, Math.max(0, tNow - dt), tNow, true, sim)
-        : advanceCircuit(currentMaterial, state.loadKey, state.pressureMag, 0, dt, false, sim);
+        ? advanceCircuit(currentMaterial, state.loadKey, state.pulseMag, tPrev, Math.min(tNow, PULSE_DURATION), true, sim)
+        : advanceCircuit(currentMaterial, state.loadKey, state.pulseMag, 0, dt, false, sim);
       state.vC = sim.V; state.peakV = sim.peakV; state.peakI = sim.peakI; state.lastPeakPower = sim.peakP;
       state.pulseEnergy += res.E; state.cumulativeEnergy += res.E;
       state.currentVoltage = sim.V;
@@ -1664,7 +1674,7 @@
 
       if (state.pulseActive) {
         const t = tNow;
-        const stress = pulseProfile(t) * state.pressureMag;
+        const stress = pulseProfile(t) * state.pulseMag;
         state.currentStress = stress;
         state.currentForce = F_PEAK * stress;
         state.currentCharge = matD(currentMaterial) * state.currentForce;
@@ -1687,13 +1697,14 @@
           updatePolarizationArrow(0);
           pulseButton.disabled = false;
           pulseButton.textContent = '▼ 압력 펄스 인가';
-          xCtrl.enable();
+          xCtrl.enable(); loadCtrl.enable();
           document.querySelectorAll('.tab').forEach(t => t.disabled = false);
+          if (state.gridExpand !== builtGridExpand) rebuildAll();
           updateReadout();
         }
       } else {
         recordSignal(state.currentVoltage, state.currentPower);
-        if (Math.abs(state.currentVoltage) > 1e-12) updateReadout();
+        if (Math.abs(state.currentVoltage) > 1e-6 * state.peakV) updateReadout();
       }
 
       drawOscilloscope();
@@ -1711,8 +1722,8 @@
     // v7: 주소 옵션 — ?mat=PVDF&load=match&auto=1 (auto=1: 펄스 트레인 켬), ?test=1 (자체 검증)
     const QS = new URLSearchParams(location.search);
     const LOAD_ALIAS = { '1k': '1 kΩ', '100k': '100 kΩ', '1.1M': '1.1 MΩ (우리 측정 회로)', '10M': '10 MΩ', 'match': '소재에 맞춘 R (≈ τ/C)', 'open': '개방 (부하 없음)' };
-    if (LOAD_ALIAS[QS.get('load')]) { state.loadKey = LOAD_ALIAS[QS.get('load')]; loadCtrl.updateDisplay(); }
-    switchMaterial(MATERIALS[QS.get('mat')] ? QS.get('mat') : 'PZT');
+    if (Object.hasOwn(LOAD_ALIAS, QS.get('load') || '')) { state.loadKey = LOAD_ALIAS[QS.get('load')]; loadCtrl.updateDisplay(); }
+    switchMaterial(Object.hasOwn(MATERIALS, QS.get('mat') || '') ? QS.get('mat') : 'PZT');
     if (QS.get('auto') === '1') { state.trainEnabled = true; document.getElementById('train-toggle').checked = true; }
     animate();
 
@@ -1730,10 +1741,10 @@
       const saveX = state.x; state.x = 0.52;
       const L11 = '1.1 MΩ (우리 측정 회로)', LM = '소재에 맞춘 R (≈ τ/C)';
       const REF = [ // [소재, 부하, Vpk(V), E(J)]
-        ['PZT', L11, 2.5453, 1051.7e-9], ['PZT', '100 kΩ', 0.28954, 150.2e-9],
+        ['PZT', L11, 2.5454, 1051.8e-9], ['PZT', '100 kΩ', 0.28954, 150.2e-9],
         ['BaTiO3', L11, 0.9416, 146.13e-9], ['PVDF', L11, 0.17792, 5.1474e-9],
         ['ZnO', L11, 0.0647, 0.68065e-9], ['Quartz', L11, 0.012401, 0.025005e-9],
-        ['PZT', LM, 3.8976, 1154.9e-9], ['PVDF', LM, 61.455, 1013.4e-9],
+        ['PZT', LM, 3.8982, 1155.3e-9], ['PVDF', LM, 61.465, 1013.7e-9],
       ];
       const out = []; let pass = 0, n = 0;
       const chk = (name, got, exp, tol) => { n++; const ok = Math.abs(got - exp) <= tol * Math.abs(exp); if (ok) pass++;
@@ -1747,8 +1758,11 @@
         chk(k + ' @' + L + ' Vpk', r.peakV, v, 0.01);
         chk(k + ' @' + L + ' E', r.E, e, 0.01);
       }
-      for (const k of Object.keys(MATERIALS)) chk(k + ' 맞춘 R: E/Umax', simulatePulse(k, LM).E / uMax(k, F_PEAK), 0.8628, 0.01);
+      for (const k of Object.keys(MATERIALS)) chk(k + ' 맞춘 R: E/Umax', simulatePulse(k, LM).E / uMax(k, F_PEAK), 0.8631, 0.01);
       chk('PZT d33(0.52) = 593', d33PZT(0.52), 593, 1e-9);
+      { const r = simulatePulse('PZT', '개방 (부하 없음)'), voc = matG('PZT') * F_PEAK / PIECE_A * PIECE_T;
+        n++; const ok = Math.abs(r.V) < 1e-3 * voc; if (ok) pass++;
+        out.push((ok ? 'PASS ' : 'FAIL ') + 'PZT 개방: 힘을 뺀 뒤 남은 전압 ' + r.V.toExponential(2) + ' V (< 0.1 % Voc)'); }
       state.x = saveX;
       const box = document.createElement('div'); box.id = 'test-result';
       box.className = pass === n ? '' : 'fail';

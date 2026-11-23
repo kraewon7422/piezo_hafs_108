@@ -45,7 +45,7 @@ flowchart LR
 | 10월 30일 | 선생님께 회로 실험 도움 요청: 지금까지 얻은 값은 최대 전압뿐이고, C_p·P–R 곡선·정류 후 전압 등이 더 필요하다고 정리 | — | Opus 5.5 |
 | 11월 2일 | 분석기 v2(아두이노 CSV 직접 읽기, ½·C_p·V², 학교 적용 판정), 압전 기초론 문서, 학교 설치 가이드 | [`sim/PiezoAnalyzer_v2.html`](../sim/PiezoAnalyzer_v2.html), [`docs/00`](00_piezo_basics.md) | Claude Code |
 | **11월 13일** | **5 × 4 타일(디스크 20개) 설계**: 디스크마다 브리지 정류, 행별 병렬 → A0–A3, 보호 회로, 발판 단면, 부품 목록(약 9.7만 원). 같은 날 모든 AI 대화를 원 출처와 대조해 사실 확인 | [`arduino/v3_array5x4/`](../arduino/v3_array5x4/), [조립 매뉴얼](../tile_5x4/docs/assembly_manual_5x4_v2.html), [AI 사실 확인](AI_FACT_CHECK.md) | Opus 5.5 / Claude Code |
-| 11월 24일 | **소재 시뮬레이터 v7**: v6의 상대값(가짜 V·mW·mJ)을 실제 단위 회로 계산(Q = d·F, C = εA/t, 부하 R)으로 바꾸고, 소재 순위를 d₃₃ 대신 d·g로, PZT 조성 정점을 52:48로 고침. `?test=1` 자체 검증 27/27 (독립 Python 계산과 대조) | [`sim/pzt_simulator_v7.html`](../sim/pzt_simulator_v7.html) | Claude Code |
+| 11월 24일 | **소재 시뮬레이터 v7**: v6의 상대값(가짜 V·mW·mJ)을 실제 단위 회로 계산(Q = d·F, C = εA/t, 부하 R)으로 바꾸고, 소재 순위를 d₃₃ 대신 d·g로, PZT 조성 정점을 52:48로 고침. `?test=1` 자체 검증 28/28 (독립 Python 계산과 대조) | [`sim/pzt_simulator_v7.html`](../sim/pzt_simulator_v7.html) | Claude Code |
 
 ## 생각이 바뀐 지점들
 
