@@ -4,7 +4,7 @@
 better material on paper, then built a 20-disc floor tile and measured it at our school's cafeteria entrance during lunch.
 
 <p align="center">
-  <img src="tile_5x4/photos/07_hand_press_and_logger.gif" width="49%" alt="pressing the 20-disc tile while the logger records">
+  <img src="tile_5x4/photos/02_tile_20_discs_wired.jpg" width="35%" alt="the 20-disc tile, one bridge rectifier per disc">
   <img src="tile_5x4/piezo_gui/walkthrough/screen_A_live.gif" width="49%" alt="real-time GUI replaying a stepping session">
 </p>
 
@@ -77,7 +77,7 @@ More detail, graphs and caveats: **[`tile_5x4/`](tile_5x4/)** for the tile, [`do
 | **play with the Sept 11 data in a browser** | [Data Analyzer v2](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) |
 | **rotate the crystal in 3D** | [crystal page](https://kraewon7422.github.io/piezo_hafs_108/sim/hafs108-crystal.html) |
 | **every Arduino sketch** | [`arduino/`](arduino/) (single disc, bench circuits) and [`tile_5x4/piezo_main/`](tile_5x4/piezo_main/) (the tile code actually run) |
-| **build the tile** | [assembly manual](tile_5x4/docs/assembly_manual_5x4_v2.html) (stoppers in the manual were not installed) |
+| **build the tile** | [build diagrams](tile_5x4/README.md#build-diagrams) and the [assembly manual](tile_5x4/docs/assembly_manual_5x4_v2.html) (stoppers in the manual were not installed) |
 | **the whole story, March → November** | [`docs/PROJECT_HISTORY.md`](docs/PROJECT_HISTORY.md) |
 | **lab logs and the midterm report** | [`docs/logs/`](docs/logs/) — each file starts with an erratum box |
 | **what the AI got wrong and how we checked** | [`docs/AI_FACT_CHECK.md`](docs/AI_FACT_CHECK.md) |
@@ -170,7 +170,7 @@ A 4-person student team did this project. License: [MIT](LICENSE).
 | 소재 설계 | [`docs/05_material_design.md`](docs/05_material_design.md) |
 | 9월 측정 데이터를 브라우저에서 보기 | [데이터 분석기 v2](https://kraewon7422.github.io/piezo_hafs_108/sim/PiezoAnalyzer_v2.html) |
 | 아두이노 코드 | [`arduino/`](arduino/), 발판에 실제로 쓴 코드는 [`tile_5x4/piezo_main/`](tile_5x4/piezo_main/) |
-| 발판 조립 매뉴얼 | [조립 매뉴얼](tile_5x4/docs/assembly_manual_5x4_v2.html) (매뉴얼의 스토퍼는 실제로 달지 않음) |
+| 발판 만드는 방법 | [제작 다이어그램](tile_5x4/README.md#build-diagrams), [조립 매뉴얼](tile_5x4/docs/assembly_manual_5x4_v2.html) (매뉴얼의 스토퍼는 실제로 달지 않음) |
 | 3월부터 11월까지의 흐름 | [프로젝트 연혁](docs/PROJECT_HISTORY.md) |
 | 연구 일지·중간보고서 (맨 위에 정오표) | [`docs/logs/`](docs/logs/) |
 | AI가 틀린 것과 확인한 방법 | [AI 사실 확인](docs/AI_FACT_CHECK.md) |

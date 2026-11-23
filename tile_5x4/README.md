@@ -15,7 +15,7 @@ This folder holds everything from that stage:
 > 🇰🇷 한국어는 [아래](#한국어)에 있습니다.
 
 <p align="center">
-  <img src="photos/07_hand_press_and_logger.gif" width="49%" alt="pressing the tile while the logger records">
+  <img src="photos/02_tile_20_discs_wired.jpg" width="35%" alt="the 20-disc tile, one bridge rectifier per disc">
   <img src="piezo_gui/walkthrough/screen_A_live.gif" width="49%" alt="real-time GUI replaying a stepping session">
 </p>
 
@@ -34,6 +34,37 @@ This folder holds everything from that stage:
 - A ***pulse*** is one voltage burst: it starts when any row goes above 1 V, and ends when all rows stay below 0.3 V for 30 ms.
 - A ***crossing*** (also called a *pass*) is a group of pulses less than 1 s apart, as grouped by `analyze.py`.
 - **Energy** is the energy delivered to the 1.1 MΩ measuring resistor, Σ V²/R·Δt per row, summed over the 4 rows. It is **not energy stored for later use**: there is no storage capacitor in this circuit, and the bridge diodes (≈ 1–1.4 V for the pair) have already taken their share.
+
+## Build diagrams
+
+Drawn for the [assembly manual](docs/assembly_manual_5x4_v2.html) (Korean labels; full step-by-step text is in the manual).
+The manual's stoppers (grey squares in the layout, posts in the cross-section) were **not installed** in the measured tile.
+
+**Signal path** — disc → bridge rectifier → WAGO row bundle → row output → breadboard divider/protection → Arduino A0–A3 → laptop
+
+![signal flow](docs/diagrams/01_signal_flow.png)
+
+| board layout (50 × 40 cm example, row 1 = outer edge, row 4 = cafeteria side) | one disc and its bridge rectifier |
+|---|---|
+| ![board layout](docs/diagrams/02_board_layout.png) | ![disc and bridge](docs/diagrams/03_disc_and_bridge.png) |
+
+**Soldering a DB107S** (fix it on tape first, tin the pins, lay each wire on a pin, check and insulate)
+
+![bridge soldering](docs/diagrams/04_bridge_soldering.png)
+
+**One row in parallel** — the five BR "+" leads meet in WAGO connectors and leave as one row lead (the "−" side is wired the same way)
+
+![wago row wiring](docs/diagrams/05_wago_row_wiring.png)
+
+**Breadboard protection and measuring circuit** — per row: 1 MΩ in series, 100 kΩ to GND (÷ 11), two 1N4148 clamps to 0 V and 5 V; four identical channels
+
+| layout (laid flat for clarity) | real orientation, wired to the Uno |
+|---|---|
+| ![breadboard](docs/diagrams/06_breadboard_protection.png) | ![breadboard to uno](docs/diagrams/07_breadboard_to_uno.png) |
+
+**Cross-section as designed** — top plate resting on the rubber bumpers at the centre of each disc, discs on support pads under the brass rim. (Stoppers drawn here were not installed.)
+
+![cross section](docs/diagrams/08_cross_section_design.png)
 
 ## 1. Preliminary sessions (Nov 21)
 
@@ -136,12 +167,10 @@ How to read the "per step" values:
 
 ## Photos
 
-| | | |
-|---|---|---|
-| ![assembly](photos/01_assembly_disks_and_bridges.jpg) | ![wired](photos/02_tile_20_discs_wired.jpg) | ![multimeter](photos/03_multimeter_check.jpg) |
-| discs, bumpers and bridge rectifiers being placed | 20 discs wired, 4 row leads | multimeter check |
-| ![logger result](photos/04_logger_result_finger_test_192827.jpg) | ![setup](photos/05_measurement_setup.jpg) | ![press test](photos/06_multimeter_press_test.gif) |
-| logger + analyze.py output of the 19:28 finger test | Uno + breadboard protection circuit + laptop | pressing discs one by one (multimeter) |
+| | | | |
+|---|---|---|---|
+| ![assembly](photos/01_assembly_disks_and_bridges.jpg) | ![wired](photos/02_tile_20_discs_wired.jpg) | ![multimeter](photos/03_multimeter_check.jpg) | ![logger result](photos/04_logger_result_finger_test_192827.jpg) |
+| discs, bumpers and bridge rectifiers being placed | 20 discs wired, 4 row leads | multimeter check | logger + analyze.py output of the 19:28 finger test |
 
 Photos were resized and all metadata (including location) was removed before upload.
 
@@ -238,6 +267,10 @@ cd tile_5x4/piezo_main && python logger.py --replay piezo_20261123_134435/raw_se
   - GUI 급식실 가정(24장, 하루 14,400걸음): 약 150 mJ = 무선 전송 약 1,500회, LED 약 7.5초
   - 결론: 이번 조건에서 **전력원으로는 비현실적**입니다. 대신 **통행량 센서**로 쓸 가능성이 있습니다. 다만 이번에도 아두이노는 따로 전원을 썼습니다.
 - **"수십 V" 가정**: 부하를 연결한 상태에서는 최대 9.52 V(예비)와 16.4 V(급식실)에 그쳤습니다. 개방 전압은 재지 않았습니다.
+
+### 제작 다이어그램
+
+조립 매뉴얼에 그린 그림을 [위의 Build diagrams](#build-diagrams)에 모았습니다: 전체 신호 흐름, 판 배치, 디스크와 정류기, 정류기 납땜, 와고로 행 병렬 연결, 빵판 보호·측정 회로, 단면도. 배치도와 단면도의 스토퍼는 실제로 달지 않았습니다.
 
 ### GUI와 코드 해석
 
