@@ -112,6 +112,8 @@ cd tile_5x4/piezo_main && python logger.py --replay piezo_20261121_205200/raw_se
 
 The GUI (screens: live / design vs measured / scale-up / improvements) — screenshot from the 20:52 stepping recording.
 Its "per person" card groups pulses less than 1 s apart, so during continuous stepping one group contains many steps.
+**How every number on each screen is computed (with captures from a screen recording):
+[`piezo_gui/CODE_WALKTHROUGH.md`](piezo_gui/CODE_WALKTHROUGH.md)** (Korean).
 
 ![GUI screen A](figures/gui_screen_A_stepping_205200.png)
 
@@ -153,6 +155,12 @@ Its "per person" card groups pulses less than 1 s apart, so during continuous st
 - **얼마나 작은가**: 가장 큰 측정 평균(9.32 µW)으로 20 mW LED를 1초 켜려면(0.02 J) 0.02 J ÷ 9.32 µW ≈ **36분** 동안 계속 밟아야 합니다(정류·저장 손실 전)
 - **9월 11일 디스크 1개(약 15 nJ)와 비교하지 않는 이유**: 그 값은 아무것도 연결하지 않은 디스크 1개의 ½·C·V²이고, 타일 값은 디스크 20개가 1.1 MΩ 저항에 준 에너지라 서로 다른 양입니다
 - **주장하지 않는 것**: 걸음당·사람당 에너지(걸음을 세지 않았고, 1초 안에 이어진 펄스는 한 묶음이 되어 계속 밟으면 여러 걸음이 한 묶음이 됨), 수확 효율, 급식실 규모 총량. GUI의 확장·개선 화면은 화면에 "가정"으로 표시된 값을 씁니다
+
+### GUI 코드 해석
+
+화면 A~D가 아두이노의 줄을 받아 어떤 식으로 숫자를 만드는지, 녹화 화면을 잘라 붙여 설명했습니다 →
+[`piezo_gui/CODE_WALKTHROUGH.md`](piezo_gui/CODE_WALKTHROUGH.md).
+GUI의 "1명당·1걸음" 값은 1초 안에 이어진 펄스를 한 묶음으로 세기 때문에, 계속 밟은 측정에서는 크게 부풀려집니다(해석 문서 4절).
 
 ### 재현
 

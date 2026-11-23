@@ -49,6 +49,7 @@ found out why it is so little, and designed a better material on paper.**
 | **build the circuits** | [`arduino/`](arduino/) | every Arduino sketch we wrote, with a plain-language run guide |
 | **build the 20-disc floor tile** | [5×4 tile guide](https://kraewon7422.github.io/piezo_hafs_108/sim/array5x4_guide_v2.html) | wiring, protection box, cross-section, parts list |
 | **see the built tile and its data** | [`tile_5x4/`](tile_5x4/) | photos, Nov 21 recordings, results per pulse, real-time GUI, Jetson port, fixed assembly manual |
+| **understand the GUI code** | [GUI code walkthrough](tile_5x4/piezo_gui/CODE_WALKTHROUGH.md) (Korean) | how each screen turns the Arduino's serial lines into numbers, with screen-recording captures |
 | **read the full research record** | [`docs/research_report_ko.md`](docs/research_report_ko.md) (Korean) | every number, every source, every correction |
 | **read our lab logs / report** | [`docs/logs/`](docs/logs/) | session logs and the midterm report |
 | **see the whole story in order** | [`docs/PROJECT_HISTORY.md`](docs/PROJECT_HISTORY.md) | March → November, what we tried, what changed and why |
@@ -82,6 +83,8 @@ docs/                      ← explanations, full report, logs, history, fact-ch
 | Hand press | **1.1–1.3 V, ≈ 0.1 s** | one smooth bump; a press is hundreds of times slower than the ringing, so the "bell" effect doesn't help |
 | Energy per press | **≈ 15 nJ** | calculated as ½·C·V² with the disc's capacitance (≈ 20 nF from the datasheet) |
 | Repeatability (4 presses) | spread ≈ 7–8 % | hand pressing is fairly consistent; a drop-weight jig would be better |
+| **20-disc tile, stepping (Nov 21)** | **median 5.6 µJ per pulse** (191 pulses) | energy into the 1.1 MΩ measuring resistor; steps were not counted, so this is per pulse, not per step — [`tile_5x4/`](tile_5x4/) |
+| Tile, highest row voltage while stepping | **9.52 V** (with the 1.1 MΩ load) | far below the "tens of volts" the tile design had assumed; open-circuit voltage not measured |
 
 <details>
 <summary><b>Why does the reading cut off below 0 V?</b> (a limitation we found)</summary>
@@ -209,6 +212,7 @@ report). License: [MIT](LICENSE).
 | 회로 만들어 보기 | [`arduino/`](arduino/) — 모든 스케치 + 쉬운 실행 안내 |
 | 20개짜리 타일 만들기 | [5×4 타일 가이드](https://kraewon7422.github.io/piezo_hafs_108/sim/array5x4_guide_v2.html) |
 | 만든 타일·측정 데이터·GUI·사진 | [`tile_5x4/`](tile_5x4/) |
+| GUI가 숫자를 계산하는 방법 | [GUI 코드 해석](tile_5x4/piezo_gui/CODE_WALKTHROUGH.md) |
 | 전체 연구 기록(수치·출처·정정 전부) | [연구 보고서](docs/research_report_ko.md) |
 | 연구일지·중간보고서 | [`docs/logs/`](docs/logs/) |
 | 3월부터 11월까지 흐름 | [프로젝트 연혁](docs/PROJECT_HISTORY.md) |
@@ -222,6 +226,8 @@ report). License: [MIT](LICENSE).
 | 두드린 뒤 울림 | **약 3.3 kHz** | 작은 종처럼 1초에 3,300번 떨림 = *공진* |
 | 손으로 누름 | **1.1–1.3 V, 약 0.1초** | 매끈한 봉우리 하나. 누름은 울림보다 수백 배 느려서 '종' 효과를 못 씀 |
 | 누름 1회 에너지 | **약 15 nJ** | ½·C·V² (C ≈ 20 nF, 데이터시트값) |
+| **디스크 20개 타일 밟기 (11/21)** | **펄스당 중앙값 5.6 µJ** (191펄스) | 1.1 MΩ 측정 저항에 전달된 에너지. 걸음 수를 세지 않아 걸음당이 아닌 펄스당 값 — [`tile_5x4/`](tile_5x4/) |
+| 밟을 때 가장 높은 행 전압 | **9.52 V** (1.1 MΩ 부하 연결) | 타일 설계가 가정한 "수십 V"보다 훨씬 낮음. 개방전압은 재지 않음 |
 
 ### 정직하게 밝혀 두는 것
 
