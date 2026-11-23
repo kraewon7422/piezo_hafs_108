@@ -44,9 +44,13 @@ The manual's stoppers (grey squares in the layout, posts in the cross-section) w
 
 ![signal flow](docs/diagrams/01_signal_flow.png)
 
-| board layout (50 × 40 cm example, row 1 = outer edge, row 4 = cafeteria side) | one disc and its bridge rectifier |
-|---|---|
-| ![board layout](docs/diagrams/02_board_layout.png) | ![disc and bridge](docs/diagrams/03_disc_and_bridge.png) |
+**Board layout** (50 × 40 cm example; row 1 = outer edge, row 4 = cafeteria side)
+
+<p align="center"><img src="docs/diagrams/02_board_layout.png" width="80%" alt="board layout"></p>
+
+**One disc and its bridge rectifier**
+
+![disc and bridge](docs/diagrams/03_disc_and_bridge.png)
 
 **Soldering a DB107S** (fix it on tape first, tin the pins, lay each wire on a pin, check and insulate)
 
@@ -58,9 +62,11 @@ The manual's stoppers (grey squares in the layout, posts in the cross-section) w
 
 **Breadboard protection and measuring circuit** — per row: 1 MΩ in series, 100 kΩ to GND (÷ 11), two 1N4148 clamps to 0 V and 5 V; four identical channels
 
-| layout (laid flat for clarity) | real orientation, wired to the Uno |
-|---|---|
-| ![breadboard](docs/diagrams/06_breadboard_protection.png) | ![breadboard to uno](docs/diagrams/07_breadboard_to_uno.png) |
+![breadboard](docs/diagrams/06_breadboard_protection.png)
+
+Real orientation on the desk, wired to the Uno:
+
+<p align="center"><img src="docs/diagrams/07_breadboard_to_uno.png" width="80%" alt="breadboard wired to the Uno"></p>
 
 **Cross-section as designed** — top plate resting on the rubber bumpers at the centre of each disc, discs on support pads under the brass rim. (Stoppers drawn here were not installed.)
 
