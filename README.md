@@ -120,9 +120,9 @@ A fresh clone reproduces `tile_5x4/analysis/results.md` exactly.
   - It is one ~4-minute session with one person counting.
   - Crossings were not time-matched one by one, and walking direction was not recorded by hand.
 - **Cold weather (Nov 24, cause not found).**
-  - On a cold day the setup stopped working: uploads failed at every baud rate (115200, 117647, 57600), the sketch's serial output arrived garbled, and the USB connection dropped once.
+  - On a cold day the setup stopped working: uploads failed at all three baud rates we tried (115200, 117647, 57600), the sketch's serial output arrived garbled, and the USB connection dropped once.
   - The laptop was on battery, so it was not the charger hum seen earlier.
-  - We did not measure the temperature and could not tell whether the cause was stiff wires and loose connectors, moisture on a cold board brought indoors, or the piezo ceramic itself. So we cannot say the tile works reliably outdoors in winter or in unheated places.
+  - We did not measure the temperature and could not tell whether the cause was wires and connectors (possibly stiffened by the cold), the piezo discs, or the board itself. Moisture on a cold board is another guess we did not check. So we cannot say the tile works reliably outdoors in winter or in unheated places.
 - **We publish our mistakes.** Withdrawn claims are listed in the erratum boxes of [`docs/logs/`](docs/logs/) and in [`docs/AI_FACT_CHECK.md`](docs/AI_FACT_CHECK.md). Examples:
   - a force calculation that used the wrong coefficient
   - an "LED lit up" result that was really powered by USB
@@ -189,7 +189,7 @@ A 4-person student team did this project. License: [MIT](LICENSE).
   - 가정: 하루 전체·입구 전체·IoT 전송·상용 타일과의 비교는 모두 가정이며, 나오는 곳마다 가정이라고 적었습니다.
   - 아직 재지 않은 것: 개방 전압, 디스크에 실린 힘, 최적 부하, 커패시터에 실제로 모이는 에너지
 - **급식실 측정의 한계**: 약 4분 한 번, 한 명이 손으로 셌고, 한 번씩 시각을 맞춰 대조하지 않았습니다. 걷는 방향도 손으로 기록하지 않았습니다.
-- **추운 날의 오작동 (11월 24일, 원인 미확인)**: 추운 날 업로드가 모든 속도(115200·117647·57600)에서 실패하고, 측정 코드가 보내는 줄도 깨져서 들어왔으며, USB 연결이 한 번 끊겼습니다. 노트북은 배터리로 동작해 충전기 잡음은 아니었습니다. 온도를 재지 않아 굳은 연결선과 단자 접촉, 차가운 장치를 실내로 옮길 때 맺히는 습기, 압전 세라믹 자체 중 무엇이 원인인지 가려내지 못했습니다. 그래서 겨울철 실외나 난방이 없는 곳에서 안정적으로 동작한다고 말할 수 없습니다.
+- **추운 날의 오작동 (11월 24일, 원인 미확인)**: 추운 날 업로드가 시도한 세 속도(115200·117647·57600)에서 모두 실패하고, 측정 코드가 보내는 줄도 깨져서 들어왔으며, USB 연결이 한 번 끊겼습니다. 노트북은 배터리로 동작해 충전기 잡음은 아니었습니다. 온도를 재지 않아 추위로 굳었을 수 있는 연결선과 단자 접촉, 압전 소자, 보드 자체 중 무엇이 원인인지 가려내지 못했습니다(습기도 떠올렸지만 확인하지 않았습니다). 그래서 겨울철 실외나 난방이 없는 곳에서 안정적으로 동작한다고 말할 수 없습니다.
 - **틀린 것을 숨기지 않습니다.** 철회한 주장(잘못된 계수로 힘을 역산한 것, USB 전원으로 켜진 LED를 발전 증거로 본 것, 시뮬레이터의 상대값 등)은 각 일지의 정오표와 [AI 사실 확인](docs/AI_FACT_CHECK.md)에 있습니다.
 - ⚠️ 디스크를 아두이노에 바로 연결한 상태에서는 **손으로만** 누르세요. 측정 저항을 단 상태에서도 밟을 때 16 V가 넘게 나왔으므로, 발 실험은 반드시 보호 회로를 거쳐야 합니다.
 
