@@ -13,7 +13,7 @@ Recorded with `piezo_main.ino` v3.1 + `logger.py` v3.1 (this folder). One folder
 | `piezo_20261121_205200` | stepping on the tile | ✅ | 1.7 min | 96.2 % | 122 | 0 | clean |
 | `piezo_20261123_134435` | **cafeteria entrance at lunch** — people walked across the tile; 50 crossings counted by hand at the same time | ✅ | 3.8 min | 96.6 % | 407 | 4 | clean |
 | `piezo_20261126_130851` | **cafeteria entrance, first-year students walking to lunch** (before the main run); 20 people counted by hand | ✅ | 4.8 min | 98.6 % | 140 | 3 | clean |
-| `piezo_20261126_131358` | **cafeteria entrance, first-year students walking to lunch** (main run); not counted by hand — the GUI's 87 is the tile's own count | ✅ | 13.3 min | 96.7 % | 986 | 1 | clean |
+| `piezo_20261126_131358` | **cafeteria entrance, first-year students walking to lunch** (main run); not counted by hand — the GUI's 87 is the tile's own count; some students jumped on or stopped on the tile | ✅ | 13.3 min | 96.7 % | 986 | 1 | clean |
 
 - *Raw-sample completeness* = R lines received ÷ (recording time × 500 per s). Missing samples happen mostly while the
   Arduino is sending a long pulse-summary line (see the "sampling and serial speed" row of the assembly manual review).
@@ -50,7 +50,7 @@ Row voltage = ADC value × VREF ÷ 1023 × (R1 + R2) ÷ R2 = ADC × 0.0538 V wit
 각 측정이 무엇이었는지는 **실험자 기록**입니다(데이터로 짐작한 것이 아님).
 11-21: 손가락 작동 테스트 3개(19:28, 19:29, 20:12), 실제 밟기 3개(20:23, 20:35, 20:52).
 11-23: 점심시간 급식실 입구에서 사람들이 발판을 밟고 지나간 측정 1개(13:44부터 약 4분). 같은 시간 동안 통과를 손으로 세어 50회를 기록했고, 발판이 센 통과는 51회(총수 차이 +2 %)입니다.
-11-26: 1학년 학생들이 점심을 먹으러 급식실로 걸어가는 동안 같은 입구에서 2개. `130851`(13:08, 약 5분)은 지나간 사람을 손으로 세어 20명, 발판은 17회(−15 %). `131358`(13:14, 약 13분)이 본 측정이며 손으로 따로 세지 않았습니다(GUI의 87명은 발판이 센 수). 모두 급식실 쪽 한 방향으로 걸었고, 어느 행이 급식실 쪽이었는지는 기록하지 않았습니다.
+11-26: 1학년 학생들이 점심을 먹으러 급식실로 걸어가는 동안 같은 입구에서 2개. `130851`(13:08, 약 5분)은 지나간 사람을 손으로 세어 20명, 발판은 17회(−15 %). `131358`(13:14, 약 13분)이 본 측정이며 손으로 따로 세지 않았습니다(GUI의 87명은 발판이 센 수). 모두 급식실 쪽 한 방향으로 걸었지만 발판 위에서 뛰거나 멈춘 학생도 있었고, 어느 행이 급식실 쪽이었는지는 기록하지 않았습니다.
 
 - **올리지 않은 측정**: `192928` — 시작 2초 잡음 기준선을 재는 동안 1행이 눌려(1.02 V) 이후 모든 에너지 값에서 빼는 기준이 틀어졌고, 깨진 줄 13개, 43분 대부분이 빈 시간
 - **`192827/summary.txt`의 "직접 센 인원 10명 대비 −50 %"**: 분석할 때 10을 입력했기 때문에 생긴 줄입니다. 손가락 테스트였으므로 사람 수 비교는 해당되지 않습니다

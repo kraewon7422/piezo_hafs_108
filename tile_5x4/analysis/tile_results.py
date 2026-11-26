@@ -265,6 +265,7 @@ plt.close(fig)
 # 131358 = main run, about 13 min, no separate hand count (the 87 shown by the GUI is the tile's own count);
 # everyone walked one way, towards the cafeteria. Which row faced the cafeteria was not written down,
 # so only the consistency of the direction calls can be checked, not which way is right.
+# Some students jumped on the tile or stopped on it (noted by the team afterwards), so not every crossing is a normal step.
 CAF26 = [("piezo_20261126_130851", 20), ("piezo_20261126_131358", None)]
 
 
@@ -289,7 +290,10 @@ def caf_stats(name, hand):
             ps = [u for u in PU if f(r["t_start_ms"]) <= f(u["t_start_ms"]) <= f(r["t_end_ms"])]
             for j in (0, 1):
                 two[j].append(sum(f(ps[j]["r%d_E_uJ" % i]) for i in range(1, 5)))
+    dirs_short = [d for d, k in zip(dirs, npul) if k < 5]
+    dirs_long = [d for d, k in zip(dirs, npul) if k >= 5]
     return dict(name=name, hand=hand, PS=PS, PU=PU, R=R, M=M, span_min=span_s / 60,
+                dirs_short=dirs_short, dirs_long=dirs_long,
                 completeness=len(R) / (span_s * 500) * 100, dropped=int(f(S[-1]["dropped_samples"])),
                 Ep=Ep, npul=npul, dur=dur, dirs=dirs, pk=pk, nr=nr, Erow=Erow,
                 per_min=len(PS) / ((t_last - t_first) / 60000), two=[np.array(v) for v in two],
@@ -345,12 +349,21 @@ T += ["", "All three cafeteria recordings pooled: %d crossings, energy per cross
       "and if row 1 faced the outside as in the assembly manual's example layout, most calls were wrong. "
       "Direction from row order is not reliable with this tile." % (b["dirs"].count(-1), decb, b["dirs"].count(-1) / decb * 100,
                                                                   a["dirs"].count(-1), deca, a["dirs"].count(-1) / deca * 100),
+      "- **Direction without the long crossings.** Some students jumped on the tile or stopped on it. The crossings with 5 or more pulses in 131358 "
+      "split %d / %d (1→4 / 4→1), close to random. Leaving them out, the majority call is %d/%d (%.0f %%) in 131358 and %d/%d (%.0f %%) for both 11-26 "
+      "recordings together, so even the short crossings disagree about 30 %% of the time." % (
+          b["dirs_long"].count(1), b["dirs_long"].count(-1),
+          b["dirs_short"].count(-1), b["dirs_short"].count(1) + b["dirs_short"].count(-1),
+          b["dirs_short"].count(-1) / (b["dirs_short"].count(1) + b["dirs_short"].count(-1)) * 100,
+          a["dirs_short"].count(-1) + b["dirs_short"].count(-1),
+          a["dirs_short"].count(1) + a["dirs_short"].count(-1) + b["dirs_short"].count(1) + b["dirs_short"].count(-1),
+          (a["dirs_short"].count(-1) + b["dirs_short"].count(-1)) / (a["dirs_short"].count(1) + a["dirs_short"].count(-1) + b["dirs_short"].count(1) + b["dirs_short"].count(-1)) * 100),
       "- **Counting.** In 130851 the tile found %d crossings for 20 people counted by hand (%+.0f %%). In 131358, %d crossings had 5 or more pulses "
-      "and lasted up to %.0f s; they may hold several students walking close together (merged by the 1-s grouping) or someone pausing on the tile. "
+      "and lasted up to %.0f s; some students jumped on the tile or stopped on it, and students walking close together may also be merged by the 1-s grouping. "
       "There is no hand count for 131358, so its counting error is unknown. Crowding does not explain the 130851 undercount: 11-23 was busier "
       "(14.2/min) and matched, while 130851 (4.9/min) had only one crossing of 5 or more pulses. The cause of the -15 %% is not determined." % (len(a["PS"]), (len(a["PS"]) - 20) / 20 * 100, (b["npul"] >= 5).sum(), b["dur"].max()),
       "- **The median is stable, the mean is not.** Median energy per crossing: %s µJ in the three recordings; the means (%s µJ) are pulled up "
-      "by a few long, merged crossings." % (meds, means),
+      "by a few long crossings." % (meds, means),
       "- **Highest voltage so far.** %.1f V on row 1 in 130851. The waveform rises and falls over many samples, so it is a real pulse, "
       "not a corrupted line. That is about 75 %% of the 55 V input range; no pulse was clipped." % a["pk"].max(),
       "- 130851 contains one corrupted timestamp (a single garbled serial line); sorting the time axis removes it and nothing else changes."]

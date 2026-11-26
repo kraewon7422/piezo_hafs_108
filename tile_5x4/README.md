@@ -131,7 +131,9 @@ Two more recordings at the same entrance, while first-year students walked to lu
 - **13:08, about 5 min** — 20 people counted by hand.
 - **13:14, about 13 min** — the main run. People were **not** counted by hand; the 87 on the GUI is the tile's own count.
 
-Everyone walked **one way, towards the cafeteria**. Which row faced the cafeteria was not written down.
+Everyone walked **one way, towards the cafeteria**, but some students jumped on the tile or stopped on it, so not every crossing is a normal step. Which row faced the cafeteria was not written down.
+
+<img src="photos/05_cafeteria_setup_20261126.jpg" width="60%" alt="the tile, breadboard, Arduino and laptop on the floor at the cafeteria entrance">
 
 | quantity | 11-23 13:44 | 11-26 13:08 | 11-26 13:14 |
 |---|---|---|---|
@@ -157,8 +159,8 @@ All three recordings pooled: **155 crossings, median 6.6 µJ, mean 15.8 µJ** pe
 ![three recordings compared](figures/tile_fig8_cafeteria_compare.png)
 
 What we checked in these data:
-- **The walking direction cannot be read reliably from the row order.** Everyone walked the same way, but the calls split: the majority call (4→1) was only 48 of 75 (64 %) at 13:14 and 12 of 15 (80 %) at 13:08. At best about two thirds of the calls are right. If row 1 faced the outside, as in the manual's example layout, most calls were wrong. On a rigid acrylic top the rows respond almost together, so "which row crossed 1 V first" mostly reflects where on the plate the foot landed.
-- **Counting is not as good as the 11-23 result suggested.** At 13:08 the tile found 17 crossings for 20 people (−15 %). Crowding does not explain this: 11-23 was busier (14.2/min) and matched, while 13:08 (4.9/min) had only one crossing of 5 or more pulses. The cause is not determined. At 13:14, 15 crossings had 5 or more pulses and lasted up to 24 s; they may hold several students walking close together, or someone pausing on the tile. Without a hand count, the error of the 13:14 run is unknown.
+- **The walking direction cannot be read reliably from the row order.** Everyone walked the same way, but the calls split: the majority call (4→1) was only 48 of 75 (64 %) at 13:14 and 12 of 15 (80 %) at 13:08. At best about two thirds of the calls are right. If row 1 faced the outside, as in the manual's example layout, most calls were wrong. On a rigid acrylic top the rows respond almost together, so "which row crossed 1 V first" mostly reflects where on the plate the foot landed. Leaving out the 15 long crossings (≥ 5 pulses, which split 8 / 7 — close to random, as expected from jumping or standing) raises the majority share only to 68 % (41 of 60) at 13:14 and 70 % (52 of 74) for both runs together.
+- **Counting is not as good as the 11-23 result suggested.** At 13:08 the tile found 17 crossings for 20 people (−15 %). Crowding does not explain this: 11-23 was busier (14.2/min) and matched, while 13:08 (4.9/min) had only one crossing of 5 or more pulses. The cause is not determined. At 13:14, 15 crossings had 5 or more pulses and lasted up to 24 s; some students jumped on the tile or stopped on it, and students walking close together may also have merged. Without a hand count, the error of the 13:14 run is unknown.
 - **The median energy per crossing is stable (6.2–8.0 µJ), the mean is not (10.4–28.6 µJ).** A few long crossings carry much of the energy (80 % in the top five at 13:08), so the median is the better "per person" number.
 - **The highest voltage so far, 40.8 V,** came at 13:08 on row 1. The waveform rises and falls over many samples, so it is a real pulse. That is about 75 % of the 55 V input range, so the ÷ 11 divider was not oversized after all.
 
@@ -216,6 +218,8 @@ How to read the "per step" values:
 |---|---|---|---|
 | ![assembly](photos/01_assembly_disks_and_bridges.jpg) | ![wired](photos/02_tile_20_discs_wired.jpg) | ![multimeter](photos/03_multimeter_check.jpg) | ![logger result](photos/04_logger_result_finger_test_192827.jpg) |
 | discs, bumpers and bridge rectifiers being placed | 20 discs wired, 4 row leads | multimeter check | logger + analyze.py output of the 19:28 finger test |
+
+`photos/05_cafeteria_setup_20261126.jpg` shows the setup at the cafeteria entrance on Nov 26 (no people in the picture).
 
 Photos were resized and all metadata (including location) was removed before upload.
 
@@ -304,7 +308,7 @@ cd tile_5x4/piezo_main && python logger.py --replay piezo_20261123_134435/raw_se
 
 - **13:08, 약 5분**: 지나간 사람을 손으로 세어 20명. 발판은 17회로 셌습니다(−15 %).
 - **13:14, 약 13분(본 측정)**: 손으로 따로 세지 않았습니다. GUI의 87명은 발판이 센 수입니다.
-- 학생들은 모두 **급식실 쪽 한 방향**으로 걸었습니다. 어느 행이 급식실 쪽이었는지는 기록하지 않았습니다.
+- 학생들은 모두 **급식실 쪽 한 방향**으로 걸었지만, 발판 위에서 뛰거나 멈춘 학생도 있어 모든 통과가 평소 걸음은 아닙니다. 어느 행이 급식실 쪽이었는지는 기록하지 않았습니다.
 
 | 항목 | 11-23 13:44 | 11-26 13:08 | 11-26 13:14 |
 |---|---|---|---|
@@ -317,8 +321,8 @@ cd tile_5x4/piezo_main && python logger.py --replay piezo_20261123_134435/raw_se
 | 방향 판정 1→4 / 4→1 / 판단 불가 | 25 / 26 / 0 | 3 / 12 / 2 | 27 / 48 / 12 |
 
 - 세 기록을 합치면 통과 155회, 1회 에너지 **중앙값 6.6 µJ**, 평균 15.8 µJ입니다.
-- **방향 판정은 믿기 어렵습니다.** 모두 한 방향으로 걸었는데도 판정이 갈렸습니다(13:14에 다수 판정 4→1이 75회 중 48회, 64 %).
-- **계수 오차의 원인은 가려내지 못했습니다.** 11-23은 더 붐볐는데(분당 14.2회) 맞았고, 13:08은 한산했는데(분당 4.9회) −15 %였습니다. 13:14에는 펄스 5개 이상, 최대 24초짜리 통과가 15회 있었는데, 여러 명이 묶였을 수도 있고 누군가 발판 위에 서 있었을 수도 있습니다.
+- **방향 판정은 믿기 어렵습니다.** 모두 한 방향으로 걸었는데도 판정이 갈렸습니다(13:14에 다수 판정 4→1이 75회 중 48회, 64 %). 펄스 5개 이상인 긴 통과 15회는 8 / 7로 거의 반반이었고(뛰거나 멈춘 경우로 보임), 이들을 빼도 68 %(60회 중 41회), 두 기록을 합쳐 70 %(74회 중 52회)에 그쳤습니다.
+- **계수 오차의 원인은 가려내지 못했습니다.** 11-23은 더 붐볐는데(분당 14.2회) 맞았고, 13:08은 한산했는데(분당 4.9회) −15 %였습니다. 13:14에는 펄스 5개 이상, 최대 24초짜리 통과가 15회 있었는데, 발판 위에서 뛰거나 멈춘 학생이 있었고, 줄지어 걸은 학생들이 묶였을 수도 있습니다.
 - **중앙값은 세 기록에서 비슷했고(6.2~8.0 µJ), 평균은 긴 묶음 몇 개 때문에 크게 달랐습니다(10.4~28.6 µJ).**
 - **최대 전압 40.8 V**는 파형이 여러 샘플에 걸쳐 오르내린 진짜 펄스입니다. 측정 범위 55 V의 약 75 %입니다.
 
