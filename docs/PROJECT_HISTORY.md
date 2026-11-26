@@ -47,6 +47,7 @@ flowchart LR
 | **11월 13일** | **5 × 4 타일(디스크 20개) 설계**: 디스크마다 브리지 정류, 행별 병렬 → A0–A3, 보호 회로, 발판 단면, 부품 목록(약 9.7만 원). 같은 날 모든 AI 대화를 원 출처와 대조해 사실 확인 | [`arduino/v3_array5x4/`](../arduino/v3_array5x4/), [조립 매뉴얼](../tile_5x4/docs/assembly_manual_5x4_v2.html), [AI 사실 확인](AI_FACT_CHECK.md) | Opus 5.5 / Claude Code |
 | 11월 24일 | **소재 시뮬레이터 v7**: v6의 상대값(가짜 V·mW·mJ)을 실제 단위 회로 계산(Q = d·F, C = εA/t, 부하 R)으로 바꾸고, 소재 순위를 d₃₃ 대신 d·g로, PZT 조성 정점을 52:48로 고침. `?test=1` 자체 검증 28/28 (독립 Python 계산과 대조) | [`sim/pzt_simulator_v7.html`](../sim/pzt_simulator_v7.html) | Claude Code |
 | 11월 24일 | **추운 날 오작동을 한계로 기록**: 업로드가 시도한 세 속도에서 모두 실패하고 시리얼 출력이 깨지며 USB가 한 번 끊김. 충전기 잡음(60 Hz)은 원인이 아님(배터리 동작). 원인(연결선·압전 소자·보드)은 가려내지 못함 | [`tile_5x4/README.md`](../tile_5x4/README.md) | Claude Code |
+| **11월 26일** | **급식실 입구 재측정** (1학년 점심, 13:08 약 5분 + 13:14 약 13분): 손으로 센 20명 → 발판 17회(−15 %), 본 측정 87회(손으로 세지 않음). 통과 1회 에너지 중앙값 6.2 µJ, 최대 40.8 V. 모두 한 방향으로 걸었는데도 행 순서 방향 판정이 갈려(64 %) 방향 판정은 믿기 어렵다고 결론 | [`tile_5x4/`](../tile_5x4/), [`results.md`](../tile_5x4/analysis/results.md) | 실측 / Claude Code |
 
 ## 생각이 바뀐 지점들
 

@@ -43,3 +43,38 @@ Caveats: 50 vs 51 is a match of totals only. Crossings were not time-matched one
 crossing and a split crossing could cancel. Walking direction was not recorded by hand, so the direction split is unverified.
 Four of the first six crossings (40–73 µJ) are long groups of 3–8 pulses lasting 4–11 s that probably hold more than
 one step, which pulls the mean above the median.
+
+## 2026-11-26 — cafeteria entrance again, first-year students walking to lunch
+
+Two recordings: `20261126_130851` (about 5 min, 20 people counted by hand) and `20261126_131358`
+(main run, about 13 min, no separate hand count). All students walked one way, towards the cafeteria.
+The 11-23 session is repeated in the first column for comparison.
+
+| quantity | 11-23 13:44 | 11-26 13:08 | 11-26 13:14 |
+|---|---|---|---|
+| recording (min) / raw-sample completeness | 3.8 / 96.6 % | 4.8 / 98.6 % | 13.3 / 96.7 % |
+| people counted by hand | 50 | 20 | not counted |
+| crossings counted by the tile (difference) | 51 (+2 %) | 17 (-15 %) | 87 |
+| crossings per minute (first to last crossing) | 14.2 | 4.9 | 7.0 |
+| pulses (per crossing) | 101 (1.98) | 32 (1.88) | 233 (2.68) |
+| crossings with 1 / 2 / 3–4 / ≥5 pulses | 15 / 30 / 5 / 1 | 10 / 3 / 3 / 1 | 35 / 25 / 12 / 15 |
+| longest crossing (s) | 10.8 | 11.1 | 24.2 |
+| energy per crossing µJ: median / mean | 6.51 / 10.41 | 8.03 / 28.56 | 6.18 / 16.45 |
+| energy per crossing µJ: IQR / max | 4.6–9.5 / 72.9 | 4.5–31.2 / 199.9 | 2.0–17.9 / 212.0 |
+| share of total energy in the top 5 crossings | 41 % | 80 % | 36 % |
+| 2-pulse crossings: 1st / 2nd pulse µJ (median) | 2.26 / 2.84 (n=30) | 16.49 / 14.70 (n=3) | 1.65 / 1.36 (n=25) |
+| peak row voltage per pulse V: median / max | 4.19 / 16.40 | 4.14 / 40.81 | 3.12 / 20.97 |
+| pulses with ≥3 rows above 1 V | 88 % | 78 % | 65 % |
+| energy share rows 1/2/3/4 | 26 / 27 / 18 / 29 % | 40 / 25 / 15 / 20 % | 38 / 30 / 12 / 20 % |
+| direction calls 1→4 / 4→1 / unknown | 25 / 26 / 0 | 3 / 12 / 2 | 27 / 48 / 12 |
+| total energy µJ / mean power over the recording µW | 531 / 2.34 | 486 / 1.69 | 1432 / 1.80 |
+| clipped pulses | 0 | 0 | 0 |
+
+All three cafeteria recordings pooled: 155 crossings, energy per crossing median 6.62 µJ, mean 15.79 µJ.
+
+Checks:
+- **Direction.** Everyone walked the same way, yet the row-order calls split. Of the crossings with a call, the majority call (4→1) was 48/75 (64 %) in 131358 and 12/15 (80 %) in 130851. So at best about two thirds of the calls agree with the real (single) direction, and if row 1 faced the outside as in the assembly manual's example layout, most calls were wrong. Direction from row order is not reliable with this tile.
+- **Counting.** In 130851 the tile found 17 crossings for 20 people counted by hand (-15 %). In 131358, 15 crossings had 5 or more pulses and lasted up to 24 s; they may hold several students walking close together (merged by the 1-s grouping) or someone pausing on the tile. There is no hand count for 131358, so its counting error is unknown. Crowding does not explain the 130851 undercount: 11-23 was busier (14.2/min) and matched, while 130851 (4.9/min) had only one crossing of 5 or more pulses. The cause of the -15 % is not determined.
+- **The median is stable, the mean is not.** Median energy per crossing: 6.5, 8.0, 6.2 µJ in the three recordings; the means (10.4, 28.6, 16.5 µJ) are pulled up by a few long, merged crossings.
+- **Highest voltage so far.** 40.8 V on row 1 in 130851. The waveform rises and falls over many samples, so it is a real pulse, not a corrupted line. That is about 75 % of the 55 V input range; no pulse was clipped.
+- 130851 contains one corrupted timestamp (a single garbled serial line); sorting the time axis removes it and nothing else changes.

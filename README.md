@@ -41,9 +41,10 @@ better material on paper, then built a 20-disc floor tile and measured it at our
 7. **At the cafeteria entrance (Nov 23, lunch, ~4 min).**
    - People walked across the tile while one of us counted them by hand: **50**. The tile counted **51** (totals within 2 %).
    - One crossing delivered a **median of 6.5 µJ** (mean 10.4 µJ) to the measuring resistor. The highest row voltage was 16.4 V.
-8. **Conclusion.** Even before any storage losses, one IoT radio transmission (assumed 100 µJ) needs 10–15 crossings, and lighting a 20 mW LED for one second needs 1,900–3,100.
+   - **Nov 26, again at lunch:** first-year students walked to the cafeteria for 5 + 13 minutes. 20 people counted by hand → the tile counted 17 (−15 %); in the 13-minute run the tile counted 87 crossings (no hand count). Median 6.2 µJ per crossing; one pulse reached 40.8 V.
+8. **Conclusion.** Across all 155 cafeteria crossings the median was 6.6 µJ (mean 15.8 µJ). Even before any storage losses, one IoT radio transmission (assumed 100 µJ) needs 6–15 crossings, and lighting a 20 mW LED for one second needs 1,300–3,000.
    - A piezo floor like ours is **not a practical power source** for a school.
-   - It does reliably produce a signal for every person who walks across, so it **may work as a people counter**. A self-powered version has not been built.
+   - Every crossing gives a clear signal, so it **may work as a rough people counter**. The count was off by +2 % and −15 % in the two hand-counted runs, and the walking direction could not be read reliably. A self-powered version has not been built.
 
 ---
 
@@ -54,16 +55,16 @@ better material on paper, then built a 20-disc floor tile and measured it at our
 | one disc, hand press (Sept 11) | **1.1–1.3 V, ≈ 0.1 s, ≈ 15 nJ** | open circuit, ½·C·V² of one disc |
 | one disc, ringing after a hard tap | ≈ 3.3 kHz (1.13 V peak) | its resonance; a footstep is far slower |
 | tile, stepping in place (Nov 21) | **median 5.6 µJ per pulse** (191 pulses) | energy into the 1.1 MΩ measuring resistor; steps not counted |
-| tile, cafeteria entrance (Nov 23) | **median 6.5 µJ, mean 10.4 µJ per crossing** (51 crossings) | one crossing ≈ press + release ≈ one step |
-| tile, people counted | **51 by the tile vs 50 by hand** | totals only; not matched one by one |
-| tile, highest row voltage | 9.52 V (Nov 21), **16.4 V** (Nov 23) | with the 1.1 MΩ load; open-circuit voltage not measured |
-| what it can power (upper bound) | 10–15 crossings per IoT transmission, 1,900–3,100 per LED-second | before rectifier/storage losses |
+| tile, cafeteria entrance (Nov 23, Nov 26) | **median 6.6 µJ, mean 15.8 µJ per crossing** (155 crossings in 3 recordings; medians 6.5 / 8.0 / 6.2 µJ) | one crossing ≈ press + release ≈ one step |
+| tile, people counted | **51 vs 50 by hand (Nov 23), 17 vs 20 (Nov 26)** | totals only; cause of the −15 % not determined |
+| tile, highest row voltage | 9.52 V (Nov 21), 16.4 V (Nov 23), **40.8 V** (Nov 26, one pulse) | with the 1.1 MΩ load; typical pulses 3–5 V |
+| what it could power | 6–15 crossings per IoT transmission, 1,300–3,000 per LED-second | energy into the 1.1 MΩ load, before storage losses |
 
 More detail, graphs and caveats: **[`tile_5x4/`](tile_5x4/)** for the tile, [`docs/00_piezo_basics.md`](docs/00_piezo_basics.md) (Korean) for the single disc.
 
 | | |
 |---|---|
-| ![one crossing at the cafeteria](tile_5x4/figures/tile_fig5_cafeteria_crossing.png) | ![all 51 crossings](tile_5x4/figures/tile_fig6_cafeteria_crossings.png) |
+| ![one crossing at the cafeteria](tile_5x4/figures/tile_fig9_cafeteria_1126_crossing.png) | ![three cafeteria recordings](tile_5x4/figures/tile_fig8_cafeteria_compare.png) |
 
 ---
 
@@ -104,8 +105,8 @@ Python 3 with `numpy`, `matplotlib` (and `pygame`, `pyserial` for the GUI):
 ```bash
 python analyze_v2.py                         # single disc, Sept 11
 python calc/verify_composition.py            # proposed material: charge balance, tolerance factor, rankings
-cd tile_5x4/analysis && python tile_results.py   # every tile number and figure (Nov 21 + Nov 23)
-cd tile_5x4/piezo_gui && python piezo_gui_v1.py --replay ../piezo_main/piezo_20261123_134435/raw_serial.txt
+cd tile_5x4/analysis && python tile_results.py   # every tile number and figure (Nov 21, 23, 26)
+cd tile_5x4/piezo_gui && python piezo_gui_v1.py --replay ../piezo_main/piezo_20261126_131358/raw_serial.txt
 ```
 
 A fresh clone reproduces `tile_5x4/analysis/results.md` exactly.
@@ -113,12 +114,12 @@ A fresh clone reproduces `tile_5x4/analysis/results.md` exactly.
 ## Honesty notes
 
 - **Measured vs assumed.**
-  - Measured: the single disc (Sept 11), the tile sessions (Nov 21), and the cafeteria session (Nov 23).
+  - Measured: the single disc (Sept 11), the tile sessions (Nov 21), and the cafeteria sessions (Nov 23, Nov 26).
   - Assumed: everything about a full day, a whole entrance, an IoT transmission or a commercial tile. These are labelled as assumptions where they appear.
   - Not measured: open-circuit voltage, the force on each disc, the best load resistance, and energy actually stored in a capacitor.
-- **Limits of the cafeteria test.**
-  - It is one ~4-minute session with one person counting.
-  - Crossings were not time-matched one by one, and walking direction was not recorded by hand.
+- **Limits of the cafeteria tests.**
+  - Three short recordings (4, 5 and 13 minutes). People were counted by hand in two of them, totals only, not matched one by one.
+  - On Nov 26 everyone walked one way, yet the row-order direction calls split (64 % / 80 % agreed with the majority call). Which row faced the cafeteria was not recorded.
 - **Cold weather (Nov 24, cause not found).**
   - On a cold day the setup stopped working: uploads failed at all three baud rates we tried (115200, 117647, 57600), the sketch's serial output arrived garbled, and the USB connection dropped once.
   - The laptop was on battery, so it was not the charger hum seen earlier.
@@ -162,9 +163,10 @@ A 4-person student team did this project. License: [MIT](LICENSE).
 7. **급식실 실측 (11월 23일 점심, 약 4분)**
    - 손으로 센 통과 **50회**, 발판이 센 통과 **51회**로 총수 차이는 2 %였습니다.
    - 통과 1회 에너지는 **중앙값 6.5 µJ**, 평균 10.4 µJ, 최대 행 전압은 16.4 V였습니다.
-8. **결론**: 손실을 빼기 전 값으로도 IoT 무선 전송 1회(100 µJ 가정)에 10~15걸음, 20 mW LED 1초에 1,900~3,100걸음이 필요합니다.
+   - **11월 26일 점심 재측정**: 1학년 학생들이 급식실로 걸어가는 동안 5분 + 13분 기록했습니다. 손으로 센 20명에 대해 발판은 17회(−15 %), 13분 본 측정에서는 87회를 셌습니다(손으로 세지 않음). 통과 1회 에너지 중앙값 6.2 µJ, 펄스 하나는 40.8 V까지 올랐습니다.
+8. **결론**: 급식실 통과 155회 전체의 중앙값은 6.6 µJ(평균 15.8 µJ)입니다. 손실을 빼기 전 값으로도 IoT 무선 전송 1회(100 µJ 가정)에 6~15걸음, 20 mW LED 1초에 1,300~3,000걸음이 필요합니다.
    - 학교 **전력원으로는 비현실적**입니다.
-   - 지나가는 사람마다 신호가 분명히 생기므로, **통행량 센서**로 쓸 가능성이 있습니다(전원 없이 동작하는 센서는 아직 만들지 않음).
+   - 지나가는 사람마다 신호가 분명히 생기므로 **대략적인 통행량 센서**로 쓸 가능성이 있습니다. 다만 손으로 센 두 기록에서 오차가 +2 %와 −15 %였고, 걷는 방향은 믿을 만하게 판정하지 못했습니다(전원 없이 동작하는 센서는 아직 만들지 않음).
 
 ### 무엇을 어디서 보나
 
@@ -185,12 +187,12 @@ A 4-person student team did this project. License: [MIT](LICENSE).
 ### 정직하게 밝혀 두는 것
 
 - **실측과 가정의 구분**
-  - 실측: 9월 11일 디스크 1개, 11월 21일 예비 측정, 11월 23일 급식실 측정
+  - 실측: 9월 11일 디스크 1개, 11월 21일 예비 측정, 11월 23일·26일 급식실 측정
   - 가정: 하루 전체·입구 전체·IoT 전송·상용 타일과의 비교는 모두 가정이며, 나오는 곳마다 가정이라고 적었습니다.
   - 아직 재지 않은 것: 개방 전압, 디스크에 실린 힘, 최적 부하, 커패시터에 실제로 모이는 에너지
-- **급식실 측정의 한계**: 약 4분 한 번, 한 명이 손으로 셌고, 한 번씩 시각을 맞춰 대조하지 않았습니다. 걷는 방향도 손으로 기록하지 않았습니다.
+- **급식실 측정의 한계**: 4분, 5분, 13분의 짧은 기록 세 번입니다. 두 번은 손으로 인원을 셌지만 총수만 비교했고 한 번씩 대조하지는 않았습니다. 11월 26일에는 모두 한 방향으로 걸었는데도 행 순서로 판정한 방향이 갈렸고(다수 판정과 일치 64 %, 80 %), 어느 행이 급식실 쪽이었는지는 기록하지 않았습니다.
 - **추운 날의 오작동 (11월 24일, 원인 미확인)**: 추운 날 업로드가 시도한 세 속도(115200·117647·57600)에서 모두 실패하고, 측정 코드가 보내는 줄도 깨져서 들어왔으며, USB 연결이 한 번 끊겼습니다. 노트북은 배터리로 동작해 충전기 잡음은 아니었습니다. 온도를 재지 않아 추위로 굳었을 수 있는 연결선과 단자 접촉, 압전 소자, 보드 자체 중 무엇이 원인인지 가려내지 못했습니다(습기도 떠올렸지만 확인하지 않았습니다). 그래서 겨울철 실외나 난방이 없는 곳에서 안정적으로 동작한다고 말할 수 없습니다.
 - **틀린 것을 숨기지 않습니다.** 철회한 주장(잘못된 계수로 힘을 역산한 것, USB 전원으로 켜진 LED를 발전 증거로 본 것, 시뮬레이터의 상대값 등)은 각 일지의 정오표와 [AI 사실 확인](docs/AI_FACT_CHECK.md)에 있습니다.
-- ⚠️ 디스크를 아두이노에 바로 연결한 상태에서는 **손으로만** 누르세요. 측정 저항을 단 상태에서도 밟을 때 16 V가 넘게 나왔으므로, 발 실험은 반드시 보호 회로를 거쳐야 합니다.
+- ⚠️ 디스크를 아두이노에 바로 연결한 상태에서는 **손으로만** 누르세요. 측정 저항을 단 상태에서도 밟을 때 40 V가 넘게 나온 적이 있으므로, 발 실험은 반드시 보호 회로를 거쳐야 합니다.
 
 4명의 학생 팀이 진행했습니다. 라이선스: [MIT](LICENSE).

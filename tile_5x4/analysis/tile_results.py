@@ -3,6 +3,7 @@
 5×4 tile measurements — reproduce every number and figure in tile_5x4/README.md
   2026-11-21  preliminary sessions (finger-press tests, stepping)
   2026-11-23  cafeteria entrance at lunch, 50 hand-counted crossings
+  2026-11-26  cafeteria entrance again, first-year students (5 min + 13 min)
 
   python tile_results.py        (needs: numpy, matplotlib)
 
@@ -258,4 +259,168 @@ fig.tight_layout()
 fig.savefig(os.path.join(FIG, "tile_fig6_cafeteria_crossings.png"))
 plt.close(fig)
 
+
+# ── 2026-11-26 cafeteria entrance again: first-year students walking to lunch (two recordings, 13:08 and 13:14)
+# Experimenter's record: 130851 = about 5 min before the main run, 20 people counted by hand;
+# 131358 = main run, about 13 min, no separate hand count (the 87 shown by the GUI is the tile's own count);
+# everyone walked one way, towards the cafeteria. Which row faced the cafeteria was not written down,
+# so only the consistency of the direction calls can be checked, not which way is right.
+CAF26 = [("piezo_20261126_130851", 20), ("piezo_20261126_131358", None)]
+
+
+def caf_stats(name, hand):
+    d = os.path.join(MAIN, name)
+    PS, PU = rows(os.path.join(d, "passes.csv")), rows(os.path.join(d, "pulses.csv"))
+    S, M = rows(os.path.join(d, "status.csv")), rows(os.path.join(d, "meta.csv"))
+    R = raw_samples(d)
+    R = R[np.argsort(R[:, 0], kind="stable")]      # one corrupted timestamp in 130851 is harmless after sorting
+    span_s = (R[-1, 0] - R[0, 0]) / 1000
+    Ep = np.array([f(r["E_total_uJ"]) for r in PS])
+    npul = np.array([int(f(r["n_pulses"])) for r in PS])
+    dur = np.array([(f(r["t_end_ms"]) - f(r["t_start_ms"])) / 1000 for r in PS])
+    dirs = [int(f(r["direction"])) for r in PS]
+    pk = np.array([max(f(r["r%d_peak_V" % i]) for i in range(1, 5)) for r in PU])
+    nr = np.array([int(f(r["rows_hit"])) for r in PU])
+    Erow = [sum(f(r["r%d_E_uJ" % i]) for r in PU) for i in range(1, 5)]
+    t_first, t_last = f(PS[0]["t_start_ms"]), f(PS[-1]["t_end_ms"])
+    two = [[], []]
+    for r in PS:
+        if int(f(r["n_pulses"])) == 2:
+            ps = [u for u in PU if f(r["t_start_ms"]) <= f(u["t_start_ms"]) <= f(r["t_end_ms"])]
+            for j in (0, 1):
+                two[j].append(sum(f(ps[j]["r%d_E_uJ" % i]) for i in range(1, 5)))
+    return dict(name=name, hand=hand, PS=PS, PU=PU, R=R, M=M, span_min=span_s / 60,
+                completeness=len(R) / (span_s * 500) * 100, dropped=int(f(S[-1]["dropped_samples"])),
+                Ep=Ep, npul=npul, dur=dur, dirs=dirs, pk=pk, nr=nr, Erow=Erow,
+                per_min=len(PS) / ((t_last - t_first) / 60000), two=[np.array(v) for v in two],
+                clipped=sum(1 for r in PU if any(f(r["r%d_clip" % i]) for i in range(1, 5))),
+                total=Ep.sum(), P_mean=Ep.sum() / span_s)
+
+
+C26 = [caf_stats("piezo_20261123_134435", 50)] + [caf_stats(n, h) for n, h in CAF26]
+lab = {"piezo_20261123_134435": "11-23 13:44", "piezo_20261126_130851": "11-26 13:08", "piezo_20261126_131358": "11-26 13:14"}
+T = ["", "## 2026-11-26 — cafeteria entrance again, first-year students walking to lunch", "",
+     "Two recordings: `20261126_130851` (about 5 min, 20 people counted by hand) and `20261126_131358`",
+     "(main run, about 13 min, no separate hand count). All students walked one way, towards the cafeteria.",
+     "The 11-23 session is repeated in the first column for comparison.", "",
+     "| quantity | " + " | ".join(lab[c["name"]] for c in C26) + " |", "|---|" + "---|" * len(C26)]
+
+
+def row(name, fn):
+    T.append("| %s | " % name + " | ".join(fn(c) for c in C26) + " |")
+
+
+def diff_txt(c):
+    return "%d" % len(c["PS"]) + (" (%+.0f %%)" % ((len(c["PS"]) - c["hand"]) / c["hand"] * 100) if c["hand"] else "")
+
+
+row("recording (min) / raw-sample completeness", lambda c: "%.1f / %.1f %%" % (c["span_min"], c["completeness"]))
+row("people counted by hand", lambda c: "%d" % c["hand"] if c["hand"] else "not counted")
+row("crossings counted by the tile (difference)", diff_txt)
+row("crossings per minute (first to last crossing)", lambda c: "%.1f" % c["per_min"])
+row("pulses (per crossing)", lambda c: "%d (%.2f)" % (len(c["PU"]), len(c["PU"]) / len(c["PS"])))
+row("crossings with 1 / 2 / 3–4 / ≥5 pulses", lambda c: "%d / %d / %d / %d" % (
+    (c["npul"] == 1).sum(), (c["npul"] == 2).sum(), ((c["npul"] >= 3) & (c["npul"] <= 4)).sum(), (c["npul"] >= 5).sum()))
+row("longest crossing (s)", lambda c: "%.1f" % c["dur"].max())
+row("energy per crossing µJ: median / mean", lambda c: "%.2f / %.2f" % (np.median(c["Ep"]), c["Ep"].mean()))
+row("energy per crossing µJ: IQR / max", lambda c: "%.1f–%.1f / %.1f" % (np.percentile(c["Ep"], 25), np.percentile(c["Ep"], 75), c["Ep"].max()))
+row("share of total energy in the top 5 crossings", lambda c: "%.0f %%" % (np.sort(c["Ep"])[-5:].sum() / c["Ep"].sum() * 100))
+row("2-pulse crossings: 1st / 2nd pulse µJ (median)", lambda c: "%.2f / %.2f (n=%d)" % (np.median(c["two"][0]), np.median(c["two"][1]), len(c["two"][0])))
+row("peak row voltage per pulse V: median / max", lambda c: "%.2f / %.2f" % (np.median(c["pk"]), c["pk"].max()))
+row("pulses with ≥3 rows above 1 V", lambda c: "%.0f %%" % ((c["nr"] >= 3).mean() * 100))
+row("energy share rows 1/2/3/4", lambda c: " / ".join("%.0f" % (e / sum(c["Erow"]) * 100) for e in c["Erow"]) + " %")
+row("direction calls 1→4 / 4→1 / unknown", lambda c: "%d / %d / %d" % (c["dirs"].count(1), c["dirs"].count(-1), c["dirs"].count(0)))
+row("total energy µJ / mean power over the recording µW", lambda c: "%.0f / %.2f" % (c["total"], c["P_mean"]))
+row("clipped pulses", lambda c: "%d" % c["clipped"])
+allE = np.concatenate([c["Ep"] for c in C26])
+a, b = C26[1], C26[2]
+deca = a["dirs"].count(1) + a["dirs"].count(-1)
+decb = b["dirs"].count(1) + b["dirs"].count(-1)
+meds = ", ".join("%.1f" % np.median(c["Ep"]) for c in C26)
+means = ", ".join("%.1f" % c["Ep"].mean() for c in C26)
+T += ["", "All three cafeteria recordings pooled: %d crossings, energy per crossing median %.2f µJ, mean %.2f µJ." % (len(allE), np.median(allE), allE.mean()), "",
+      "Checks:",
+      "- **Direction.** Everyone walked the same way, yet the row-order calls split. Of the crossings with a call, the majority call (4→1) was "
+      "%d/%d (%.0f %%) in 131358 and %d/%d (%.0f %%) in 130851. So at best about two thirds of the calls agree with the real (single) direction, "
+      "and if row 1 faced the outside as in the assembly manual's example layout, most calls were wrong. "
+      "Direction from row order is not reliable with this tile." % (b["dirs"].count(-1), decb, b["dirs"].count(-1) / decb * 100,
+                                                                  a["dirs"].count(-1), deca, a["dirs"].count(-1) / deca * 100),
+      "- **Counting.** In 130851 the tile found %d crossings for 20 people counted by hand (%+.0f %%). In 131358, %d crossings had 5 or more pulses "
+      "and lasted up to %.0f s; they may hold several students walking close together (merged by the 1-s grouping) or someone pausing on the tile. "
+      "There is no hand count for 131358, so its counting error is unknown. Crowding does not explain the 130851 undercount: 11-23 was busier "
+      "(14.2/min) and matched, while 130851 (4.9/min) had only one crossing of 5 or more pulses. The cause of the -15 %% is not determined." % (len(a["PS"]), (len(a["PS"]) - 20) / 20 * 100, (b["npul"] >= 5).sum(), b["dur"].max()),
+      "- **The median is stable, the mean is not.** Median energy per crossing: %s µJ in the three recordings; the means (%s µJ) are pulled up "
+      "by a few long, merged crossings." % (meds, means),
+      "- **Highest voltage so far.** %.1f V on row 1 in 130851. The waveform rises and falls over many samples, so it is a real pulse, "
+      "not a corrupted line. That is about 75 %% of the 55 V input range; no pulse was clipped." % a["pk"].max(),
+      "- 130851 contains one corrupted timestamp (a single garbled serial line); sorting the time axis removes it and nothing else changes."]
+open(os.path.join(HERE, "results.md"), "a", encoding="utf-8").write("\n".join(T) + "\n")
+print("\n".join(T))
+
+# Fig T7: 131358 — energy of each crossing over time + histogram
+tm = np.array([(f(r["t_start_ms"]) - f(b["PS"][0]["t_start_ms"])) / 60000 for r in b["PS"]])
+fig, ax = plt.subplots(1, 2, figsize=(10, 3.8), gridspec_kw=dict(width_ratios=[2, 1]))
+sz = 14 + 6 * np.minimum(b["npul"], 8)
+for dv, colr, labl in ((1, "#2a9fd6", "row order 1→4"), (-1, "#e8772e", "row order 4→1"), (0, "gray", "unknown")):
+    m = np.array(b["dirs"]) == dv
+    if m.any():
+        ax[0].scatter(tm[m], b["Ep"][m], color=colr, s=sz[m], label=labl, alpha=0.85)
+ax[0].axhline(np.median(b["Ep"]), color="k", ls=":", lw=0.8)
+ax[0].set_yscale("log")
+ax[0].set_xlabel("minutes since first crossing")
+ax[0].set_ylabel("energy per crossing [µJ] (log)")
+ax[0].legend(fontsize=8, title="marker size = pulses", title_fontsize=7)
+ax[1].hist(b["Ep"], bins=np.logspace(-0.3, 2.5, 22), color="#e8772e")
+ax[1].set_xscale("log")
+ax[1].set_xlabel("energy per crossing [µJ] (log)")
+ax[1].set_ylabel("crossings")
+fig.suptitle("Cafeteria entrance, 2026-11-26 13:14 — %d crossings in %.0f min, median %.1f µJ, mean %.1f µJ"
+             % (len(b["PS"]), b["span_min"], np.median(b["Ep"]), b["Ep"].mean()))
+fig.tight_layout()
+fig.savefig(os.path.join(FIG, "tile_fig7_cafeteria_1126.png"))
+plt.close(fig)
+
+# Fig T8: the three cafeteria recordings side by side
+fig, ax = plt.subplots(1, 3, figsize=(11, 3.6))
+names3 = [lab[c["name"]] for c in C26]
+x = np.arange(3)
+ax[0].boxplot([c["Ep"] for c in C26], positions=x)
+ax[0].set_xticks(x, names3, fontsize=8)
+ax[0].set_yscale("log")
+ax[0].set_ylabel("energy per crossing [µJ] (log)")
+ax[0].set_title("energy per crossing")
+for j, (lo, hi, labl) in enumerate(((1, 1, "1"), (2, 2, "2"), (3, 4, "3–4"), (5, 99, "≥5"))):
+    ax[1].bar(x + (j - 1.5) * 0.2, [((c["npul"] >= lo) & (c["npul"] <= hi)).mean() * 100 for c in C26], width=0.2, label=labl)
+ax[1].set_xticks(x, names3, fontsize=8)
+ax[1].set_ylabel("share of crossings [%]")
+ax[1].set_title("pulses per crossing")
+ax[1].legend(fontsize=7, title="pulses", title_fontsize=7)
+ax[2].bar(x, [c["per_min"] for c in C26], color="#888")
+ax[2].set_xticks(x, names3, fontsize=8)
+ax[2].set_ylabel("crossings per minute")
+ax[2].set_title("traffic counted by the tile")
+fig.suptitle("Three recordings at the cafeteria entrance")
+fig.tight_layout()
+fig.savefig(os.path.join(FIG, "tile_fig8_cafeteria_compare.png"))
+plt.close(fig)
+
+# Fig T9: one typical crossing in 131358 (2 pulses, energy closest to the median)
+mb = b["M"][-1]
+kb = f(mb["VREF"]) / 1023 * (f(mb["R1"]) + f(mb["R2"])) / f(mb["R2"])
+cand = [i for i in range(len(b["PS"])) if b["npul"][i] == 2]
+ib = min(cand, key=lambda i: abs(b["Ep"][i] - np.median(b["Ep"])))
+a0, b0 = f(b["PS"][ib]["t_start_ms"]), f(b["PS"][ib]["t_end_ms"])
+Rb = b["R"]
+w = (Rb[:, 0] > a0 - 400) & (Rb[:, 0] < b0 + 600)
+fig, ax = plt.subplots(figsize=(9, 3.8))
+for j in range(4):
+    ax.plot((Rb[w, 0] - a0) / 1000, Rb[w, j + 1] * kb, color=COL[j], lw=1.2, label="row %d" % (j + 1))
+ax.axhline(1.0, color="gray", ls="--", lw=0.8)
+ax.set_xlabel("time from start of crossing [s]")
+ax.set_ylabel("row voltage [V]")
+ax.set_title("One student crossing the tile (2026-11-26, crossing #%d: 2 pulses, %.1f µJ ≈ median)" % (ib + 1, b["Ep"][ib]))
+ax.legend(ncol=4, fontsize=8)
+fig.tight_layout()
+fig.savefig(os.path.join(FIG, "tile_fig9_cafeteria_1126_crossing.png"))
+plt.close(fig)
 print("\nfigures written to", FIG)

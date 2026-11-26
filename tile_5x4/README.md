@@ -5,6 +5,7 @@ Timeline:
 - **Nov 19:** parts arrived and the tile was built.
 - **Nov 21:** preliminary sessions (finger-press tests, stepping).
 - **Nov 23:** recorded at the **school cafeteria entrance during lunch**, while people walked across the tile and the crossings were counted by hand.
+- **Nov 26:** two more recordings at the entrance (5 min + 13 min) while first-year students walked to lunch.
 
 This folder holds everything from that stage:
 - the Arduino code that was actually run, and every recording
@@ -44,7 +45,7 @@ The manual's stoppers (grey squares in the layout, posts in the cross-section) w
 
 ![signal flow](docs/diagrams/01_signal_flow.png)
 
-**Board layout** (50 × 40 cm example; row 1 = outer edge, row 4 = cafeteria side)
+**Board layout** (50 × 40 cm example; row 1 = outer edge, row 4 = cafeteria side in the manual — the orientation on the measurement days was not recorded)
 
 <p align="center"><img src="docs/diagrams/02_board_layout.png" width="80%" alt="board layout"></p>
 
@@ -124,38 +125,76 @@ Without the bridges, the release half would be negative and invisible to the Ard
 Right: all 51 crossings. Four of the first six (40–73 µJ) are long groups of 3–8 pulses lasting 4–11 s. They probably contain more
 than one step or more than one person, and they pull the mean above the median.
 
-## 3. What these numbers do and do not say
+## 3. Cafeteria entrance again (Nov 26) — first-year students walking to lunch
 
-- **Counting people works on the total, at least here.** The tile counted 51 crossings against 50 counted by hand.
-  - This is a match of totals only. Crossings were not time-matched one by one, so a merged pair and a split one could cancel.
-  - Four minutes with one person counting is a short test. A crowded rush, with two people within a second, is untested.
-  - The walking direction comes from the row order and was not checked against a hand record.
+Two more recordings at the same entrance, while first-year students walked to lunch:
+- **13:08, about 5 min** — 20 people counted by hand.
+- **13:14, about 13 min** — the main run. People were **not** counted by hand; the 87 on the GUI is the tile's own count.
+
+Everyone walked **one way, towards the cafeteria**. Which row faced the cafeteria was not written down.
+
+| quantity | 11-23 13:44 | 11-26 13:08 | 11-26 13:14 |
+|---|---|---|---|
+| recording / raw-sample completeness | 3.8 min / 96.6 % | 4.8 min / 98.6 % | 13.3 min / 96.7 % |
+| people counted by hand | 50 | 20 | not counted |
+| crossings counted by the tile | 51 (+2 %) | 17 (−15 %) | 87 |
+| crossings per minute | 14.2 | 4.9 | 7.0 |
+| pulses per crossing | 1.98 | 1.88 | 2.68 |
+| crossings with ≥ 5 pulses / longest crossing | 1 / 10.8 s | 1 / 11.1 s | **15 / 24.2 s** |
+| energy per crossing, median / mean | 6.5 / 10.4 µJ | 8.0 / 28.6 µJ | **6.2 / 16.5 µJ** |
+| share of all energy in the top 5 crossings | 41 % | 80 % | 36 % |
+| peak row voltage, median / max | 4.19 / 16.4 V | 4.14 / **40.8 V** | 3.12 / 21.0 V |
+| energy share rows 1/2/3/4 | 26/27/18/29 % | 40/25/15/20 % | 38/30/12/20 % |
+| direction calls 1→4 / 4→1 / unknown | 25 / 26 / 0 | 3 / 12 / 2 | 27 / 48 / 12 |
+| mean power over the recording | 2.34 µW | 1.69 µW | 1.80 µW |
+
+All three recordings pooled: **155 crossings, median 6.6 µJ, mean 15.8 µJ** per crossing. No pulse was clipped.
+
+| | |
+|---|---|
+| ![one crossing, 11-26](figures/tile_fig9_cafeteria_1126_crossing.png) | ![all crossings, 11-26](figures/tile_fig7_cafeteria_1126.png) |
+
+![three recordings compared](figures/tile_fig8_cafeteria_compare.png)
+
+What we checked in these data:
+- **The walking direction cannot be read reliably from the row order.** Everyone walked the same way, but the calls split: the majority call (4→1) was only 48 of 75 (64 %) at 13:14 and 12 of 15 (80 %) at 13:08. At best about two thirds of the calls are right. If row 1 faced the outside, as in the manual's example layout, most calls were wrong. On a rigid acrylic top the rows respond almost together, so "which row crossed 1 V first" mostly reflects where on the plate the foot landed.
+- **Counting is not as good as the 11-23 result suggested.** At 13:08 the tile found 17 crossings for 20 people (−15 %). Crowding does not explain this: 11-23 was busier (14.2/min) and matched, while 13:08 (4.9/min) had only one crossing of 5 or more pulses. The cause is not determined. At 13:14, 15 crossings had 5 or more pulses and lasted up to 24 s; they may hold several students walking close together, or someone pausing on the tile. Without a hand count, the error of the 13:14 run is unknown.
+- **The median energy per crossing is stable (6.2–8.0 µJ), the mean is not (10.4–28.6 µJ).** A few long crossings carry much of the energy (80 % in the top five at 13:08), so the median is the better "per person" number.
+- **The highest voltage so far, 40.8 V,** came at 13:08 on row 1. The waveform rises and falls over many samples, so it is a real pulse. That is about 75 % of the 55 V input range, so the ÷ 11 divider was not oversized after all.
+
+## 4. What these numbers do and do not say
+
+- **Counting people works only roughly.**
+  - 11-23: 51 crossings for 50 counted by hand (+2 %), totals only.
+  - 11-26 13:08: 17 for 20 (−15 %); the cause is not determined (see §3).
+  - The walking direction from row order was not reliable (see §3).
 - **Walking across vs stepping in place.** Compared with the GUI's assumed design values (760 N, d_eff 11 nC/N; both assumptions):
 
   | | charge per pulse | peak voltage | energy | time to peak |
   |---|---|---|---|---|
-  | cafeteria | 30 % | 24 % | 6 % | 246 ms |
+  | cafeteria 11-23 | 30 % | 24 % | 6 % | 246 ms |
+  | cafeteria 11-26 13:14 | 38 % | 18 % | 7 % | 386 ms |
   | stepping in place (11-21 20:52) | 72 % | 27 % | 17 % | 543 ms |
 
   - The press time of 543 ms is much longer than the circuit's RC time constant (1.1 MΩ × 100 nF per row ≈ 110 ms). So during long presses, charge leaks through the resistor before the voltage can build. This is consistent with the "circuit" share of the loss being larger there (×0.28 vs ×0.48).
   - At the cafeteria the press was short, but much less charge was produced in the first place.
   - Force on the discs was not measured, so these causes are interpretations, not measurements.
-- **"Tens of volts" did not happen with the load connected.** The tile design assumed tens of volts. With the 1.1 MΩ load the highest row voltage was 9.52 V (11-21) and 16.4 V (cafeteria). The open-circuit voltage was not measured and may be higher.
-- **How much electricity is that?** These are upper bounds, because rectifier, storage and converter losses come on top.
+- **"Tens of volts" happened only once with the load connected.** The tile design assumed tens of volts. With the 1.1 MΩ load the highest row voltage was 9.52 V (11-21), 16.4 V (11-23) and 21.0 V (11-26 13:14); a single pulse reached 40.8 V (11-26 13:08). Typical pulses stayed at 3–5 V. The open-circuit voltage was not measured and may be higher.
+- **How much electricity is that?** These values are the energy that reached the fixed 1.1 MΩ load. A better-matched load could take more; a real storage circuit would lose some to rectification, storage and conversion.
 
   | to do this | it takes |
   |---|---|
-  | one IoT radio transmission (assumed 100 µJ) | 10–15 crossings (mean 10.4 µJ to median 6.5 µJ) |
-  | 20 mW LED for 1 s (0.02 J) | 1,900–3,100 crossings |
+  | one IoT radio transmission (assumed 100 µJ) | 6–15 crossings (pooled mean 15.8 µJ to median 6.6 µJ) |
+  | 20 mW LED for 1 s (0.02 J) | 1,300–3,000 crossings |
 
-  The GUI's cafeteria scenario assumes 24 tiles (50 × 40 cm) in a 2 m × 2.4 m entrance, and 1,200 people × 3 meals × 4 steps = 14,400 steps per day. At the measured mean that gives ~150 mJ per day, or ~1,500 transmissions or ~7.5 s of LED light.
+  The GUI's cafeteria scenario assumes 24 tiles (50 × 40 cm) in a 2 m × 2.4 m entrance, and 1,200 people × 3 meals × 4 steps = 14,400 steps per day. With the 11-26 mean (16.5 µJ) the GUI shows ~237 mJ per day (~2,400 transmissions, ~12 s of LED light). With the pooled median (6.6 µJ) it would be ~95 mJ.
   - The tile is **not a practical power source** under these conditions.
   - It might work as a **people counter** at the entrance. The Arduino and laptop were powered separately here, so a self-powered sensor has not been built.
 - **Compared with the Sept 11 single disc (≈ 15 nJ per press):** that is ½·C·V² of one unloaded disc. The tile values are energy into a 1.1 MΩ resistor from 20 discs. They are different quantities and are not divided into each other.
 
 ## 4. The real-time GUI
 
-[`piezo_gui/`](piezo_gui/) is the presentation program. It works with live serial input or replays a recording, on four screens:
+[`piezo_gui/`](piezo_gui/) is the presentation program. It works with live serial input or replays a recording, on four screens (captures below replay the 11-26 13:14 run):
 - **A** live measurement
 - **B** design vs measured
 - **C** scale-up
@@ -168,7 +207,7 @@ than one step or more than one person, and they pull the mean above the median.
 
 How to read the "per step" values:
 - They count a group of pulses less than 1 s apart as one step.
-- That is right for the cafeteria, where one crossing ≈ one step.
+- That is roughly right for the cafeteria, where one crossing ≈ one step, but long crossings (11-26) may hold more than one person.
 - It is inflated for the 11-21 stepping-in-place sessions: in the 20:52 session, 29 pulses formed one group.
 
 ## Photos
@@ -188,7 +227,7 @@ The layout copies the original working folder, so the relative paths inside the 
 tile_5x4/
   piezo_main/            ← Arduino sketch v3.1 actually used + logger.py + analyze.py + 측정_시작.bat
     DATA.md              ← what each session was, data quality, how to regenerate raw.csv
-    piezo_2026xxxx_xxxx/ ← 6 sessions (raw_serial.txt = every line the Arduino sent)
+    piezo_2026xxxx_xxxx/ ← 8 sessions (raw_serial.txt = every line the Arduino sent)
   piezo_gui/             ← real-time GUI (Windows, pygame) + CODE_WALKTHROUGH.md + walkthrough/ captures
   piezo_jetson/          ← port for Jetson Orin Nano + AI starter kit (camera people count etc.) — NOT yet run on the hardware
   piezo_demo/            ← earlier draft sketch (storage-capacitor "E mode"); replaced by v3.1, never used for data
@@ -204,7 +243,7 @@ tile_5x4/
 
 ```bash
 cd tile_5x4/analysis && python tile_results.py      # every number + figure above (numpy, matplotlib)
-cd tile_5x4/piezo_gui && python piezo_gui_v1.py --replay ../piezo_main/piezo_20261123_134435/raw_serial.txt
+cd tile_5x4/piezo_gui && python piezo_gui_v1.py --replay ../piezo_main/piezo_20261126_131358/raw_serial.txt
 cd tile_5x4/piezo_main && python logger.py --replay piezo_20261123_134435/raw_serial.txt   # rebuilds raw.csv etc. in a new folder
 ```
 
@@ -217,6 +256,7 @@ cd tile_5x4/piezo_main && python logger.py --replay piezo_20261123_134435/raw_se
 - **11월 19일:** 부품 도착, 제작
 - **11월 21일:** 예비 측정(손가락 작동 시험, 밟기)
 - **11월 23일:** **점심시간 급식실 입구**에서 사람들이 발판을 밟고 지나가는 동안 기록하고, 같은 시간 동안 통과 수를 손으로 셌습니다.
+- **11월 26일:** 1학년 학생들이 점심을 먹으러 지나가는 동안 같은 입구에서 두 번 더 기록했습니다(약 5분 + 13분).
 
 ### 발판 구성과 그렇게 만든 이유
 
@@ -260,19 +300,42 @@ cd tile_5x4/piezo_main && python logger.py --replay piezo_20261123_134435/raw_se
 - **행별 에너지**: 26 / 27 / 18 / 29 %로 예비 측정보다 고르게 나왔습니다.
 - 시작 2초 잡음 기준선이 0.05 V 이하라, 앞서 겪은 충전기 잡음은 이번 기록에 없었습니다.
 
-### 3. 해석과 한계
+### 3. 급식실 입구 재측정 (11월 26일, 1학년 점심)
+
+- **13:08, 약 5분**: 지나간 사람을 손으로 세어 20명. 발판은 17회로 셌습니다(−15 %).
+- **13:14, 약 13분(본 측정)**: 손으로 따로 세지 않았습니다. GUI의 87명은 발판이 센 수입니다.
+- 학생들은 모두 **급식실 쪽 한 방향**으로 걸었습니다. 어느 행이 급식실 쪽이었는지는 기록하지 않았습니다.
+
+| 항목 | 11-23 13:44 | 11-26 13:08 | 11-26 13:14 |
+|---|---|---|---|
+| 기록 시간 / 원자료 | 3.8분 / 96.6 % | 4.8분 / 98.6 % | 13.3분 / 96.7 % |
+| 손으로 센 인원 / 발판이 센 통과 | 50 / 51 | 20 / 17 | 세지 않음 / 87 |
+| 분당 통과 | 14.2 | 4.9 | 7.0 |
+| 통과당 펄스 / 펄스 5개 이상인 통과 | 1.98 / 1회 | 1.88 / 1회 | 2.68 / **15회** |
+| 통과 1회 에너지 중앙값 / 평균 | 6.5 / 10.4 µJ | 8.0 / 28.6 µJ | **6.2 / 16.5 µJ** |
+| 최대 행 전압 중앙값 / 최대 | 4.19 / 16.4 V | 4.14 / **40.8 V** | 3.12 / 21.0 V |
+| 방향 판정 1→4 / 4→1 / 판단 불가 | 25 / 26 / 0 | 3 / 12 / 2 | 27 / 48 / 12 |
+
+- 세 기록을 합치면 통과 155회, 1회 에너지 **중앙값 6.6 µJ**, 평균 15.8 µJ입니다.
+- **방향 판정은 믿기 어렵습니다.** 모두 한 방향으로 걸었는데도 판정이 갈렸습니다(13:14에 다수 판정 4→1이 75회 중 48회, 64 %).
+- **계수 오차의 원인은 가려내지 못했습니다.** 11-23은 더 붐볐는데(분당 14.2회) 맞았고, 13:08은 한산했는데(분당 4.9회) −15 %였습니다. 13:14에는 펄스 5개 이상, 최대 24초짜리 통과가 15회 있었는데, 여러 명이 묶였을 수도 있고 누군가 발판 위에 서 있었을 수도 있습니다.
+- **중앙값은 세 기록에서 비슷했고(6.2~8.0 µJ), 평균은 긴 묶음 몇 개 때문에 크게 달랐습니다(10.4~28.6 µJ).**
+- **최대 전압 40.8 V**는 파형이 여러 샘플에 걸쳐 오르내린 진짜 펄스입니다. 측정 범위 55 V의 약 75 %입니다.
+
+### 4. 해석과 한계
 
 - **지나가기와 제자리 밟기의 비교** (GUI의 설계 가정 760 N, 11 nC/N 기준)
   - 급식실: 전하 30 %, 전압 24 %, 에너지 6 %, 최고점까지 246 ms
   - 20:52 제자리 밟기: 전하 72 %, 전압 27 %, 에너지 17 %, 최고점까지 543 ms
-  - 오래 누를수록 측정 회로의 시정수(약 110 ms)보다 길어 전하가 저항으로 빠져나가는 몫이 커집니다.
+  - 11-26 13:14 급식실: 전하 38 %, 전압 18 %, 에너지 7 %, 최고점까지 386 ms
+  - 누르는 시간이 측정 회로의 시정수(눌린 디스크 수에 따라 약 22~110 ms)보다 길어, 누르는 동안 전하가 저항으로 빠져나갑니다. 다만 손실의 크기가 누르는 시간 순서와 꼭 맞지는 않습니다.
   - 짧게 지나갈 때는 생긴 전하 자체가 적었던 것으로 **추정**합니다. 힘은 재지 않았습니다.
-- **전기적 활용** (손실 전 상한)
-  - IoT 무선 전송 1회(100 µJ 가정): 10~15걸음
-  - 20 mW LED 1초: 1,900~3,100걸음
-  - GUI 급식실 가정(24장, 하루 14,400걸음): 약 150 mJ = 무선 전송 약 1,500회, LED 약 7.5초
+- **전기적 활용** (1.1 MΩ 측정 저항에 전달된 에너지 기준, 저장 손실은 빼지 않음)
+  - IoT 무선 전송 1회(100 µJ 가정): 6~15걸음 (세 기록 합친 평균 15.8 µJ ~ 중앙값 6.6 µJ)
+  - 20 mW LED 1초: 1,300~3,000걸음
+  - GUI 급식실 가정(24장, 하루 14,400걸음): 11-26 평균 16.5 µJ이면 약 237 mJ(무선 전송 약 2,400회, LED 약 12초), 중앙값 6.6 µJ이면 약 95 mJ
   - 결론: 이번 조건에서 **전력원으로는 비현실적**입니다. 대신 **통행량 센서**로 쓸 가능성이 있습니다. 다만 이번에도 아두이노는 따로 전원을 썼습니다.
-- **"수십 V" 가정**: 부하를 연결한 상태에서는 최대 9.52 V(예비)와 16.4 V(급식실)에 그쳤습니다. 개방 전압은 재지 않았습니다.
+- **"수십 V" 가정**: 부하를 연결한 상태에서 대부분의 펄스는 3~5 V였고, 최대는 9.52 V(예비), 16.4 V(11-23), 40.8 V(11-26 13:08, 한 번)였습니다. 개방 전압은 재지 않았습니다.
 - **추운 날의 오작동 (11월 24일, 원인 미확인)**
   - 업로드가 115200·117647·57600 모두에서 실패했습니다("expects OK byte 0x10 but got 0xfc"). 앞서 117647로 고친 설정이 그대로인데도 실패했습니다.
   - 측정 코드가 250000으로 보내는 줄도 깨져서 들어왔고, 시험 중 COM3가 한 번 사라졌다가 다시 잡혔습니다. 노트북은 배터리로 동작했습니다.
@@ -287,14 +350,14 @@ cd tile_5x4/piezo_main && python logger.py --replay piezo_20261123_134435/raw_se
 
 화면 A~D가 아두이노의 줄을 어떤 식으로 숫자로 바꾸는지는 [`piezo_gui/CODE_WALKTHROUGH.md`](piezo_gui/CODE_WALKTHROUGH.md)에 있습니다.
 - "걸음당" 값은 1초 안에 이어진 펄스를 한 묶음으로 셉니다.
-- 급식실 기록에서는 맞습니다.
+- 급식실 기록에서는 대체로 맞지만, 11-26의 긴 묶음에는 여러 명이 들어 있을 수 있습니다.
 - 제자리에서 계속 밟은 11-21 기록에서는 부풀려집니다.
 
 ### 재현
 
 ```bash
 cd tile_5x4/analysis && python tile_results.py
-cd tile_5x4/piezo_gui && python piezo_gui_v1.py --replay ../piezo_main/piezo_20261123_134435/raw_serial.txt
+cd tile_5x4/piezo_gui && python piezo_gui_v1.py --replay ../piezo_main/piezo_20261126_131358/raw_serial.txt
 ```
 
 사진은 크기를 줄이고 위치 정보를 포함한 메타데이터를 모두 지운 뒤 올렸습니다.
